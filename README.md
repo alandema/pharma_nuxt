@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Medical Prescription App (Next.js + Turso)
 
-## Getting Started
+Rewrite of former Flask app into Next.js 15 (App Router) using Turso (libSQL) as database.
 
-First, run the development server:
+### Stack
+- Next.js 15 App Router
+- TypeScript (strict)
+- Turso / libSQL via `@libsql/client`
+- Zod for runtime validation
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### Environment
+Create a `.env` (already present) with:
+```
+TURSO_DATABASE_URL=libsql://...yourdb...
+TURSO_AUTH_TOKEN=...token...
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Install & Run
+```
+npm install
+npm run dev
+```
+Database tables auto-create lazily on first page/API access (`migrate()`), no separate migration step yet.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### API Routes (simplified)
+| Purpose | Method | Path |
+|---------|--------|------|
+| List / Create Patients | GET / POST | /api/patients |
+| Get / Update / Delete Patient | GET / PUT / DELETE | /api/patients/:id |
+| List / Create Prescriptions | GET / POST | /api/prescriptions |
+| Get / Delete Prescription | GET / DELETE | /api/prescriptions/:id |
+| List / Create CIDs | GET / POST | /api/cids |
+| Get / Update / Delete CID | GET / PUT / DELETE | /api/cids/:id |
+| List / Create Medications | GET / POST | /api/medications |
+| Get / Update / Delete Medication | GET / PUT / DELETE | /api/medications/:id |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Mapping from Flask routes
+| Flask | Next.js |
+|-------|---------|
+| `/create_prescription` | `/prescriptions/create` (page) |
+| `/save_prescription` (POST) | `POST /api/prescriptions` |
+| `/delete_prescription/<id>` | `DELETE /api/prescriptions/:id` |
+| `/register_patient` | `/patients` page + `/api/patients` & `/api/patients/:id` |
+| `/get_patient/<id>` | `GET /api/patients/:id` |
+| `/prescriptions_history` | `/prescriptions/history` page + `GET /api/prescriptions` |
+| `/view_prescription/<id>` | (future page) + `GET /api/prescriptions/:id` |
+| `/edit_cids` | `/cids` page + `/api/cids` endpoints |
+| `/get_cid/<id>` | `GET /api/cids/:id` |
+| `/edit_medications` | `/medications` page + `/api/medications` |
+| `/get_medication/<id>` | `GET /api/medications/:id` |
+| `/delete_patient/<id>` (DELETE) | `DELETE /api/patients/:id` |
 
-## Learn More
+### TODO (Next steps)
+- Build interactive forms & client components
+- Add authentication
+- Proper migrations & drizzle/ORM integration
+- PDF generation for prescriptions
+- Input masking/validation for CPF & dates
 
-To learn more about Next.js, take a look at the following resources:
+### Development Notes
+- All pages currently just dump JSON for rapid backend parity.
+- `migrate()` runs simple `CREATE TABLE IF NOT EXISTS` statements; safe to call multiple times.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### License
+MIT
