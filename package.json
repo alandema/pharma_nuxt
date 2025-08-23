@@ -5,8 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "create-user": "tsx scripts/create-user.ts"
+    "start": "next start"
   },
   "dependencies": {
     "@libsql/client": "^0.15.12",

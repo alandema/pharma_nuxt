@@ -1,5 +1,5 @@
+import { findUserByUsername, signToken, verifyPassword } from '@/src/lib/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { findUserByUsername, verifyPassword, signToken } from '@/src/lib/auth';
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     const res = NextResponse.json({ user: { id: user.id, username: user.username, role: user.role } });
     res.cookies.set('auth_token', token, { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', path: '/' });
     return res;
-  } catch (e:any) {
+  } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }
