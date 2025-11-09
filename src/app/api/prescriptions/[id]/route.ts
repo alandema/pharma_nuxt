@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 export async function GET(_req: Request, context: any) {
   const { params } = context as { params: { id: string } };
   const prescription = await prisma.prescription.findUnique({
-    where: { id: parseInt(params.id) },
+    where: { id: params.id },
     include: { patient: true },
   });
   if (!prescription) return NextResponse.json({ error: 'Not found' }, { status: 404 });
@@ -14,7 +14,7 @@ export async function GET(_req: Request, context: any) {
 export async function DELETE(_req: Request, context: any) {
   const { params } = context as { params: { id: string } };
   await prisma.prescription.delete({
-    where: { id: parseInt(params.id) },
+    where: { id: params.id },
   });
   return NextResponse.json({ success: true });
 }

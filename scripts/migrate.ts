@@ -2,7 +2,7 @@
 /**
  * Database Migration Script
  * 
- * This script runs database migrations to create/update tables.
+ * This script uses Prisma's db push to sync the database schema.
  * Run this script during deployment or when setting up a new environment.
  * 
  * Usage:
@@ -11,68 +11,23 @@
  *   npx tsx scripts/migrate.ts
  */
 
-import { prisma } from '../src/lib/prisma';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 
-async function migrate() {
-  const statements = [
-    `CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT NOT NULL UNIQUE,
-      password_hash TEXT NOT NULL,
-      role TEXT NOT NULL CHECK(role IN ('superadmin','doctor','nurse','employee')),
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP
-    )`,
-    `CREATE TABLE IF NOT EXISTS patients (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      rg TEXT,
-      gender TEXT,
-      cpf TEXT UNIQUE,
-      birth_date TEXT,
-      phone TEXT,
-      zipcode TEXT,
-      street TEXT,
-      district TEXT,
-      house_number TEXT,
-      additional_info TEXT,
-      country TEXT,
-      state TEXT,
-      city TEXT,
-      medical_history TEXT,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP
-    )`,
-    `CREATE TABLE IF NOT EXISTS prescriptions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      patient_id INTEGER NOT NULL,
-      date_prescribed TEXT NOT NULL,
-      json_form_info TEXT NOT NULL,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY(patient_id) REFERENCES patients(id) ON DELETE CASCADE
-    )`,
-    `CREATE TABLE IF NOT EXISTS cids (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      code TEXT NOT NULL UNIQUE,
-      description TEXT,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP
-    )`,
-    `CREATE TABLE IF NOT EXISTS medications (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL UNIQUE,
-      information TEXT,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP
-    )`
-  ];
-  for (const sql of statements) {
-    await prisma.$executeRawUnsafe(sql);
-  }
-}
+const execAsync = promisify(exec);
 
 async function main() {
   try {
     console.log('🔄 Running database migrations...');
-    await migrate();
+    console.log('📦 Using Prisma db push to sync schema...');
+
+    const { stdout, stderr } = await execAsync('npx prisma db push');
+
+    if (stdout) console.log(stdout);
+    if (stderr) console.error(stderr);
+
     console.log('✅ Database migrations completed successfully!');
-    console.log('📊 Tables created/verified:');
+    console.log('📊 Schema synced with:');
     console.log('   - users');
     console.log('   - patients');
     console.log('   - prescriptions');

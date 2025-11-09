@@ -1,13 +1,10 @@
 import { prisma } from '@/src/lib/prisma';
 import { NextResponse } from 'next/server';
-import { z } from 'zod';
-
-const schema = z.object({ code: z.string().optional(), description: z.string().nullable().optional() });
 
 export async function GET(_req: Request, context: any) {
   const { params } = context as { params: { id: string } };
   const cid = await prisma.cid.findUnique({
-    where: { id: parseInt(params.id) },
+    where: { id: params.id },
   });
   if (!cid) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   return NextResponse.json(cid);
@@ -17,20 +14,33 @@ export async function PUT(req: Request, context: any) {
   const { params } = context;
   try {
     const body = await req.json();
-    const parsed = schema.parse(body);
-    const entries = Object.entries(parsed).filter(([, v]) => v !== undefined);
+
+    // Filter out undefined values
+    const updateData: any = {};
+    if (body.code !== undefined) updateData.code = body.code;
+    if (body.description !== undefined) updateData.description = body.description;
+
+    const entries = Object.entries(updateData);
     if (!entries.length) return NextResponse.json({ error: 'No fields' }, { status: 400 });
 
-    if (parsed.code) {
-      const exist = await prisma.$queryRaw<Array<{ id: number }>>`
-        SELECT id FROM cids WHERE lower(code) = lower(${parsed.code}) AND id != ${parseInt(params.id)} LIMIT 1
-      `;
-      if (exist.length) return NextResponse.json({ error: 'Código CID já cadastrado' }, { status: 400 });
+    // Check if code already exists for another CID
+    if (updateData.code) {
+      const exist = await prisma.cid.findFirst({
+        where: {
+          code: updateData.code,
+          NOT: { id: params.id },
+        },
+        select: { id: true },
+      });
+
+      if (exist) {
+        return NextResponse.json({ error: 'Código CID já cadastrado' }, { status: 400 });
+      }
     }
 
     const cid = await prisma.cid.update({
-      where: { id: parseInt(params.id) },
-      data: parsed,
+      where: { id: params.id },
+      data: updateData,
     });
 
     return NextResponse.json(cid);
@@ -42,7 +52,7 @@ export async function PUT(req: Request, context: any) {
 export async function DELETE(_req: Request, context: any) {
   const { params } = context as { params: { id: string } };
   await prisma.cid.delete({
-    where: { id: parseInt(params.id) },
+    where: { id: params.id },
   });
   return NextResponse.json({ success: true });
 }

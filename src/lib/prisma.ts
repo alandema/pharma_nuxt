@@ -8,3 +8,4 @@ const adapter = new PrismaLibSQL({
 const prisma = new PrismaClient({ adapter })
 
 export { prisma }
+

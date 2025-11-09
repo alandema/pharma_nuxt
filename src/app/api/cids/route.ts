@@ -1,8 +1,5 @@
 import { prisma } from '@/src/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-
-const schema = z.object({ code: z.string().min(1), description: z.string().optional().nullable() });
 
 export async function GET() {
   const cids = await prisma.cid.findMany({
@@ -14,18 +11,28 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const parsed = schema.parse(body);
+
+    // Basic validation
+    if (!body.code || typeof body.code !== 'string' || body.code.trim().length === 0) {
+      return NextResponse.json({ error: 'Code is required' }, { status: 400 });
+    }
 
     // Check if CID code already exists (case-insensitive)
-    const existing = await prisma.$queryRaw<Array<{ id: number }>>`
-      SELECT id FROM cids WHERE lower(code) = lower(${parsed.code}) LIMIT 1
-    `;
-    if (existing.length) return NextResponse.json({ error: 'Código CID já cadastrado' }, { status: 400 });
+    const existing = await prisma.cid.findFirst({
+      where: {
+        code: body.code,
+      },
+      select: { id: true },
+    });
+
+    if (existing) {
+      return NextResponse.json({ error: 'Código CID já cadastrado' }, { status: 400 });
+    }
 
     const cid = await prisma.cid.create({
       data: {
-        code: parsed.code,
-        description: parsed.description ?? null,
+        code: body.code,
+        description: body.description ?? null,
       },
     });
 

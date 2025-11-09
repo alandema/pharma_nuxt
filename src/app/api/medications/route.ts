@@ -1,8 +1,5 @@
 import { prisma } from '@/src/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-
-const schema = z.object({ name: z.string().min(1), information: z.string().optional().nullable() });
 
 export async function GET() {
   const medications = await prisma.medication.findMany({
@@ -14,18 +11,28 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const parsed = schema.parse(body);
 
-    // Check if medication already exists (case-insensitive)
-    const exist = await prisma.$queryRaw<Array<{ id: number }>>`
-      SELECT id FROM medications WHERE lower(name) = lower(${parsed.name}) LIMIT 1
-    `;
-    if (exist.length) return NextResponse.json({ error: 'Medicamento já cadastrado' }, { status: 400 });
+    // Basic validation
+    if (!body.name || typeof body.name !== 'string' || body.name.trim().length === 0) {
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 });
+    }
+
+    // Check if medication already exists
+    const exist = await prisma.medication.findFirst({
+      where: {
+        name: body.name,
+      },
+      select: { id: true },
+    });
+
+    if (exist) {
+      return NextResponse.json({ error: 'Medicamento já cadastrado' }, { status: 400 });
+    }
 
     const medication = await prisma.medication.create({
       data: {
-        name: parsed.name,
-        information: parsed.information ?? null,
+        name: body.name,
+        information: body.information ?? null,
       },
     });
 

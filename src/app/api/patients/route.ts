@@ -1,24 +1,5 @@
 import { prisma } from '@/src/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-
-const patientSchema = z.object({
-  name: z.string().min(1),
-  rg: z.string().optional().nullable(),
-  gender: z.string().optional().nullable(),
-  cpf: z.string().optional().nullable(),
-  birth_date: z.string().optional().nullable(),
-  phone: z.string().optional().nullable(),
-  zipcode: z.string().optional().nullable(),
-  street: z.string().optional().nullable(),
-  district: z.string().optional().nullable(),
-  house_number: z.string().optional().nullable(),
-  additional_info: z.string().optional().nullable(),
-  country: z.string().optional().nullable(),
-  state: z.string().optional().nullable(),
-  city: z.string().optional().nullable(),
-  medical_history: z.string().optional().nullable()
-});
 
 export async function GET() {
   const patients = await prisma.patient.findMany({
@@ -30,12 +11,16 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const parsed = patientSchema.parse(body);
+
+    // Basic validation
+    if (!body.name || typeof body.name !== 'string' || body.name.trim().length === 0) {
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 });
+    }
 
     // Unique CPF check
-    if (parsed.cpf && parsed.cpf !== '000.000.000-00') {
+    if (body.cpf && body.cpf !== '000.000.000-00') {
       const existing = await prisma.patient.findUnique({
-        where: { cpf: parsed.cpf },
+        where: { cpf: body.cpf },
         select: { id: true },
       });
       if (existing) {
@@ -44,7 +29,23 @@ export async function POST(req: NextRequest) {
     }
 
     const patient = await prisma.patient.create({
-      data: parsed,
+      data: {
+        name: body.name,
+        rg: body.rg ?? null,
+        gender: body.gender ?? null,
+        cpf: body.cpf ?? null,
+        birth_date: body.birth_date ?? null,
+        phone: body.phone ?? null,
+        zipcode: body.zipcode ?? null,
+        street: body.street ?? null,
+        district: body.district ?? null,
+        house_number: body.house_number ?? null,
+        additional_info: body.additional_info ?? null,
+        country: body.country ?? null,
+        state: body.state ?? null,
+        city: body.city ?? null,
+        medical_history: body.medical_history ?? null,
+      },
     });
 
     return NextResponse.json(patient, { status: 201 });

@@ -1,6 +1,3 @@
-// Prisma schema for pharma_next with Turso (libSQL)
-// This schema replaces the raw SQL migrations with a type-safe ORM
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,55 +8,51 @@ datasource db {
 }
 
 model User {
-  id            Int      @id @default(autoincrement())
+  id            String   @id @default(uuid())
   username      String   @unique
   password_hash String   @map("password_hash")
-  role          String   // superadmin, doctor, nurse, employee
+  role          String
   created_at    DateTime @default(now()) @map("created_at")
 
   @@map("users")
 }
 
 model Patient {
-  id              Int      @id @default(autoincrement())
+  id              String         @id @default(uuid())
   name            String
   rg              String?
   gender          String?
-  cpf             String?  @unique
-  birth_date      String?  @map("birth_date")
+  cpf             String?        @unique
+  birth_date      String?        @map("birth_date")
   phone           String?
   zipcode         String?
   street          String?
   district        String?
-  house_number    String?  @map("house_number")
-  additional_info String?  @map("additional_info")
+  house_number    String?        @map("house_number")
+  additional_info String?        @map("additional_info")
   country         String?
   state           String?
   city            String?
-  medical_history String?  @map("medical_history")
-  created_at      DateTime @default(now()) @map("created_at")
-
-  // Relations
-  prescriptions Prescription[]
+  medical_history String?        @map("medical_history")
+  created_at      DateTime       @default(now()) @map("created_at")
+  prescriptions   Prescription[]
 
   @@map("patients")
 }
 
 model Prescription {
-  id              Int      @id @default(autoincrement())
-  patient_id      Int      @map("patient_id")
+  id              String   @id @default(uuid())
+  patient_id      String   @map("patient_id")
   date_prescribed String   @map("date_prescribed")
   json_form_info  String   @map("json_form_info")
   created_at      DateTime @default(now()) @map("created_at")
-
-  // Relations
-  patient Patient @relation(fields: [patient_id], references: [id], onDelete: Cascade)
+  patient         Patient  @relation(fields: [patient_id], references: [id], onDelete: Cascade)
 
   @@map("prescriptions")
 }
 
 model Cid {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(uuid())
   code        String   @unique
   description String?
   created_at  DateTime @default(now()) @map("created_at")
@@ -68,7 +61,7 @@ model Cid {
 }
 
 model Medication {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(uuid())
   name        String   @unique
   information String?
   created_at  DateTime @default(now()) @map("created_at")
