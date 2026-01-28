@@ -1,15 +1,17 @@
-﻿-- CreateTable
+-- CreateTable
 CREATE TABLE "users" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "id" TEXT NOT NULL,
     "username" TEXT NOT NULL,
     "password_hash" TEXT NOT NULL,
     "role" TEXT NOT NULL,
-    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "patients" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "rg" TEXT,
     "gender" TEXT,
@@ -25,33 +27,40 @@ CREATE TABLE "patients" (
     "state" TEXT,
     "city" TEXT,
     "medical_history" TEXT,
-    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "patients_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "prescriptions" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "patient_id" INTEGER NOT NULL,
+    "id" TEXT NOT NULL,
+    "patient_id" TEXT NOT NULL,
     "date_prescribed" TEXT NOT NULL,
     "json_form_info" TEXT NOT NULL,
-    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT "prescriptions_patient_id_fkey" FOREIGN KEY ("patient_id") REFERENCES "patients" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "prescriptions_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "cids" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "id" TEXT NOT NULL,
     "code" TEXT NOT NULL,
     "description" TEXT,
-    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "cids_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "medications" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "information" TEXT,
-    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "medications_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -66,3 +75,5 @@ CREATE UNIQUE INDEX "cids_code_key" ON "cids"("code");
 -- CreateIndex
 CREATE UNIQUE INDEX "medications_name_key" ON "medications"("name");
 
+-- AddForeignKey
+ALTER TABLE "prescriptions" ADD CONSTRAINT "prescriptions_patient_id_fkey" FOREIGN KEY ("patient_id") REFERENCES "patients"("id") ON DELETE CASCADE ON UPDATE CASCADE;

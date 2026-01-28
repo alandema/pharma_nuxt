@@ -1,4 +1,4 @@
-import { PrismaLibSQL } from '@prisma/adapter-libsql'
+import { PrismaNeon } from '@prisma/adapter-neon'
 import path from 'node:path'
 import { defineConfig } from 'prisma/config'
 
@@ -11,9 +11,8 @@ export default defineConfig({
     },
     schema: path.join('prisma', 'schema.prisma'),
     async adapter() {
-        return new PrismaLibSQL({
-            url: `${process.env.TURSO_DATABASE_URL}`,
-            authToken: `${process.env.TURSO_AUTH_TOKEN}`,
+        return new PrismaNeon({
+            connectionString: process.env.DATABASE_URL!,
         })
     }
 })

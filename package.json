@@ -7,27 +7,28 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@prisma/adapter-libsql": "^6.19.0",
+    "@prisma/adapter-neon": "latest",
     "@prisma/client": "latest",
     "@prisma/extension-accelerate": "latest",
-    "@types/bcryptjs": "^2.4.6",
-    "@types/jsonwebtoken": "^9.0.10",
-    "bcryptjs": "^3.0.3",
-    "dotenv": "^17.2.3",
-    "jsonwebtoken": "^9.0.2",
-    "next": "15.5.8",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "zod": "^4.1.12"
+    "@types/bcryptjs": "latest",
+    "@types/jsonwebtoken": "latest",
+    "bcryptjs": "latest",
+    "dotenv": "latest",
+    "jsonwebtoken": "latest",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "zod": "latest"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "postcss": "^8",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
     "prisma": "latest",
-    "tailwindcss": "^3.4.1",
-    "tsx": "^4.19.2",
+    "tailwindcss": "^4",
     "typescript": "^5"
   }
 }
