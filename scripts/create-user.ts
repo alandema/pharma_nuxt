@@ -1,14 +1,6 @@
-#!/usr/bin/env ts-node
-/**
- * Simple CLI to create a user (superadmin only manual process) in Turso.
- * Usage (PowerShell ONLY supports flag style now):  
- *   npx tsx scripts/create-user.ts --username alice --password secret --role doctor
- *   npm run create-user -- --username alice --password secret --role doctor
- * Positional arguments have been removed; you MUST use -- flags.
- */
 import bcrypt from 'bcryptjs';
 import 'dotenv/config';
-import { prisma } from '../src/lib/prisma';
+import { prisma } from '@/lib/db';
 
 const args = process.argv.slice(2);
 const params: Record<string, string> = {};

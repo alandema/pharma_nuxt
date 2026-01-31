@@ -1,14 +1,16 @@
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
-import { prisma } from './prisma';
+import { prisma } from './db';
+import { is } from 'zod/locales';
 
 // ROLES place-holder; define granular permissions later
-export type Role = 'superadmin' | 'doctor' | 'nurse' | 'employee';
+export type Role = 'superadmin' | 'user' | 'employee';
 
 export interface JwtPayload { id: number; username: string; role: Role; }
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-insecure-secret-change';
-const JWT_EXPIRES = '8h';
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_EXPIRES = process.env.JWT_EXPIRES;
+
 
 export async function findUserByUsername(username: string) {
   const user = await prisma.user.findUnique({
@@ -29,11 +31,11 @@ export async function verifyPassword(password: string, hash: string) {
 
 export function signToken(user: { id: number; username: string; role: Role }) {
   const payload: JwtPayload = { id: user.id, username: user.username, role: user.role };
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES });
+  return jwt.sign(payload, JWT_SECRET!, { expiresIn: JWT_EXPIRES! } as jwt.SignOptions);
 }
 
 export function verifyToken(token: string): JwtPayload | null {
-  try { return jwt.verify(token, JWT_SECRET) as JwtPayload; } catch { return null; }
+  try { return jwt.verify(token, JWT_SECRET!) as JwtPayload; } catch { return null; }
 }
 
 export function requireRole(user: JwtPayload | null, allowed: Role[]) {
@@ -45,7 +47,6 @@ export function requireRole(user: JwtPayload | null, allowed: Role[]) {
 // Minimal placeholder permission map (expand later)
 export const RolePermissions: Record<Role, string[]> = {
   superadmin: ['*'],
-  doctor: [],
-  nurse: [],
+  user: [],
   employee: []
 };

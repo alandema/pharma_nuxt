@@ -1,4 +1,4 @@
-import { findUserByUsername, signToken, verifyPassword } from '@/src/lib/auth';
+import { findUserByUsername, signToken, verifyPassword } from '@/lib/auth';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
