@@ -48,7 +48,8 @@ export default defineEventHandler(async (event) => {
     })
 
     return {
-      message: 'Login successful'
+      message: 'Login successful',
+      role: existing.role
     };
 
 })

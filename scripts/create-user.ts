@@ -1,6 +1,10 @@
 import bcrypt from 'bcryptjs';
 import 'dotenv/config';
-import { prisma } from '../server/utils/db';
+import { PrismaClient } from '../generated/prisma/index.js';
+import { PrismaNeon } from '@prisma/adapter-neon'
+
+const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL })
+export const prisma = new PrismaClient({ adapter })
 
 const args = process.argv.slice(2);
 const params: Record<string, string> = {};

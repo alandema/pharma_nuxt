@@ -3,16 +3,11 @@ const username = ref('')
 const password = ref('')
 const handleSubmit = async () => {
   try {
-    const response = await fetch('/api/auth/login', {
+    console.log('Attempting to log in with:', { username: username.value, password: password.value })
+    await $fetch('/api/auth/login', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ username: username.value, password: password.value })
+      body: { username: username.value, password: password.value }
     })
-    if (!response.ok) {
-      throw new Error('Login failed')
-    }
     await navigateTo('/')
   } catch (error) {
     console.error('Error during login:', error)
