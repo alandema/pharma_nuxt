@@ -1,6 +1,5 @@
 <script setup lang="ts">
 
-
 type Patient = {
   id: string;
   name: string;
@@ -103,4 +102,5 @@ const save = async () => {
     </li>
   </ul>
   <p v-else>No prescriptions found.</p>
+  <button @click="navigateTo('/admin/patients')">Back to Patients</button>
 </template>

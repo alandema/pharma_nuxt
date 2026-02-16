@@ -5,7 +5,7 @@ export default defineEventHandler(async (event) => {
     where.registered_by = user.userId;
   }
 
-  const patient = await prisma.patients.findUnique({
+  const patient = await prisma.patient.findUnique({
     where,
     include: {
       prescriptions: true,

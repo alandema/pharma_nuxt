@@ -9,8 +9,9 @@ const submit = async () => {
     method: 'POST',
     body: { name: name.value, information: information.value }
   })
-  await navigateTo('/admin/formulas')
+  navigateTo('/admin/formulas')
 }
+
 </script>
 
 <template>
@@ -20,6 +21,6 @@ const submit = async () => {
     <button type="submit">Save</button>
   </form>
   <div>
-    <button @click="$router.push('/admin/formulas')">Back to Formula List</button>
+    <button @click="navigateTo('/admin/formulas')">Back to Formula List</button>
   </div>
 </template>

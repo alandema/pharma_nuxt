@@ -28,4 +28,5 @@ const save = async () => {
     <textarea v-model="information" placeholder="Information"></textarea>
     <button type="submit">Save</button>
   </form>
+  <button @click="navigateTo('/admin/formulas')">Back to Formulas</button>
 </template>

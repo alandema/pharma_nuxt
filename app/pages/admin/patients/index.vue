@@ -5,6 +5,7 @@ const {data: patients}  = await useFetch('/api/patients',
         method: 'GET',
     }
 )
+
 </script>
 
 <template>
@@ -14,7 +15,5 @@ const {data: patients}  = await useFetch('/api/patients',
         <NuxtLink :to="`/admin/patients/${patient.id}`">{{ patient.name }} - {{ patient.cpf }} {{ patient.registered_by }}</NuxtLink>
         </li>
     </ul>
-    <div>
-        <button @click="$router.push('/admin/patients/register')">Create New Patient</button>
-    </div>
+    <button @click="navigateTo('/admin/patients/register')">Create New Patient</button>
 </template>

@@ -39,6 +39,7 @@ const submit = async () => {
   })
   await navigateTo('/patients')
 }
+
 </script>
 
 <template>
@@ -61,6 +62,6 @@ const submit = async () => {
     <button type="submit">Save</button>
   </form>
   <div>
-    <button @click="$router.push('/patients')">Back to Patient List</button>
+    <button @click="navigateTo('/patients')">Back to Patient List</button>
   </div>
 </template>

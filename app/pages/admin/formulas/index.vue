@@ -5,6 +5,7 @@ const {data: formulas}  = await useFetch('/api/formulas',
         method: 'GET',
     }
 )
+
 </script>
 
 <template>
@@ -15,6 +16,6 @@ const {data: formulas}  = await useFetch('/api/formulas',
         </li>
     </ul>
     <div>
-        <button @click="$router.push('/admin/formulas/register')">Create New Formula</button>
+        <button @click="navigateTo('/admin/formulas/register')">Create New Formula</button>
     </div>
 </template>

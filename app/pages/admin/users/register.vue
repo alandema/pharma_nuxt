@@ -22,11 +22,6 @@ const handleSubmit = async () => {
   await navigateTo('/admin/users')
 }
 
-function navigate (path: string) {
-  return navigateTo({
-    path: path,
-  })
-}
 </script>
 
 <template>
@@ -39,5 +34,5 @@ function navigate (path: string) {
     </select>
     <button type="submit">Create User</button>
   </form>
-  <button @click="navigate('/admin/users')">Back to User List</button>
+  <button @click="navigateTo('/admin/users')">Back to User List</button>
 </template>

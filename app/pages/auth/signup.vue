@@ -20,11 +20,6 @@ const handleSubmit = async () => {
   await navigateTo('/auth/login')
 }
 
-function navigate (path: string) {
-  return navigateTo({
-    path: path,
-  })
-}
 </script>
 
 <template>
@@ -33,5 +28,5 @@ function navigate (path: string) {
     <input v-model="password" type="password" placeholder="Password" required />
     <button type="submit">Sign Up</button>
   </form>
-  <button @click="navigate('/auth/login')">Already have an account? Log in</button>
+  <button @click="navigateTo('/auth/login')">Already have an account? Log in</button>
 </template>

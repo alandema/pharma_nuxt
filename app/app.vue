@@ -1,8 +1,8 @@
 <template>
   <header>
     Header content
-    <button v-if="user" loading-auto @click="navigate('/')">Go Home</button>
-    <button v-if="user?.role === 'admin'" loading-auto @click="navigate('/admin')">Go Home Admin</button>
+    <button v-if="user" loading-auto @click="navigateTo('/')">Go Home</button>
+    <button v-if="user?.role === 'admin'" loading-auto @click="navigateTo('/admin')">Go Home Admin</button>
   </header>
   <NuxtPage />
   <footer>
@@ -25,11 +25,6 @@ const { data: user } = await useFetch<User>('/api/users/me', {
   onResponseError: () => {}  // Ignore 401 errors to prevent breaking the layout
 })
 
-function navigate (path: string) {
-  return navigateTo({
-    path: path,
-  })
-}
 
 const handleLogout = async () => {
   

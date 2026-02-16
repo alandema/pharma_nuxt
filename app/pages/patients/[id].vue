@@ -102,4 +102,5 @@ const save = async () => {
     </li>
   </ul>
   <p v-else>No prescriptions found.</p>
+  <button @click="navigateTo('/patients')">Back to Patients</button>
 </template>

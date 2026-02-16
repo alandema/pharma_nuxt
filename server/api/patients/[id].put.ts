@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const body = await readBody(event)
-  const patient = await prisma.patients.update({
+  const patient = await prisma.patient.update({
     where,
     data: {
       name: body.name,

@@ -16,7 +16,5 @@ const {data: user}  = await useFetch<User>(`/api/users/${useRoute().params.id}`,
         <p>Username: {{ user.username }}</p>
         <p>Role: {{ user.role }}</p>
     </div>
-    <div>
-        <button @click="$router.back()">Back to User List</button>
-    </div>
+    <button @click="navigateTo('/admin/users')">Back to User List</button>
 </template>

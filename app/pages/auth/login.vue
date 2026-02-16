@@ -23,12 +23,6 @@ const handleSubmit = async () => {
   }
 }
 
-function navigate (path: string) {
-  return navigateTo({
-    path: path,
-  })
-}
-
 </script>
 
 <template>
@@ -38,5 +32,5 @@ function navigate (path: string) {
     <button loading-auto type="submit">Sign In</button>
   </form>
 
-  <button @click="navigate('/auth/signup')">Go to Sign Up</button>
+  <button @click="navigateTo('/auth/signup')">Go to Sign Up</button>
 </template>

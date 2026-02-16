@@ -8,18 +8,19 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(uuid())
-  username      String   @unique
-  password_hash String   @map("password_hash")
+  id            String         @id @default(uuid())
+  username      String         @unique
+  password_hash String         @map("password_hash")
   role          String
-  is_active     Boolean  @default(true)
-  created_at    DateTime @default(now()) @map("created_at")
-  patients      Patients[]
+  is_active     Boolean        @default(true)
+  created_at    DateTime       @default(now()) @map("created_at")
+  patient       Patient[]
+  prescriptions Prescription[]
 
   @@map("users")
 }
 
-model Patients {
+model Patient {
   id              String         @id @default(uuid())
   registered_by   String
   user            User           @relation(fields: [registered_by], references: [id], onDelete: SetNull)
@@ -47,10 +48,12 @@ model Patients {
 model Prescription {
   id              String   @id @default(uuid())
   patient_id      String   @map("patient_id")
+  prescribed_by   String?  @map("prescribed_by")
   date_prescribed String   @map("date_prescribed")
   json_form_info  String   @map("json_form_info")
   created_at      DateTime @default(now()) @map("created_at")
-  patients        Patients  @relation(fields: [patient_id], references: [id], onDelete: Cascade)
+  patient         Patient  @relation(fields: [patient_id], references: [id], onDelete: Cascade)
+  user            User?    @relation(fields: [prescribed_by], references: [id], onDelete: SetNull)
 
   @@map("prescriptions")
 }
@@ -61,5 +64,5 @@ model Formulas {
   information String?
   created_at  DateTime @default(now()) @map("created_at")
 
-  @@map("medications")
+  @@map("formulas")
 }

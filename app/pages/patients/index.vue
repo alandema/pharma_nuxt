@@ -5,6 +5,7 @@ const {data: patients}  = await useFetch('/api/patients',
         method: 'GET',
     }
 )
+
 </script>
 
 <template>
@@ -15,6 +16,6 @@ const {data: patients}  = await useFetch('/api/patients',
         </li>
     </ul>
     <div>
-        <button @click="$router.push('/patients/register')">Create New Patient</button>
+        <button @click="navigateTo('/patients/register')">Create New Patient</button>
     </div>
 </template>

@@ -12,4 +12,5 @@ function navigate (path: string) {
 <template>
   <pre>THIS IS INDEX {{ data_hello.data }}</pre>
   <button loading-auto @click="navigate('/patients')">Go Patients</button>
+  <button loading-auto @click="navigate('/prescriptions')">Go Prescriptions</button>
 </template>

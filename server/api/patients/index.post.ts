@@ -2,7 +2,7 @@ export default defineEventHandler(async (event) => {
   const user = event.context.user;
 
   const body = await readBody(event)
-  const patient = await prisma.patients.create({
+  const patient = await prisma.patient.create({
     data: {
       registered_by: user.userId,
       name: body.name,
