@@ -3,9 +3,16 @@
 type Patient = {
   id: string;
   name: string;
-  cpf?: string;
-  phone?: string;
-  birth_date?: string;
+  cpf?: string | null;
+  rg?: string | null;
+  gender?: string | null;
+  birth_date?: string | null;
+  phone?: string | null;
+  street?: string | null;
+  district?: string | null;
+  house_number?: string | null;
+  city?: string | null;
+  state?: string | null;
 };
 
 type User = {
@@ -25,9 +32,15 @@ type Prescription = {
 };
 
 const route = useRoute();
-const { data: prescription } = await useFetch<Prescription>(`/api/prescriptions/${route.params.id}`, {
-  method: 'GET'
-});
+
+const { data: prescription } = await useFetch<Prescription>(
+  `/api/prescriptions/${route.params.id}`,
+  { method: 'GET' }
+);
+
+const openPrintPage = () => {
+  window.open(`/prescriptions/print/${route.params.id}`, '_blank');
+};
 
 </script>
 
@@ -52,6 +65,8 @@ const { data: prescription } = await useFetch<Prescription>(`/api/prescriptions/
 
     <h2>Prescription Details</h2>
     <pre>{{ prescription.json_form_info }}</pre>
+
+    <button @click="openPrintPage">Open Prescription</button>
   </div>
   <p v-else>Prescription not found.</p>
 

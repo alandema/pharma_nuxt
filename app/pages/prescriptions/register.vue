@@ -12,7 +12,10 @@ const [{ data: patients }, { data: cidsData }] = await Promise.all([
   useAsyncData('cids', () => queryCollection('cids').first())
 ]);
 
-const cids = computed(() => cidsData.value?.codes ?? []);
+const cids = computed(() => {
+  const codes = cidsData.value?.codes ?? [];
+  return [...codes].sort((a, b) => a.name.localeCompare(b.name));
+});
 
 const submit = async () => {
   await $fetch('/api/prescriptions', {

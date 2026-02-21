@@ -4,8 +4,12 @@ export default defineEventHandler(async (event) => {
   const limit = 10;
   const skip = (page - 1) * limit;
   const patientId = query.patientId as string | undefined;
+  const user = event.context.user;
 
-  const where = patientId ? { patient_id: patientId } : {};
+  const where = {
+    ...(patientId ? { patient_id: patientId } : {}),
+    ...(user.role !== 'admin' ? { OR: [{ prescribed_by: user.userId }, { patient: { registered_by: user.userId } }] } : {})
+  };
 
   const [prescriptions, total] = await Promise.all([
     prisma.prescription.findMany({

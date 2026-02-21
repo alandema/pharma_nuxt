@@ -81,7 +81,7 @@ async function main() {
       state: 'SP',
       country: 'Brazil',
       medical_history: 'No significant medical history',
-      registered_by: admin.id,
+      registered_by: doctor1.id,
     },
     {
       name: 'Bob Smith',

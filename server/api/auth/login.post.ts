@@ -16,8 +16,7 @@ export default defineEventHandler(async (event) => {
 
   const existing = await prisma.user.findUnique(
     { where: { username },
-    select: { id: true, password_hash: true, username: true, role: true 
-    }
+    select: { id: true, password_hash: true, username: true, role: true, is_active: true }
     });
   if (!existing) {
     throw createError({
@@ -32,7 +31,12 @@ export default defineEventHandler(async (event) => {
       statusMessage: 'Invalid username or password'
     });
   }
-    const token = jwt.sign(
+
+  if (!existing.is_active) {
+    throw createError({ statusCode: 403, statusMessage: 'Account is deactivated' });
+  }
+
+  const token = jwt.sign(
       { userId: existing.id, username: existing.username , role: existing.role} as JwtPayload,
       JWT_SECRET!,
       { expiresIn: '8h' }

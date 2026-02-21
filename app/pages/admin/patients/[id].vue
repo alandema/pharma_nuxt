@@ -109,6 +109,12 @@ const transferPatient = async () => {
     transferError.value = err?.data?.statusMessage ?? 'Transfer failed.'
   }
 }
+
+const deletePatient = async () => {
+  if (!confirm('Delete this patient?')) return
+  await $fetch(`/api/patients/${route.params.id}`, { method: 'DELETE' })
+  await navigateTo('/admin/patients')
+}
 </script>
 
 <template>
@@ -159,4 +165,5 @@ const transferPatient = async () => {
   </ul>
   <p v-else>No prescriptions found.</p>
   <button @click="navigateTo('/admin/patients')">Back to Patients</button>
+  <button @click="deletePatient" style="color:red">Delete Patient</button>
 </template>

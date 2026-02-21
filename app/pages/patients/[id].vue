@@ -3,6 +3,7 @@
 type Patient = {
   id: string;
   name: string;
+  registered_by: string;
   rg?: string;
   gender?: string;
   cpf?: string;
@@ -32,6 +33,14 @@ const route = useRoute()
 const { data: patient, refresh } = await useFetch<Patient>(`/api/patients/${route.params.id}`, {
   method: 'GET'
 })
+const { data: me } = await useFetch('/api/users/me')
+const canDelete = computed(() => (me.value as any)?.role === 'admin' || (me.value as any)?.userId === patient.value?.registered_by)
+
+const deletePatient = async () => {
+  if (!confirm('Delete this patient?')) return
+  await $fetch(`/api/patients/${route.params.id}`, { method: 'DELETE' })
+  await navigateTo('/patients')
+}
 
 const name = ref(patient.value?.name || '')
 const rg = ref(patient.value?.rg || '')
@@ -103,4 +112,5 @@ const save = async () => {
   </ul>
   <p v-else>No prescriptions found.</p>
   <button @click="navigateTo('/patients')">Back to Patients</button>
+  <button v-if="canDelete" @click="deletePatient" style="color:red">Delete Patient</button>
 </template>
