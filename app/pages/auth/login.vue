@@ -1,25 +1,23 @@
 <script setup lang="ts">
 const username = ref('')
 const password = ref('')
+
+const { add: addToast } = useToast()
+
+
 const handleSubmit = async () => {
   try {
-    console.log('Attempting to log in with:', { username: username.value, password: password.value })
-    await $fetch('/api/auth/login', {
+    const res = await $fetch<{ message: string }>('/api/auth/login', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        username: username.value,
-        password: password.value,
-      }),
+      body: { username: username.value, password: password.value },
     })
-    
-    // Redirect to home page after successful login
-    await refreshNuxtData() // Clears all useFetch caches
+
+    addToast(res.message, 'success')
+    await refreshNuxtData()
     await navigateTo('/')
-  } catch (error) {
-    console.error('Error during login:', error)
+
+  } catch (err: any) {
+    addToast(err.data?.message ?? 'Something went wrong', 'error')
   }
 }
 

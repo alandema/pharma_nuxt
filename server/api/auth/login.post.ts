@@ -20,8 +20,8 @@ export default defineEventHandler(async (event) => {
     });
   if (!existing) {
     throw createError({
-      statusCode: 409,
-      statusMessage: 'User does not exist'
+      statusCode: 401,
+      statusMessage: 'Invalid username or password'
     });
   }
 

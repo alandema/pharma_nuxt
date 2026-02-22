@@ -5,6 +5,7 @@
     <button v-else-if="user" loading-auto @click="navigateTo('/')">Go Home</button>
   </header>
   <NuxtPage />
+  <AppToast />
   <footer>
     Footer content
     <button v-if="user" @click="handleLogout" loading-auto>Logout</button>
