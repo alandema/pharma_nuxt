@@ -46,22 +46,22 @@ const transferSuccess = ref('')
 const transferPatient = async () => {
   transferError.value = ''
   transferSuccess.value = ''
-  if (!selectedDoctorId.value) { transferError.value = 'Please select a doctor.'; return }
+  if (!selectedDoctorId.value) { transferError.value = 'Por favor, selecione um médico.'; return }
   try {
     const result = await $fetch(`/api/patients/${route.params.id}/transfer`, {
       method: 'POST',
       body: { doctor_id: selectedDoctorId.value },
     })
     await refresh()
-    transferSuccess.value = `Patient successfully transferred to ${result.transferred_to}.`
+    transferSuccess.value = `Paciente transferido com sucesso para ${result.transferred_to}.`
     selectedDoctorId.value = ''
   } catch (err: any) {
-    transferError.value = err?.data?.statusMessage ?? 'Transfer failed.'
+    transferError.value = err?.data?.statusMessage ?? 'Falha na transferência.'
   }
 }
 
 const deletePatient = async () => {
-  if (!confirm('Delete this patient?')) return
+  if (!confirm('Excluir este paciente?')) return
   await $fetch(`/api/patients/${route.params.id}`, { method: 'DELETE' })
   await navigateTo('/patients')
 }
@@ -109,46 +109,46 @@ const save = async () => {
 </script>
 
 <template>
-  <h1>Patient Details</h1>
+  <h1>Detalhes do Paciente</h1>
   <form @submit.prevent="save">
-    <input v-model="name" placeholder="Name" required />
+    <input v-model="name" placeholder="Nome" required />
     <input v-model="rg" placeholder="RG" />
-    <input v-model="gender" placeholder="Gender" />
+    <input v-model="gender" placeholder="Gênero" />
     <input v-model="cpf" placeholder="CPF" />
-    <input v-model="birth_date" placeholder="Birth Date" />
-    <input v-model="phone" placeholder="Phone" />
-    <input v-model="zipcode" placeholder="Zipcode" />
-    <input v-model="street" placeholder="Street" />
-    <input v-model="district" placeholder="District" />
-    <input v-model="house_number" placeholder="House Number" />
-    <input v-model="additional_info" placeholder="Additional Info" />
-    <input v-model="country" placeholder="Country" />
-    <input v-model="state" placeholder="State" />
-    <input v-model="city" placeholder="City" />
-    <textarea v-model="medical_history" placeholder="Medical History"></textarea>
-    <button type="submit">Save</button>
+    <input v-model="birth_date" placeholder="Data de Nascimento" />
+    <input v-model="phone" placeholder="Telefone" />
+    <input v-model="zipcode" placeholder="CEP" />
+    <input v-model="street" placeholder="Rua" />
+    <input v-model="district" placeholder="Bairro" />
+    <input v-model="house_number" placeholder="Número" />
+    <input v-model="additional_info" placeholder="Complemento" />
+    <input v-model="country" placeholder="País" />
+    <input v-model="state" placeholder="Estado" />
+    <input v-model="city" placeholder="Cidade" />
+    <textarea v-model="medical_history" placeholder="Histórico Médico"></textarea>
+    <button type="submit">Salvar</button>
   </form>
-  <h2>Prescriptions</h2>
+  <h2>Prescrições</h2>
   <ul v-if="patient?.prescriptions?.length">
     <li v-for="prescription in patient.prescriptions" :key="prescription.id">
       <strong>{{ prescription.date_prescribed }}</strong>: {{ prescription.json_form_info }}
     </li>
   </ul>
-  <p v-else>No prescriptions found.</p>
+  <p v-else>Nenhuma prescrição encontrada.</p>
   <template v-if="isAdmin">
     <hr />
-    <h2>Transfer Patient</h2>
-    <p>Current doctor: <strong>{{ patient?.registered_by_username ?? patient?.registered_by }}</strong></p>
+    <h2>Transferir Paciente</h2>
+    <p>Médico atual: <strong>{{ patient?.registered_by_username ?? patient?.registered_by }}</strong></p>
     <select v-model="selectedDoctorId">
-      <option value="" disabled>Select a doctor</option>
+      <option value="" disabled>Selecione um médico</option>
       <option v-for="doctor in doctors" :key="doctor.id" :value="doctor.id" :disabled="doctor.id === patient?.registered_by">
-        {{ doctor.username }}{{ doctor.id === patient?.registered_by ? ' (current)' : '' }}
+        {{ doctor.username }}{{ doctor.id === patient?.registered_by ? ' (atual)' : '' }}
       </option>
     </select>
-    <button type="button" @click="transferPatient" :disabled="!selectedDoctorId">Transfer</button>
+    <button type="button" @click="transferPatient" :disabled="!selectedDoctorId">Transferir</button>
     <p v-if="transferSuccess" style="color: green;">{{ transferSuccess }}</p>
     <p v-if="transferError" style="color: red;">{{ transferError }}</p>
   </template>
-  <button @click="navigateTo('/patients')">Back to Patients</button>
-  <button v-if="canDelete" @click="deletePatient" style="color:red">Delete Patient</button>
+  <button @click="navigateTo('/patients')">Voltar para Pacientes</button>
+  <button v-if="canDelete" @click="deletePatient" style="color:red">Excluir Paciente</button>
 </template>

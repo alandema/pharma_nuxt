@@ -16,11 +16,11 @@ const submit = async () => {
 
 <template>
   <form @submit.prevent="submit">
-    <input v-model="name" placeholder="Name" required />
-    <textarea v-model="information" placeholder="Information"></textarea>
-    <button type="submit">Save</button>
+    <input v-model="name" placeholder="Nome" required />
+    <textarea v-model="information" placeholder="Informação"></textarea>
+    <button type="submit">Salvar</button>
   </form>
   <div>
-    <button @click="navigateTo('/admin/formulas')">Back to Formula List</button>
+    <button @click="navigateTo('/admin/formulas')">Voltar para a Lista de Fórmulas</button>
   </div>
 </template>

@@ -5,11 +5,11 @@ const isAdmin = computed(() => (me.value as any)?.role === 'admin')
 </script>
 
 <template>
-    <h1>Patient List</h1>
+    <h1>Lista de Pacientes</h1>
     <ul v-if="patients">
         <li v-for="patient in patients" :key="patient.id">
-        <NuxtLink :to="`/patients/${patient.id}`">{{ patient.name }} - {{ patient.cpf }}<span v-if="isAdmin"> ({{ patient.registered_by }})</span></NuxtLink>
+        <NuxtLink :to="`/patients/${patient.id}`">{{ patient.name }} - {{ patient.cpf }}<span v-if="isAdmin"> (Registrado por: {{ patient.user?.username }})</span></NuxtLink>
         </li>
     </ul>
-    <button @click="navigateTo('/patients/register')">Create New Patient</button>
+    <button @click="navigateTo('/patients/register')">Criar Novo Paciente</button>
 </template>

@@ -9,13 +9,13 @@ const {data: formulas}  = await useFetch('/api/formulas',
 </script>
 
 <template>
-    <h1>Formula List</h1>
+    <h1>Lista de Fórmulas</h1>
     <ul v-if="formulas">
         <li v-for="formula in formulas" :key="formula.id">
         <NuxtLink :to="`/admin/formulas/${formula.id}`">{{ formula.name }}</NuxtLink>
         </li>
     </ul>
     <div>
-        <button @click="navigateTo('/admin/formulas/register')">Create New Formula</button>
+        <button @click="navigateTo('/admin/formulas/register')">Criar Nova Fórmula</button>
     </div>
 </template>

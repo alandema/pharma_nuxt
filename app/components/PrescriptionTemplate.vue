@@ -150,7 +150,7 @@ const generatedAt = new Date().toLocaleString('pt-BR');
           </tr>
         </template>
         <tr v-else>
-          <td colspan="2" class="no-details">No additional details provided.</td>
+          <td colspan="2" class="no-details">Nenhum detalhe adicional fornecido.</td>
         </tr>
       </tbody>
     </table>

@@ -11,20 +11,20 @@ async function toggleActive() {
 }
 
 async function deleteUser() {
-  if (!confirm(`Delete user "${user.value?.username}"? Their patients will be transferred to you.`)) return
+  if (!confirm(`Excluir usuário "${user.value?.username}"? Seus pacientes serão transferidos para você.`)) return
   await $fetch(`/api/users/admin/${route.params.id}`, { method: 'DELETE' })
   navigateTo('/admin/users')
 }
 </script>
 
 <template>
-    <h1>User Details</h1>
+    <h1>Detalhes do Usuário</h1>
     <div v-if="user">
-        <p>Username: {{ user.username }}</p>
-        <p>Role: {{ user.role }}</p>
-        <p>Status: {{ user.is_active ? 'Active' : 'Inactive' }}</p>
-        <button @click="toggleActive">{{ user.is_active ? 'Deactivate' : 'Activate' }}</button>
-        <button @click="deleteUser" style="margin-left:8px;color:red">Delete User</button>
+        <p>Usuário: {{ user.username }}</p>
+        <p>Função: {{ user.role }}</p>
+        <p>Status: {{ user.is_active ? 'Ativo' : 'Inativo' }}</p>
+        <button @click="toggleActive">{{ user.is_active ? 'Desativar' : 'Ativar' }}</button>
+        <button @click="deleteUser" style="margin-left:8px;color:red">Excluir Usuário</button>
     </div>
-    <button @click="navigateTo('/admin/users')">Back to User List</button>
+    <button @click="navigateTo('/admin/users')">Voltar para a Lista de Usuários</button>
 </template>

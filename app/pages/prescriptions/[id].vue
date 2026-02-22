@@ -45,30 +45,30 @@ const openPrintPage = () => {
 </script>
 
 <template>
-  <h1>Prescription Details</h1>
+  <h1>Detalhes da Prescrição</h1>
 
   <div v-if="prescription">
-    <h2>Prescription Information</h2>
+    <h2>Informações da Prescrição</h2>
     <ul>
-      <li><strong>Date Prescribed:</strong> {{ prescription.date_prescribed }}</li>
-      <li><strong>Prescribed By:</strong> {{ prescription.user?.username || 'Unknown' }}</li>
-      <li><strong>Created At:</strong> {{ new Date(prescription.created_at).toLocaleString() }}</li>
+      <li><strong>Data da Prescrição:</strong> {{ prescription.date_prescribed }}</li>
+      <li><strong>Prescrito Por:</strong> {{ prescription.user?.username || 'Desconhecido' }}</li>
+      <li><strong>Criado Em:</strong> {{ new Date(prescription.created_at).toLocaleString() }}</li>
     </ul>
 
-    <h2>Patient Information</h2>
+    <h2>Informações do Paciente</h2>
     <ul>
-      <li><strong>Name:</strong> {{ prescription.patient.name }}</li>
+      <li><strong>Nome:</strong> {{ prescription.patient.name }}</li>
       <li v-if="prescription.patient.cpf"><strong>CPF:</strong> {{ prescription.patient.cpf }}</li>
-      <li v-if="prescription.patient.phone"><strong>Phone:</strong> {{ prescription.patient.phone }}</li>
-      <li v-if="prescription.patient.birth_date"><strong>Birth Date:</strong> {{ prescription.patient.birth_date }}</li>
+      <li v-if="prescription.patient.phone"><strong>Telefone:</strong> {{ prescription.patient.phone }}</li>
+      <li v-if="prescription.patient.birth_date"><strong>Data de Nascimento:</strong> {{ prescription.patient.birth_date }}</li>
     </ul>
 
-    <h2>Prescription Details</h2>
+    <h2>Detalhes da Prescrição</h2>
     <pre>{{ prescription.json_form_info }}</pre>
 
-    <button @click="openPrintPage">Open Prescription</button>
+    <button @click="openPrintPage">Abrir Prescrição</button>
   </div>
-  <p v-else>Prescription not found.</p>
+  <p v-else>Prescrição não encontrada.</p>
 
-  <button @click="navigateTo('/prescriptions')">Back to Prescriptions</button>
+  <button @click="navigateTo('/prescriptions')">Voltar para Prescrições</button>
 </template>

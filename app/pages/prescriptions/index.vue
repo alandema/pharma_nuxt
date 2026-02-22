@@ -57,36 +57,36 @@ const clearFilter = () => {
 </script>
 
 <template>
-  <h1>Prescription List</h1>
+  <h1>Lista de Prescrições</h1>
   
   <div>
-    <label>Filter by Patient:</label>
+    <label>Filtrar por Paciente:</label>
     <select v-model="selectedPatientId" @change="filterByPatient">
-      <option value="">All Patients</option>
+      <option value="">Todos os Pacientes</option>
       <option v-for="patient in patients" :key="patient.id" :value="patient.id">
         {{ patient.name }}
       </option>
     </select>
-    <button v-if="selectedPatientId" @click="clearFilter">Clear Filter</button>
+    <button v-if="selectedPatientId" @click="clearFilter">Limpar Filtro</button>
   </div>
 
   <ul v-if="response?.prescriptions?.length">
     <li v-for="prescription in response.prescriptions" :key="prescription.id">
       <NuxtLink :to="`/prescriptions/${prescription.id}`">
         {{ prescription.date_prescribed }} - {{ prescription.patient.name }}
-        <span v-if="prescription.user"> (by {{ prescription.user.username }})</span>
+        <span v-if="prescription.user"> (por {{ prescription.user.username }})</span>
       </NuxtLink>
     </li>
   </ul>
-  <p v-else>No prescriptions found.</p>
+  <p v-else>Nenhuma prescrição encontrada.</p>
 
   <div v-if="response && response.totalPages > 1">
-    <button @click="goToPage(page - 1)" :disabled="page <= 1">Previous</button>
-    <span>Page {{ page }} of {{ response.totalPages }}</span>
-    <button @click="goToPage(page + 1)" :disabled="page >= response.totalPages">Next</button>
+    <button @click="goToPage(page - 1)" :disabled="page <= 1">Anterior</button>
+    <span>Página {{ page }} de {{ response.totalPages }}</span>
+    <button @click="goToPage(page + 1)" :disabled="page >= response.totalPages">Próxima</button>
   </div>
 
   <div>
-    <button @click="navigateTo('/prescriptions/register')">Create New Prescription</button>
+    <button @click="navigateTo('/prescriptions/register')">Criar Nova Prescrição</button>
   </div>
 </template>

@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
   if (!username || !password) { 
     throw createError({
       statusCode: 400,
-      statusMessage: 'Missing username or password'
+      statusMessage: 'Usuário ou senha ausentes'
     });
   }
 
@@ -21,19 +21,19 @@ export default defineEventHandler(async (event) => {
   if (!existing) {
     throw createError({
       statusCode: 401,
-      statusMessage: 'Invalid username or password'
+      statusMessage: 'Usuário ou senha inválidos'
     });
   }
 
   if (!(await bcrypt.compare(password, existing.password_hash))) {
     throw createError({
       statusCode: 401,
-      statusMessage: 'Invalid username or password'
+      statusMessage: 'Usuário ou senha inválidos'
     });
   }
 
   if (!existing.is_active) {
-    throw createError({ statusCode: 403, statusMessage: 'Account is deactivated' });
+    throw createError({ statusCode: 403, statusMessage: 'A conta está desativada' });
   }
 
   const token = jwt.sign(
@@ -52,7 +52,7 @@ export default defineEventHandler(async (event) => {
     })
 
     return {
-      message: 'Login successful',
+      message: 'Login realizado com sucesso',
       role: existing.role
     };
 

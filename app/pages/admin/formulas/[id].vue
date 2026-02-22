@@ -22,11 +22,11 @@ const save = async () => {
 </script>
 
 <template>
-  <h1>Formula Details</h1>
+  <h1>Detalhes da Fórmula</h1>
   <form @submit.prevent="save">
-    <input v-model="name" placeholder="Name" required />
-    <textarea v-model="information" placeholder="Information"></textarea>
-    <button type="submit">Save</button>
+    <input v-model="name" placeholder="Nome" required />
+    <textarea v-model="information" placeholder="Informação"></textarea>
+    <button type="submit">Salvar</button>
   </form>
-  <button @click="navigateTo('/admin/formulas')">Back to Formulas</button>
+  <button @click="navigateTo('/admin/formulas')">Voltar para Fórmulas</button>
 </template>

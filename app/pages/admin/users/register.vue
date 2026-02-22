@@ -26,13 +26,13 @@ const handleSubmit = async () => {
 
 <template>
   <form @submit.prevent="handleSubmit">
-    <input v-model="username" type="text" placeholder="Username" required />
-    <input v-model="password" type="password" placeholder="Password" required />
+    <input v-model="username" type="text" placeholder="Usuário" required />
+    <input v-model="password" type="password" placeholder="Senha" required />
     <select v-model="role" required>
-      <option value="user">User</option>
-      <option value="admin">Admin</option>
+      <option value="user">Usuário</option>
+      <option value="admin">Administrador</option>
     </select>
-    <button type="submit">Create User</button>
+    <button type="submit">Criar Usuário</button>
   </form>
-  <button @click="navigateTo('/admin/users')">Back to User List</button>
+  <button @click="navigateTo('/admin/users')">Voltar para a Lista de Usuários</button>
 </template>

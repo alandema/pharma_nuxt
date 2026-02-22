@@ -52,8 +52,8 @@ onUnmounted(() => document.body.classList.remove('print-page'));
 <template>
   <div>
     <div class="print-controls">
-      <button class="btn btn-primary" onclick="window.print()">🖨️ Print / Save as PDF</button>
-      <button class="btn" onclick="window.close()">Close</button>
+      <button class="btn btn-primary" onclick="window.print()">🖨️ Imprimir / Salvar como PDF</button>
+      <button class="btn" onclick="window.close()">Fechar</button>
     </div>
 
     <PrescriptionTemplate
@@ -61,7 +61,7 @@ onUnmounted(() => document.body.classList.remove('print-page'));
       :prescription="prescription"
       :cids="cids"
     />
-    <p v-else>Prescription not found.</p>
+    <p v-else>Prescrição não encontrada.</p>
   </div>
 </template>
 

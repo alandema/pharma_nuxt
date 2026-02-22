@@ -4,7 +4,7 @@ export default defineEventHandler(async (event) => {
 
   const patients = await prisma.patient.findMany({
     where,
-    select: { id: true, name: true, cpf: true , registered_by: true},
+    select: { id: true, name: true, cpf: true, user: { select: { username: true } } },
     orderBy: { name: 'asc' },
   });
 

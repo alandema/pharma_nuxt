@@ -1,9 +1,9 @@
 <!-- pages/logout.vue -->
 <template>
   <div>
-    <h1>Logout</h1>
+    <h1>Sair</h1>
     <button @click="handleLogout" :disabled="loading">
-      {{ loading ? 'Logging out...' : 'Logout' }}
+      {{ loading ? 'Saindo...' : 'Sair' }}
     </button>
     <p v-if="error">{{ error }}</p>
   </div>

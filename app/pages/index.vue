@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-const data_hello = await useFetch('/api/hello')
+// const data_hello = await useFetch('/api/hello')
 
 function navigate (path: string) {
   return navigateTo({
@@ -10,7 +10,7 @@ function navigate (path: string) {
 </script>
 
 <template>
-  <pre>THIS IS INDEX {{ data_hello.data }}</pre>
-  <button loading-auto @click="navigate('/patients')">Go Patients</button>
-  <button loading-auto @click="navigate('/prescriptions')">Go Prescriptions</button>
+  <pre>ESTA É A ÁREA DE UM PRESCRITOR</pre>
+  <button loading-auto @click="navigate('/patients')">Ir para Pacientes</button>
+  <button loading-auto @click="navigate('/prescriptions')">Ir para Prescrições</button>
 </template>

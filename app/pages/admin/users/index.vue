@@ -9,11 +9,11 @@ const {data: users}  = await useFetch('/api/users/admin',
 </script>
 
 <template>
-    <h1>User List</h1>
+    <h1>Lista de Usuários</h1>
     <ul v-if="users">
         <li v-for="user in users" :key="user.id">
         <NuxtLink :to="`/admin/users/${user.id}`">{{ user.username }} - {{ user.role }}</NuxtLink>
         </li>
     </ul>
-    <button @click="navigateTo('/admin/users/register')">Create New User</button>
+    <button @click="navigateTo('/admin/users/register')">Criar Novo Usuário</button>
 </template>

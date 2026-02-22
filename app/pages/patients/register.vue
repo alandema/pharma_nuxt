@@ -50,24 +50,24 @@ const submit = async () => {
 
 <template>
   <form @submit.prevent="submit">
-    <input v-model="name" placeholder="Name" required />
+    <input v-model="name" placeholder="Nome" required />
     <input v-model="rg" placeholder="RG" />
-    <input v-model="gender" placeholder="Gender" />
+    <input v-model="gender" placeholder="Gênero" />
     <input v-model="cpf" placeholder="CPF" />
-    <input v-model="birth_date" placeholder="Birth Date" />
-    <input v-model="phone" placeholder="Phone" />
-    <input v-model="zipcode" placeholder="Zipcode" />
-    <input v-model="street" placeholder="Street" />
-    <input v-model="district" placeholder="District" />
-    <input v-model="house_number" placeholder="House Number" />
-    <input v-model="additional_info" placeholder="Additional Info" />
-    <select v-model="country"><option value="">Country</option><option v-for="c in countries" :key="c.id['M49']" :value="c.nome">{{ c.nome }}</option></select>
-    <select v-model="state" :disabled="!states.length"><option value="">State</option><option v-for="s in states" :key="s.id" :value="s.sigla">{{ s.nome }}</option></select>
-    <select v-model="city" :disabled="!cities.length"><option value="">City</option><option v-for="c in cities" :key="c.id" :value="c.nome">{{ c.nome }}</option></select>
-    <textarea v-model="medical_history" placeholder="Medical History"></textarea>
-    <button type="submit">Save</button>
+    <input v-model="birth_date" placeholder="Data de Nascimento" />
+    <input v-model="phone" placeholder="Telefone" />
+    <input v-model="zipcode" placeholder="CEP" />
+    <input v-model="street" placeholder="Rua" />
+    <input v-model="district" placeholder="Bairro" />
+    <input v-model="house_number" placeholder="Número" />
+    <input v-model="additional_info" placeholder="Complemento" />
+    <select v-model="country"><option value="">País</option><option v-for="c in countries" :key="c.id['M49']" :value="c.nome">{{ c.nome }}</option></select>
+    <select v-model="state" :disabled="!states.length"><option value="">Estado</option><option v-for="s in states" :key="s.id" :value="s.sigla">{{ s.nome }}</option></select>
+    <select v-model="city" :disabled="!cities.length"><option value="">Cidade</option><option v-for="c in cities" :key="c.id" :value="c.nome">{{ c.nome }}</option></select>
+    <textarea v-model="medical_history" placeholder="Histórico Médico"></textarea>
+    <button type="submit">Salvar</button>
   </form>
   <div>
-    <button @click="navigateTo('/patients')">Back to Patient List</button>
+    <button @click="navigateTo('/patients')">Voltar para a Lista de Pacientes</button>
   </div>
 </template>

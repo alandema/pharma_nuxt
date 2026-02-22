@@ -24,9 +24,9 @@ const handleSubmit = async () => {
 
 <template>
   <form @submit.prevent="handleSubmit">
-    <input v-model="username" type="text" placeholder="Username" required />
-    <input v-model="password" type="password" placeholder="Password" required />
-    <button type="submit">Sign Up</button>
+    <input v-model="username" type="text" placeholder="Usuário" required />
+    <input v-model="password" type="password" placeholder="Senha" required />
+    <button type="submit">Cadastrar</button>
   </form>
-  <button @click="navigateTo('/auth/login')">Already have an account? Log in</button>
+  <button @click="navigateTo('/auth/login')">Já tem uma conta? Entrar</button>
 </template>

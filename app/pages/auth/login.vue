@@ -17,7 +17,7 @@ const handleSubmit = async () => {
     await navigateTo('/')
 
   } catch (err: any) {
-    addToast(err.data?.message ?? 'Something went wrong', 'error')
+    addToast(err.data?.message ?? 'Algo deu errado', 'error')
   }
 }
 
@@ -25,10 +25,10 @@ const handleSubmit = async () => {
 
 <template>
   <form @submit.prevent="handleSubmit">
-    <input v-model="username" type="text" placeholder="Username" required />
-    <input v-model="password" type="password" placeholder="Password" required />
-    <button loading-auto type="submit">Sign In</button>
+    <input v-model="username" type="text" placeholder="Usuário" required />
+    <input v-model="password" type="password" placeholder="Senha" required />
+    <button loading-auto type="submit">Entrar</button>
   </form>
 
-  <button @click="navigateTo('/auth/signup')">Go to Sign Up</button>
+  <button @click="navigateTo('/auth/signup')">Ir para Cadastro</button>
 </template>
