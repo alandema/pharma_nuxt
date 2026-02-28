@@ -16,6 +16,7 @@ model User {
   created_at    DateTime       @default(now()) @map("created_at")
   patient       Patient[]
   prescriptions Prescription[]
+  logs          Log[]
 
   @@map("users")
 }
@@ -41,6 +42,7 @@ model Patient {
   medical_history String?        @map("medical_history")
   created_at      DateTime       @default(now()) @map("created_at")
   prescriptions   Prescription[]
+  logs             Log[]
 
   @@map("patients")
 }
@@ -65,4 +67,15 @@ model Formulas {
   created_at  DateTime @default(now()) @map("created_at")
 
   @@map("formulas")
+}
+
+model Log {
+  id            String    @id @default(uuid())
+  event_time    DateTime  @map("event_time")
+  message       String    @map("message")
+  user_id       String?   @map("user_id")
+  patient_id    String?   @map("patient_id")
+  user          User?     @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  patient       Patient?  @relation(fields: [patient_id], references: [id], onDelete: SetNull)
+  @@map("logs")
 }

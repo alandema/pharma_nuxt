@@ -7,5 +7,6 @@ export default defineEventHandler(async (event) => {
   if (!patient) throw createError({ statusCode: 404, statusMessage: 'Patient not found' })
 
   await prisma.patient.delete({ where: { id: patient.id } })
+  await prisma.log.create({ data: { event_time: new Date(), message: `Deletou paciente: ${patient.name}`, user_id: user.userId } })
   return { success: true }
 })

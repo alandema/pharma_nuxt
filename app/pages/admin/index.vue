@@ -21,5 +21,9 @@
       <div class="dash-icon">👤</div>
       <div class="dash-label">Usuários</div>
     </div>
+    <div class="dash-card" @click="navigateTo('/admin/logs')">
+      <div class="dash-icon">📜</div>
+      <div class="dash-label">Logs</div>
+    </div>
   </div>
 </template>

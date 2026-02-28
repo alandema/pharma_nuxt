@@ -265,6 +265,30 @@ async function main() {
   }
   console.log('✓ Created prescriptions');
 
+  // Create logs (matching the actions above)
+  const logs = [
+    { event_time: new Date('2026-01-10T09:00:00'), message: 'Cadastrou paciente: Alice Johnson', user_id: doctor1.id, patient_id: createdPatients[0].id },
+    { event_time: new Date('2026-01-10T09:15:00'), message: 'Cadastrou paciente: Bob Smith', user_id: doctor1.id, patient_id: createdPatients[1].id },
+    { event_time: new Date('2026-01-10T09:30:00'), message: 'Cadastrou paciente: Carol Martinez', user_id: doctor1.id, patient_id: createdPatients[2].id },
+    { event_time: new Date('2026-01-11T10:00:00'), message: 'Cadastrou paciente: David Lee', user_id: doctor2.id, patient_id: createdPatients[3].id },
+    { event_time: new Date('2026-01-11T10:20:00'), message: 'Cadastrou paciente: Emma Wilson', user_id: doctor2.id, patient_id: createdPatients[4].id },
+    { event_time: new Date('2026-01-12T11:00:00'), message: 'Editou paciente: Alice Johnson', user_id: doctor1.id, patient_id: createdPatients[0].id },
+    { event_time: new Date('2026-01-15T14:00:00'), message: 'Prescreveu para paciente', user_id: doctor2.id, patient_id: createdPatients[0].id },
+    { event_time: new Date('2026-01-20T09:00:00'), message: 'Prescreveu para paciente', user_id: doctor2.id, patient_id: createdPatients[1].id },
+    { event_time: new Date('2026-01-25T10:30:00'), message: 'Prescreveu para paciente', user_id: doctor1.id, patient_id: createdPatients[2].id },
+    { event_time: new Date('2026-02-10T08:00:00'), message: 'Prescreveu para paciente', user_id: doctor1.id, patient_id: createdPatients[0].id },
+    { event_time: new Date('2026-02-12T09:00:00'), message: 'Prescreveu para paciente', user_id: doctor1.id, patient_id: createdPatients[1].id },
+    { event_time: new Date('2026-02-13T10:00:00'), message: 'Prescreveu para paciente', user_id: doctor1.id, patient_id: createdPatients[2].id },
+    { event_time: new Date('2026-02-14T11:00:00'), message: 'Prescreveu para paciente', user_id: doctor2.id, patient_id: createdPatients[3].id },
+    { event_time: new Date('2026-02-15T12:00:00'), message: 'Prescreveu para paciente', user_id: doctor2.id, patient_id: createdPatients[4].id },
+    { event_time: new Date('2026-02-16T14:00:00'), message: 'Editou paciente: Bob Smith', user_id: doctor1.id, patient_id: createdPatients[1].id },
+  ];
+
+  for (const log of logs) {
+    await prisma.log.create({ data: log });
+  }
+  console.log('✓ Created logs');
+
   console.log('\n✅ Database seeding completed successfully!');
   console.log('\nTest credentials:');
   console.log('  Admin: username=admin, password=admin123');

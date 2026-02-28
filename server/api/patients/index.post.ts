@@ -22,6 +22,8 @@ export default defineEventHandler(async (event) => {
       medical_history: body.medical_history,
     },
   })
+  await prisma.log.create({ data: { event_time: new Date(), message: `Cadastrou paciente: ${patient.name}`, user_id: user.userId, patient_id: patient.id } })
+
   return {
     id: patient.id,
     name: patient.name,

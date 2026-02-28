@@ -1,25 +1,64 @@
 <script setup lang="ts">
+const page = ref(1)
+const selectedUserId = ref('')
+const selectedPatientId = ref('')
+const selectedDate = ref('')
+
+const { data: users } = await useFetch('/api/users/admin', { method: 'GET' })
+const { data: patients } = await useFetch('/api/patients', { method: 'GET' })
+
+const { data: response, refresh } = await useFetch<any>('/api/logs', {
+  method: 'GET',
+  query: { page, userId: selectedUserId, patientId: selectedPatientId, date: selectedDate },
+  watch: [page, selectedUserId, selectedPatientId, selectedDate],
+})
+
+const clearFilters = () => {
+  selectedUserId.value = ''
+  selectedPatientId.value = ''
+  selectedDate.value = ''
+  page.value = 1
+}
+
+const goToPage = (n: number) => { page.value = n }
 </script>
 
 <template>
-  <h1>Área do Administrador</h1>
-  <hr class="gold-divider" />
-  <div class="dash-grid">
-    <div class="dash-card" @click="navigateTo('/patients')">
-      <div class="dash-icon">👥</div>
-      <div class="dash-label">Pacientes</div>
-    </div>
-    <div class="dash-card" @click="navigateTo('/prescriptions')">
-      <div class="dash-icon">📋</div>
-      <div class="dash-label">Prescrições</div>
-    </div>
-    <div class="dash-card" @click="navigateTo('/admin/formulas')">
-      <div class="dash-icon">🧪</div>
-      <div class="dash-label">Fórmulas</div>
-    </div>
-    <div class="dash-card" @click="navigateTo('/admin/users')">
-      <div class="dash-icon">👤</div>
-      <div class="dash-label">Usuários</div>
-    </div>
+  <div class="page-header">
+    <h1>📝 Logs</h1>
+  </div>
+
+  <div class="filter-bar">
+    <label>Usuário:</label>
+    <select v-model="selectedUserId" @change="page = 1">
+      <option value="">Todos</option>
+      <option v-for="u in users" :key="u.id" :value="u.id">{{ u.username }}</option>
+    </select>
+    <label>Paciente:</label>
+    <select v-model="selectedPatientId" @change="page = 1">
+      <option value="">Todos</option>
+      <option v-for="p in patients" :key="p.id" :value="p.id">{{ p.name }}</option>
+    </select>
+    <label>Data:</label>
+    <input type="date" v-model="selectedDate" @change="page = 1" />
+    <button v-if="selectedUserId || selectedPatientId || selectedDate" class="btn-sm" @click="clearFilters">✕ Limpar</button>
+  </div>
+
+  <div class="card">
+    <template v-if="response?.logs?.length">
+      <div class="list-item" v-for="log in response.logs" :key="log.id">
+        <span class="text-muted">{{ new Date(log.event_time).toLocaleString('pt-BR') }}</span>
+        — {{ log.message }}
+        <span v-if="log.user" class="text-muted"> ({{ log.user.username }})</span>
+        <span v-if="log.patient" class="text-muted"> → {{ log.patient.name }}</span>
+      </div>
+    </template>
+    <div v-else class="empty">Nenhum log encontrado.</div>
+  </div>
+
+  <div v-if="response && response.totalPages > 1" class="pagination">
+    <button class="btn-sm" @click="goToPage(page - 1)" :disabled="page <= 1">← Anterior</button>
+    <span class="text-muted">Página {{ page }} de {{ response.totalPages }}</span>
+    <button class="btn-sm" @click="goToPage(page + 1)" :disabled="page >= response.totalPages">Próxima →</button>
   </div>
 </template>

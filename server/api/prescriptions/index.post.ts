@@ -12,7 +12,9 @@ export default defineEventHandler(async (event) => {
       json_form_info: formInfo,
     },
   });
-  
+
+  await prisma.log.create({ data: { event_time: new Date(), message: `Prescreveu para paciente`, user_id: user.userId, patient_id: body.patient_id } })
+
   return {
     id: prescription.id,
     patient_id: prescription.patient_id,
