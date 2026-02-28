@@ -194,7 +194,7 @@ const { brand } = useAppConfig();
 
 /* ── Header ──────────────────────────────────────── */
 .rx-header {
-  border-bottom: 3px double #444;
+  border-bottom: 3px double #B8A44E;
   padding-bottom: 8px;
   margin-bottom: 14px;
   display: flex;
@@ -206,6 +206,7 @@ const { brand } = useAppConfig();
   font-weight: bold;
   letter-spacing: 1px;
   text-transform: uppercase;
+  color: #B8A44E;
 }
 .clinic-subtitle {
   font-size: 11px;
@@ -272,12 +273,12 @@ const { brand } = useAppConfig();
   font-size: 36px;
   font-style: italic;
   font-weight: bold;
-  color: #222;
+  color: #B8A44E;
   line-height: 1;
 }
 .rx-line {
   flex: 1;
-  border-top: 1.5px solid #444;
+  border-top: 1.5px solid #B8A44E;
 }
 
 /* ── Details table ───────────────────────────────── */

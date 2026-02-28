@@ -4,6 +4,7 @@ function navigate(path: string) { return navigateTo({ path }) }
 
 <template>
   <h1>Área do Prescritor</h1>
+  <hr class="gold-divider" />
   <div class="dash-grid">
     <div class="dash-card" @click="navigate('/patients')">
       <div class="dash-icon">👥</div>

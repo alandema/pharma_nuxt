@@ -23,11 +23,7 @@ const handleSubmit = async () => {
 <template>
   <div class="auth-page">
     <div class="card auth-card">
-      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:48px;height:48px;margin:0 auto .5rem">
-        <rect width="100" height="100" rx="18" fill="#2563eb"/>
-        <text x="50" y="70" font-family="serif" font-size="58" font-weight="bold" fill="#fff" text-anchor="middle">Rx</text>
-      </svg>
-      <h1>{{ brand.name }}</h1>
+      <img src="/logo.png" alt="amma" class="auth-logo" />
       <p class="text-muted auth-sub">{{ brand.subtitle }}</p>
       <form @submit.prevent="handleSubmit">
         <div class="form-group">

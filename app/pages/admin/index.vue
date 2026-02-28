@@ -3,6 +3,7 @@
 
 <template>
   <h1>Área do Administrador</h1>
+  <hr class="gold-divider" />
   <div class="dash-grid">
     <div class="dash-card" @click="navigateTo('/patients')">
       <div class="dash-icon">👥</div>

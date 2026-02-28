@@ -20,7 +20,8 @@ const handleSubmit = async () => {
 <template>
   <div class="auth-page">
     <div class="card auth-card">
-      <h1>Criar Conta</h1>
+      <img src="/logo.png" alt="amma" class="auth-logo" />
+      <div class="auth-brand-name">Criar Conta</div>
       <p class="text-muted auth-sub">Preencha os dados para se cadastrar</p>
       <form @submit.prevent="handleSubmit">
         <div class="form-group">

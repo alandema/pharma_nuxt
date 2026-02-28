@@ -1,12 +1,13 @@
 <template>
   <div class="auth-page">
     <div class="card auth-card">
-      <h1>Sair</h1>
+      <img src="/logo.png" alt="amma" class="auth-logo" />
+      <div class="auth-brand-name">Sair</div>
       <p class="text-muted auth-sub">Tem certeza que deseja sair?</p>
       <button class="btn-primary" @click="handleLogout" :disabled="loading">
         {{ loading ? 'Saindo...' : 'Confirmar Saída' }}
       </button>
-      <p v-if="error" style="color:var(--c-danger);margin-top:.5rem">{{ error }}</p>
+      <p v-if="error" style="color:var(--c-danger);margin-top:.75rem;font-size:.9rem">{{ error }}</p>
     </div>
   </div>
 </template>
