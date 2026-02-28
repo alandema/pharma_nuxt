@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
   const where = {
     ...(patientId ? { patient_id: patientId } : {}),
     ...(startDate || endDate ? { date_prescribed: datePrescribed } : {}),
-    ...(user.role !== 'admin' ? { OR: [{ prescribed_by: user.userId }, { patient: { registered_by: user.userId } }] } : {})
+    ...(user.role !== 'admin' ? { prescribed_by: user.userId } : {})
   };
 
   const [prescriptions, total] = await Promise.all([

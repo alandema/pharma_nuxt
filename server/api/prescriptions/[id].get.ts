@@ -1,4 +1,6 @@
 export default defineEventHandler(async (event) => {
+  const user = event.context.user;
+
   const prescription = await prisma.prescription.findUnique({
     where: {
       id: event.context.params?.id,
@@ -12,6 +14,13 @@ export default defineEventHandler(async (event) => {
   });
 
   if (!prescription) return null;
+
+  if (user.role !== 'admin' && prescription.prescribed_by !== user.userId) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'Prescription not found',
+    });
+  }
   
   return {
     ...prescription,
