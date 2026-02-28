@@ -15,12 +15,15 @@ const submit = async () => {
 </script>
 
 <template>
-  <form @submit.prevent="submit">
-    <input v-model="name" placeholder="Nome" required />
-    <textarea v-model="information" placeholder="Informação"></textarea>
-    <button type="submit">Salvar</button>
-  </form>
-  <div>
-    <button @click="navigateTo('/admin/formulas')">Voltar para a Lista de Fórmulas</button>
+  <div class="page-header">
+    <h1>Nova Fórmula</h1>
+    <button @click="navigateTo('/admin/formulas')">← Voltar</button>
+  </div>
+  <div class="card">
+    <form @submit.prevent="submit">
+      <div class="form-group"><label>Nome *</label><input v-model="name" placeholder="Nome da fórmula" required /></div>
+      <div class="form-group"><label>Informação</label><textarea v-model="information" placeholder="Detalhes da fórmula" rows="5"></textarea></div>
+      <button type="submit">Salvar Fórmula</button>
+    </form>
   </div>
 </template>

@@ -1,16 +1,17 @@
 <script setup lang="ts">
-
-// const data_hello = await useFetch('/api/hello')
-
-function navigate (path: string) {
-  return navigateTo({
-    path: path,
-  })
-}
+function navigate(path: string) { return navigateTo({ path }) }
 </script>
 
 <template>
-  <pre>ESTA É A ÁREA DE UM PRESCRITOR</pre>
-  <button loading-auto @click="navigate('/patients')">Ir para Pacientes</button>
-  <button loading-auto @click="navigate('/prescriptions')">Ir para Prescrições</button>
+  <h1>Área do Prescritor</h1>
+  <div class="dash-grid">
+    <div class="dash-card" @click="navigate('/patients')">
+      <div class="dash-icon">👥</div>
+      <div class="dash-label">Pacientes</div>
+    </div>
+    <div class="dash-card" @click="navigate('/prescriptions')">
+      <div class="dash-icon">📋</div>
+      <div class="dash-label">Prescrições</div>
+    </div>
+  </div>
 </template>

@@ -25,14 +25,22 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <form @submit.prevent="handleSubmit">
-    <input v-model="username" type="text" placeholder="Usuário" required />
-    <input v-model="password" type="password" placeholder="Senha" required />
-    <select v-model="role" required>
-      <option value="user">Usuário</option>
-      <option value="admin">Administrador</option>
-    </select>
-    <button type="submit">Criar Usuário</button>
-  </form>
-  <button @click="navigateTo('/admin/users')">Voltar para a Lista de Usuários</button>
+  <div class="page-header">
+    <h1>Novo Usuário</h1>
+    <button @click="navigateTo('/admin/users')">← Voltar</button>
+  </div>
+  <div class="card">
+    <form @submit.prevent="handleSubmit">
+      <div class="form-group"><label>Usuário *</label><input v-model="username" type="text" placeholder="Nome de usuário" required /></div>
+      <div class="form-group"><label>Senha *</label><input v-model="password" type="password" placeholder="Senha" required /></div>
+      <div class="form-group">
+        <label>Função *</label>
+        <select v-model="role" required>
+          <option value="user">Usuário</option>
+          <option value="admin">Administrador</option>
+        </select>
+      </div>
+      <button type="submit">Criar Usuário</button>
+    </form>
+  </div>
 </template>

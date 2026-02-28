@@ -1,40 +1,40 @@
 <template>
-  <header>
-    <button v-if="user?.role === 'admin'" loading-auto @click="navigateTo('/admin')">Início</button>
-    <button v-else-if="user" loading-auto @click="navigateTo('/')">Início</button>
-  </header>
-  <NuxtPage />
+  <nav v-if="user" class="app-nav">
+    <div class="logo" @click="navigateTo(user.role === 'admin' ? '/admin' : '/')">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100" height="100" rx="18" fill="#2563eb"/>
+        <text x="50" y="70" font-family="serif" font-size="58" font-weight="bold" fill="#fff" text-anchor="middle">Rx</text>
+      </svg>
+      {{ brand.name }}
+    </div>
+    <div class="nav-actions">
+      <span class="text-muted" style="font-size:.8rem">{{ user.username }}</span>
+      <button class="btn-sm" @click="handleLogout">Sair</button>
+    </div>
+  </nav>
+
+  <main class="app-main">
+    <NuxtPage />
+  </main>
+
   <AppToast />
-  <footer>
-    <button v-if="user" @click="handleLogout" loading-auto>Sair</button>
-  </footer>
 </template>
 
 <script setup lang="ts">
-interface User {
-  userId: number;
-  username: string;
-  role: string;
-}
+interface User { userId: number; username: string; role: string }
 
-// Fetch user data for conditional UI rendering
+const { brand } = useAppConfig()
+useHead({ title: brand.name })
+
 const { data: user } = await useFetch<User>('/api/users/me', {
-  key: useRoute().path,  // Refresh user data on route change
-  default: () => undefined,  // Fallback if fetch fails (e.g., not logged in)
-  onResponseError: () => {}  // Ignore 401 errors to prevent breaking the layout
+  key: useRoute().path,
+  default: () => undefined,
+  onResponseError: () => {}
 })
 
-
 const handleLogout = async () => {
-  
-  await $fetch('/api/auth/logout', {
-    method: 'POST',
-    body: {}
-  })
-
+  await $fetch('/api/auth/logout', { method: 'POST', body: {} })
   await refreshNuxtData()
-
   navigateTo('/auth/login')
 }
-
 </script>

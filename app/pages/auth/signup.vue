@@ -1,32 +1,39 @@
 <script setup lang="ts">
 const username = ref('')
 const password = ref('')
+const { add: addToast } = useToast()
+
 const handleSubmit = async () => {
   try {
-    const data = await $fetch('/api/auth/signup', {
+    await $fetch('/api/auth/signup', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        username: username.value,
-        password: password.value,
-      }),
+      body: { username: username.value, password: password.value },
     })
-  } catch (error) {
-    console.error('Error during signup:', error)
+    addToast('Conta criada com sucesso!', 'success')
+    await navigateTo('/auth/login')
+  } catch (err: any) {
+    addToast(err.data?.message ?? 'Erro ao cadastrar', 'error')
   }
-
-  await navigateTo('/auth/login')
 }
-
 </script>
 
 <template>
-  <form @submit.prevent="handleSubmit">
-    <input v-model="username" type="text" placeholder="Usuário" required />
-    <input v-model="password" type="password" placeholder="Senha" required />
-    <button type="submit">Cadastrar</button>
-  </form>
-  <button @click="navigateTo('/auth/login')">Já tem uma conta? Entrar</button>
+  <div class="auth-page">
+    <div class="card auth-card">
+      <h1>Criar Conta</h1>
+      <p class="text-muted auth-sub">Preencha os dados para se cadastrar</p>
+      <form @submit.prevent="handleSubmit">
+        <div class="form-group">
+          <label>Usuário</label>
+          <input v-model="username" type="text" placeholder="Escolha um usuário" required />
+        </div>
+        <div class="form-group">
+          <label>Senha</label>
+          <input v-model="password" type="password" placeholder="Escolha uma senha" required />
+        </div>
+        <button type="submit">Cadastrar</button>
+      </form>
+      <p class="auth-link"><NuxtLink to="/auth/login">Já tem conta? Entrar</NuxtLink></p>
+    </div>
+  </div>
 </template>

@@ -9,11 +9,17 @@ const {data: users}  = await useFetch('/api/users/admin',
 </script>
 
 <template>
-    <h1>Lista de Usuários</h1>
-    <ul v-if="users">
-        <li v-for="user in users" :key="user.id">
-        <NuxtLink :to="`/admin/users/${user.id}`">{{ user.username }} - {{ user.role }}</NuxtLink>
-        </li>
-    </ul>
-    <button @click="navigateTo('/admin/users/register')">Criar Novo Usuário</button>
+  <div class="page-header">
+    <h1>👤 Usuários</h1>
+    <button class="btn-primary" @click="navigateTo('/admin/users/register')">+ Novo Usuário</button>
+  </div>
+  <div class="card">
+    <template v-if="users?.length">
+      <div class="list-item" v-for="user in users" :key="user.id">
+        <NuxtLink :to="`/admin/users/${user.id}`">{{ user.username }}</NuxtLink>
+        <span :class="['badge', user.role === 'admin' ? 'badge-admin' : 'badge-user']">{{ user.role }}</span>
+      </div>
+    </template>
+    <div v-else class="empty">Nenhum usuário cadastrado.</div>
+  </div>
 </template>

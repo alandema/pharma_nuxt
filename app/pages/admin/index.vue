@@ -1,13 +1,24 @@
 <script setup lang="ts">
-
-// const data_hello = await useFetch('/api/hello')
-
 </script>
 
 <template>
-  <pre>ESTA É A ÁREA DO ADMINISTRADOR</pre>
-  <button loading-auto @click="navigateTo('/patients')">Ir para Pacientes</button>
-  <button loading-auto @click="navigateTo('/prescriptions')">Ir para Prescrições</button>
-  <button loading-auto @click="navigateTo('/admin/formulas')">Ir para Fórmulas</button>
-  <button loading-auto @click="navigateTo('/admin/users')">Ir para Usuários</button>
+  <h1>Área do Administrador</h1>
+  <div class="dash-grid">
+    <div class="dash-card" @click="navigateTo('/patients')">
+      <div class="dash-icon">👥</div>
+      <div class="dash-label">Pacientes</div>
+    </div>
+    <div class="dash-card" @click="navigateTo('/prescriptions')">
+      <div class="dash-icon">📋</div>
+      <div class="dash-label">Prescrições</div>
+    </div>
+    <div class="dash-card" @click="navigateTo('/admin/formulas')">
+      <div class="dash-icon">🧪</div>
+      <div class="dash-label">Fórmulas</div>
+    </div>
+    <div class="dash-card" @click="navigateTo('/admin/users')">
+      <div class="dash-icon">👤</div>
+      <div class="dash-label">Usuários</div>
+    </div>
+  </div>
 </template>

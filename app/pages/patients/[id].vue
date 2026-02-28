@@ -109,46 +109,73 @@ const save = async () => {
 </script>
 
 <template>
-  <h1>Detalhes do Paciente</h1>
-  <form @submit.prevent="save">
-    <input v-model="name" placeholder="Nome" required />
-    <input v-model="rg" placeholder="RG" />
-    <input v-model="gender" placeholder="Gênero" />
-    <input v-model="cpf" placeholder="CPF" />
-    <input v-model="birth_date" placeholder="Data de Nascimento" />
-    <input v-model="phone" placeholder="Telefone" />
-    <input v-model="zipcode" placeholder="CEP" />
-    <input v-model="street" placeholder="Rua" />
-    <input v-model="district" placeholder="Bairro" />
-    <input v-model="house_number" placeholder="Número" />
-    <input v-model="additional_info" placeholder="Complemento" />
-    <input v-model="country" placeholder="País" />
-    <input v-model="state" placeholder="Estado" />
-    <input v-model="city" placeholder="Cidade" />
-    <textarea v-model="medical_history" placeholder="Histórico Médico"></textarea>
-    <button type="submit">Salvar</button>
-  </form>
-  <h2>Prescrições</h2>
-  <ul v-if="patient?.prescriptions?.length">
-    <li v-for="prescription in patient.prescriptions" :key="prescription.id">
-      <strong>{{ prescription.date_prescribed }}</strong>: {{ prescription.json_form_info }}
-    </li>
-  </ul>
-  <p v-else>Nenhuma prescrição encontrada.</p>
-  <template v-if="isAdmin">
-    <hr />
+  <div class="page-header">
+    <h1>Detalhes do Paciente</h1>
+    <div class="btn-group">
+      <button @click="navigateTo('/patients')">← Voltar</button>
+      <button v-if="canDelete" class="btn-danger" @click="deletePatient">Excluir</button>
+    </div>
+  </div>
+
+  <div class="card mb-2">
+    <form @submit.prevent="save">
+      <div class="form-group"><label>Nome *</label><input v-model="name" placeholder="Nome completo" required /></div>
+      <div class="form-row">
+        <div class="form-group"><label>CPF</label><input v-model="cpf" placeholder="000.000.000-00" /></div>
+        <div class="form-group"><label>RG</label><input v-model="rg" placeholder="RG" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Gênero</label><input v-model="gender" placeholder="Gênero" /></div>
+        <div class="form-group"><label>Data de Nascimento</label><input v-model="birth_date" type="date" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Telefone</label><input v-model="phone" placeholder="(00) 00000-0000" /></div>
+        <div class="form-group"><label>CEP</label><input v-model="zipcode" placeholder="00000-000" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Rua</label><input v-model="street" placeholder="Rua" /></div>
+        <div class="form-group"><label>Número</label><input v-model="house_number" placeholder="Nº" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Bairro</label><input v-model="district" placeholder="Bairro" /></div>
+        <div class="form-group"><label>Complemento</label><input v-model="additional_info" placeholder="Apto, Bloco..." /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>País</label><input v-model="country" placeholder="País" /></div>
+        <div class="form-group"><label>Estado</label><input v-model="state" placeholder="UF" /></div>
+      </div>
+      <div class="form-group"><label>Cidade</label><input v-model="city" placeholder="Cidade" /></div>
+      <div class="form-group"><label>Histórico Médico</label><textarea v-model="medical_history" placeholder="Observações clínicas..." rows="4"></textarea></div>
+      <button type="submit">Salvar Alterações</button>
+    </form>
+  </div>
+
+  <div class="card mb-2">
+    <h2>Prescrições</h2>
+    <template v-if="patient?.prescriptions?.length">
+      <div class="list-item" v-for="prescription in patient.prescriptions" :key="prescription.id">
+        <NuxtLink :to="`/prescriptions/${prescription.id}`">
+          <strong>{{ prescription.date_prescribed }}</strong>
+          <span class="text-muted" style="margin-left:.5rem">{{ prescription.json_form_info.substring(0, 60) }}...</span>
+        </NuxtLink>
+      </div>
+    </template>
+    <div v-else class="empty">Nenhuma prescrição encontrada.</div>
+  </div>
+
+  <div v-if="isAdmin" class="card">
     <h2>Transferir Paciente</h2>
-    <p>Médico atual: <strong>{{ patient?.registered_by_username ?? patient?.registered_by }}</strong></p>
-    <select v-model="selectedDoctorId">
-      <option value="" disabled>Selecione um médico</option>
-      <option v-for="doctor in doctors" :key="doctor.id" :value="doctor.id" :disabled="doctor.id === patient?.registered_by">
-        {{ doctor.username }}{{ doctor.id === patient?.registered_by ? ' (atual)' : '' }}
-      </option>
-    </select>
-    <button type="button" @click="transferPatient" :disabled="!selectedDoctorId">Transferir</button>
-    <p v-if="transferSuccess" style="color: green;">{{ transferSuccess }}</p>
-    <p v-if="transferError" style="color: red;">{{ transferError }}</p>
-  </template>
-  <button @click="navigateTo('/patients')">Voltar para Pacientes</button>
-  <button v-if="canDelete" @click="deletePatient" style="color:red">Excluir Paciente</button>
+    <p class="text-muted mb-2">Médico atual: <strong>{{ patient?.registered_by_username ?? patient?.registered_by }}</strong></p>
+    <div class="gap-row">
+      <select v-model="selectedDoctorId" style="flex:1">
+        <option value="" disabled>Selecione um médico</option>
+        <option v-for="doctor in doctors" :key="doctor.id" :value="doctor.id" :disabled="doctor.id === patient?.registered_by">
+          {{ doctor.username }}{{ doctor.id === patient?.registered_by ? ' (atual)' : '' }}
+        </option>
+      </select>
+      <button class="btn-primary" @click="transferPatient" :disabled="!selectedDoctorId">Transferir</button>
+    </div>
+    <p v-if="transferSuccess" style="color:var(--c-success);margin-top:.5rem">{{ transferSuccess }}</p>
+    <p v-if="transferError" style="color:var(--c-danger);margin-top:.5rem">{{ transferError }}</p>
+  </div>
 </template>

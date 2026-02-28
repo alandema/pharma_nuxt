@@ -45,30 +45,36 @@ const openPrintPage = () => {
 </script>
 
 <template>
-  <h1>Detalhes da Prescrição</h1>
+  <div class="page-header">
+    <h1>Detalhes da Prescrição</h1>
+    <div class="btn-group">
+      <button @click="navigateTo('/prescriptions')">← Voltar</button>
+      <button class="btn-primary" @click="openPrintPage">🖨️ Imprimir</button>
+    </div>
+  </div>
 
   <div v-if="prescription">
-    <h2>Informações da Prescrição</h2>
-    <ul>
-      <li><strong>Data da Prescrição:</strong> {{ prescription.date_prescribed }}</li>
-      <li><strong>Prescrito Por:</strong> {{ prescription.user?.username || 'Desconhecido' }}</li>
-      <li><strong>Criado Em:</strong> {{ new Date(prescription.created_at).toLocaleString() }}</li>
-    </ul>
+    <div class="card mb-2">
+      <h2>Informações</h2>
+      <div class="form-row">
+        <div><label>Data</label><p>{{ prescription.date_prescribed }}</p></div>
+        <div><label>Prescrito por</label><p>{{ prescription.user?.username || 'Desconhecido' }}</p></div>
+      </div>
+      <div><label>Criado em</label><p>{{ new Date(prescription.created_at).toLocaleString('pt-BR') }}</p></div>
+    </div>
 
-    <h2>Informações do Paciente</h2>
-    <ul>
-      <li><strong>Nome:</strong> {{ prescription.patient.name }}</li>
-      <li v-if="prescription.patient.cpf"><strong>CPF:</strong> {{ prescription.patient.cpf }}</li>
-      <li v-if="prescription.patient.phone"><strong>Telefone:</strong> {{ prescription.patient.phone }}</li>
-      <li v-if="prescription.patient.birth_date"><strong>Data de Nascimento:</strong> {{ prescription.patient.birth_date }}</li>
-    </ul>
+    <div class="card mb-2">
+      <h2>Paciente</h2>
+      <p><strong>{{ prescription.patient.name }}</strong></p>
+      <p v-if="prescription.patient.cpf" class="text-muted">CPF: {{ prescription.patient.cpf }}</p>
+      <p v-if="prescription.patient.phone" class="text-muted">Tel: {{ prescription.patient.phone }}</p>
+      <p v-if="prescription.patient.birth_date" class="text-muted">Nasc: {{ prescription.patient.birth_date }}</p>
+    </div>
 
-    <h2>Detalhes da Prescrição</h2>
-    <pre>{{ prescription.json_form_info }}</pre>
-
-    <button @click="openPrintPage">Abrir Prescrição</button>
+    <div class="card">
+      <h2>Conteúdo da Prescrição</h2>
+      <pre style="white-space:pre-wrap;font-size:.85rem;background:var(--c-bg);padding:1rem;border-radius:var(--radius)">{{ prescription.json_form_info }}</pre>
+    </div>
   </div>
-  <p v-else>Prescrição não encontrada.</p>
-
-  <button @click="navigateTo('/prescriptions')">Voltar para Prescrições</button>
+  <div v-else class="card empty">Prescrição não encontrada.</div>
 </template>

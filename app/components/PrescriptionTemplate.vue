@@ -78,6 +78,7 @@ const humanizeKey = (key: string) =>
   key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
 const generatedAt = new Date().toLocaleString('pt-BR');
+const { brand } = useAppConfig();
 </script>
 
 <template>
@@ -86,8 +87,8 @@ const generatedAt = new Date().toLocaleString('pt-BR');
     <!-- Header -->
     <div class="rx-header">
       <div>
-        <div class="clinic-name">Receita Médica</div>
-        <div class="clinic-subtitle">Prescrição Farmacêutica</div>
+        <div class="clinic-name">{{ brand.name }}</div>
+        <div class="clinic-subtitle">{{ brand.subtitle }}</div>
       </div>
       <div class="prescription-id">Nº {{ prescriptionShortId }}</div>
     </div>

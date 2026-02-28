@@ -3,21 +3,27 @@ import { fileURLToPath } from 'url'
 export default defineNuxtConfig({
   modules: ['@nuxt/content'],
 
+  css: ['~/assets/css/main.css'],
+
   alias: {
     '~prisma/client': fileURLToPath(new URL('./generated/prisma', import.meta.url))
   },
 
   ssr: false,
-  
-  // Enable source maps for debugging
-  sourcemap: {
-    server: true,
-    client: true
+
+  app: {
+    head: {
+      link: [
+        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
+        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap' }
+      ]
+    }
   },
 
+  sourcemap: { server: true, client: true },
+
   vite: {
-    build: {
-      sourcemap: true
-    }
+    build: { sourcemap: true }
   }
 })

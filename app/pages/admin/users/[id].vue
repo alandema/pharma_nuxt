@@ -18,13 +18,22 @@ async function deleteUser() {
 </script>
 
 <template>
+  <div class="page-header">
     <h1>Detalhes do Usuário</h1>
-    <div v-if="user">
-        <p>Usuário: {{ user.username }}</p>
-        <p>Função: {{ user.role }}</p>
-        <p>Status: {{ user.is_active ? 'Ativo' : 'Inativo' }}</p>
-        <button @click="toggleActive">{{ user.is_active ? 'Desativar' : 'Ativar' }}</button>
-        <button @click="deleteUser" style="margin-left:8px;color:red">Excluir Usuário</button>
+    <button @click="navigateTo('/admin/users')">← Voltar</button>
+  </div>
+  <div v-if="user" class="card">
+    <div class="form-row mb-2">
+      <div><label>Usuário</label><p style="font-size:1.1rem;font-weight:600">{{ user.username }}</p></div>
+      <div><label>Função</label><p><span :class="['badge', user.role === 'admin' ? 'badge-admin' : 'badge-user']">{{ user.role }}</span></p></div>
     </div>
-    <button @click="navigateTo('/admin/users')">Voltar para a Lista de Usuários</button>
+    <div class="mb-2">
+      <label>Status</label>
+      <p><span :class="['badge', user.is_active ? 'badge-active' : 'badge-inactive']">{{ user.is_active ? 'Ativo' : 'Inativo' }}</span></p>
+    </div>
+    <div class="btn-group">
+      <button @click="toggleActive">{{ user.is_active ? 'Desativar' : 'Ativar' }}</button>
+      <button class="btn-danger" @click="deleteUser">Excluir Usuário</button>
+    </div>
+  </div>
 </template>

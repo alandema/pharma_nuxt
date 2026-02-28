@@ -22,11 +22,15 @@ const save = async () => {
 </script>
 
 <template>
-  <h1>Detalhes da Fórmula</h1>
-  <form @submit.prevent="save">
-    <input v-model="name" placeholder="Nome" required />
-    <textarea v-model="information" placeholder="Informação"></textarea>
-    <button type="submit">Salvar</button>
-  </form>
-  <button @click="navigateTo('/admin/formulas')">Voltar para Fórmulas</button>
+  <div class="page-header">
+    <h1>Editar Fórmula</h1>
+    <button @click="navigateTo('/admin/formulas')">← Voltar</button>
+  </div>
+  <div class="card">
+    <form @submit.prevent="save">
+      <div class="form-group"><label>Nome *</label><input v-model="name" placeholder="Nome da fórmula" required /></div>
+      <div class="form-group"><label>Informação</label><textarea v-model="information" placeholder="Detalhes da fórmula" rows="5"></textarea></div>
+      <button type="submit">Salvar Alterações</button>
+    </form>
+  </div>
 </template>

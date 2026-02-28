@@ -66,39 +66,16 @@ onUnmounted(() => document.body.classList.remove('print-page'));
 </template>
 
 <style scoped>
-/* Hide the app shell (header / footer from app.vue) on this page */
-:global(body.print-page header),
-:global(body.print-page footer) {
-  display: none;
-}
-
 .print-controls {
   display: flex;
   justify-content: center;
   gap: 12px;
   padding: 16px;
-  background: #f5f5f5;
-  border-bottom: 1px solid #ddd;
-}
-
-.btn {
-  padding: 8px 24px;
-  font-size: 14px;
-  cursor: pointer;
-  border-radius: 4px;
-  border: 1px solid #555;
-  background: #fff;
-}
-
-.btn-primary {
-  background: #1a56a8;
-  color: #fff;
-  border-color: #1a56a8;
+  background: var(--c-bg);
+  border-bottom: 1px solid var(--c-border);
 }
 
 @media print {
-  .print-controls {
-    display: none;
-  }
+  .print-controls { display: none; }
 }
 </style>
