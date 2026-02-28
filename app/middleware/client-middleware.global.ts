@@ -3,7 +3,7 @@ interface User {
 }
 
 export default defineNuxtRouteMiddleware(async (to) => {
-  const allowedPaths = ['/auth/login', '/auth/signup']
+  const allowedPaths = ['/auth/login']
   if (allowedPaths.includes(to.path)) return
 
   const user = await $fetch<User>('/api/users/me', {

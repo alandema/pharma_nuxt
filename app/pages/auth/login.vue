@@ -36,7 +36,6 @@ const handleSubmit = async () => {
         </div>
         <button type="submit">Entrar</button>
       </form>
-      <p class="auth-link"><NuxtLink to="/auth/signup">Não tem conta? Cadastre-se</NuxtLink></p>
     </div>
   </div>
 </template>

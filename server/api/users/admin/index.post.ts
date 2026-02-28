@@ -1,14 +1,19 @@
 import bcrypt from "bcryptjs";
+import { validateCredentials } from '../../../utils/credentials';
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
 
-  const { username, password} = body;
-  if (!username || !password) { 
+  const { username, password, role = 'prescritor' } = body;
+  const errorMessage = validateCredentials(username, password)
+  if (errorMessage) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Missing username or password'
+      statusMessage: errorMessage
     });
+  }
+  if (role !== 'prescritor' && role !== 'admin') {
+    throw createError({ statusCode: 400, statusMessage: 'Invalid role' })
   }
 
   const existing = await prisma.user.findUnique({ where: { username }, select: { id: true } });
@@ -24,11 +29,11 @@ export default defineEventHandler(async (event) => {
     data: {
       username,
       password_hash: hash,
-      role: 'prescritor',
+      role,
     },
   });
 
-  console.log('User created:', username, 'role:', 'prescritor');
+  console.log('User created:', username, 'role:', role);
   
   return {
     success: true,

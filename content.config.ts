@@ -15,6 +15,13 @@ export default defineContentConfig({
       schema: z.object({
         genders: z.array(z.object({ id: z.number(), code: z.string(), name: z.string() }))
       })
+    }),
+    platform_roles: defineCollection({
+      type: 'data',
+      source: 'roles.yml',
+      schema: z.object({
+        platform_roles: z.array(z.object({ id: z.number(), code: z.string()}))
+      })
     })
   }
 })
