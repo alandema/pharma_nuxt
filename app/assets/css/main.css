@@ -43,7 +43,7 @@ a:hover { color: var(--c-gold); text-decoration: none; }
 
 /* ── Layout ──────────────────────────────────── */
 .app-nav {
-  background: var(--c-dark);
+  background: var(--c-surface);
   padding: 0 2rem;
   display: flex;
   align-items: center;
@@ -79,7 +79,8 @@ a:hover { color: var(--c-gold); text-decoration: none; }
 }
 
 .app-nav .nav-home {
-  color: rgba(255,255,255,.7);
+  color: var(--c-bg);
+  background: var(--c-dark-soft);
   font-size: .88rem;
   font-weight: 500;
   cursor: pointer;
@@ -88,8 +89,8 @@ a:hover { color: var(--c-gold); text-decoration: none; }
   transition: all .2s;
 }
 .app-nav .nav-home:hover {
-  color: var(--c-gold-light);
-  background: rgba(255,255,255,.08);
+  color: var(--c-dark-soft);
+  background: var(--c-gold-light);
 }
 
 .app-nav .nav-actions {
@@ -256,6 +257,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 textarea { resize: vertical; min-height: 80px; }
+input:disabled, select:disabled, textarea:disabled { background: var(--c-bg); color: var(--c-muted); cursor: not-allowed; opacity: .6; }
 
 .form-group { display: flex; flex-direction: column; gap: .25rem; }
 .form-row  { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }

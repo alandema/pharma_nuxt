@@ -42,6 +42,12 @@ const openPrintPage = () => {
   window.open(`/prescriptions/print/${route.params.id}`, '_blank');
 };
 
+const reuse = () => {
+  const q = new URLSearchParams({ patient_id: prescription.value!.patient_id,
+    json_form_info: prescription.value!.json_form_info });
+  navigateTo(`/prescriptions/register?${q}`);
+};
+
 </script>
 
 <template>
@@ -50,6 +56,7 @@ const openPrintPage = () => {
     <div class="btn-group">
       <button @click="navigateTo('/prescriptions')">← Voltar</button>
       <button class="btn-primary" @click="openPrintPage">🖨️ Imprimir</button>
+      <button @click="reuse">♻️ Reutilizar</button>
     </div>
   </div>
 

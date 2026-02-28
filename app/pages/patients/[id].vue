@@ -66,43 +66,13 @@ const deletePatient = async () => {
   await navigateTo('/patients')
 }
 
-const name = ref(patient.value?.name || '')
-const rg = ref(patient.value?.rg || '')
-const gender = ref(patient.value?.gender || '')
-const cpf = ref(patient.value?.cpf || '')
-const birth_date = ref(patient.value?.birth_date || '')
-const phone = ref(patient.value?.phone || '')
-const zipcode = ref(patient.value?.zipcode || '')
-const street = ref(patient.value?.street || '')
-const district = ref(patient.value?.district || '')
-const house_number = ref(patient.value?.house_number || '')
-const additional_info = ref(patient.value?.additional_info || '')
-const country = ref(patient.value?.country || '')
-const state = ref(patient.value?.state || '')
-const city = ref(patient.value?.city || '')
-const medical_history = ref(patient.value?.medical_history || '')
+const initialData = computed(() => {
+  const p = patient.value
+  return p ? { name: p.name, rg: p.rg || '', gender: p.gender || '', cpf: p.cpf || '', birth_date: p.birth_date || '', phone: p.phone || '', zipcode: p.zipcode || '', street: p.street || '', district: p.district || '', house_number: p.house_number || '', additional_info: p.additional_info || '', country: p.country || '', state: p.state || '', city: p.city || '', medical_history: p.medical_history || '' } : undefined
+})
 
-const save = async () => {
-  await $fetch(`/api/patients/${route.params.id}`, {
-    method: 'PUT',
-    body: {
-      name: name.value,
-      rg: rg.value,
-      gender: gender.value,
-      cpf: cpf.value,
-      birth_date: birth_date.value,
-      phone: phone.value,
-      zipcode: zipcode.value,
-      street: street.value,
-      district: district.value,
-      house_number: house_number.value,
-      additional_info: additional_info.value,
-      country: country.value,
-      state: state.value,
-      city: city.value,
-      medical_history: medical_history.value,
-    }
-  })
+const save = async (data: Record<string, string>) => {
+  await $fetch(`/api/patients/${route.params.id}`, { method: 'PUT', body: data })
   refresh()
   await navigateTo('/patients')
 }
@@ -118,36 +88,7 @@ const save = async () => {
   </div>
 
   <div class="card mb-2">
-    <form @submit.prevent="save">
-      <div class="form-group"><label>Nome *</label><input v-model="name" placeholder="Nome completo" required /></div>
-      <div class="form-row">
-        <div class="form-group"><label>CPF</label><input v-model="cpf" placeholder="000.000.000-00" /></div>
-        <div class="form-group"><label>RG</label><input v-model="rg" placeholder="RG" /></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label>Gênero</label><input v-model="gender" placeholder="Gênero" /></div>
-        <div class="form-group"><label>Data de Nascimento</label><input v-model="birth_date" type="date" /></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label>Telefone</label><input v-model="phone" placeholder="(00) 00000-0000" /></div>
-        <div class="form-group"><label>CEP</label><input v-model="zipcode" placeholder="00000-000" /></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label>Rua</label><input v-model="street" placeholder="Rua" /></div>
-        <div class="form-group"><label>Número</label><input v-model="house_number" placeholder="Nº" /></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label>Bairro</label><input v-model="district" placeholder="Bairro" /></div>
-        <div class="form-group"><label>Complemento</label><input v-model="additional_info" placeholder="Apto, Bloco..." /></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label>País</label><input v-model="country" placeholder="País" /></div>
-        <div class="form-group"><label>Estado</label><input v-model="state" placeholder="UF" /></div>
-      </div>
-      <div class="form-group"><label>Cidade</label><input v-model="city" placeholder="Cidade" /></div>
-      <div class="form-group"><label>Histórico Médico</label><textarea v-model="medical_history" placeholder="Observações clínicas..." rows="4"></textarea></div>
-      <button type="submit">Salvar Alterações</button>
-    </form>
+    <PatientForm :initial="initialData" submit-label="Salvar Alterações" @submit="save" />
   </div>
 
   <div class="card mb-2">

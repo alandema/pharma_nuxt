@@ -6,7 +6,14 @@ export default defineContentConfig({
       type: 'data',
       source: 'cids.yml',
       schema: z.object({
-        codes: z.array(z.object({ code: z.string(), name: z.string() }))
+        codes: z.array(z.object({ id: z.number(), code: z.string(), name: z.string() }))
+      })
+    }),
+    genders: defineCollection({
+      type: 'data',
+      source: 'genders.yml',
+      schema: z.object({
+        genders: z.array(z.object({ id: z.number(), code: z.string(), name: z.string() }))
       })
     })
   }

@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
     data: {
       patient_id: body.patient_id,
       prescribed_by: user.userId,
-      date_prescribed: body.date_prescribed || new Date().toISOString(),
+      date_prescribed: new Date().toISOString().split('T')[0],
       json_form_info: formInfo,
     },
   });

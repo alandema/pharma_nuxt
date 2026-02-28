@@ -2,9 +2,10 @@
 
 const getTodayDate = () => new Date().toISOString().split('T')[0];
 
-const patient_id = ref('');
+const route = useRoute();
+const patient_id = ref((route.query.patient_id as string) || '');
+const json_form_info = ref((route.query.json_form_info as string) || '');
 const date_prescribed = ref(getTodayDate());
-const json_form_info = ref('');
 const cid_code = ref('');
 
 const [{ data: patients }, { data: cidsData }] = await Promise.all([
@@ -20,7 +21,7 @@ const cids = computed(() => {
 const submit = async () => {
   await $fetch('/api/prescriptions', {
     method: 'POST',
-    body: { patient_id: patient_id.value, date_prescribed: date_prescribed.value, cid_code: cid_code.value, json_form_info: json_form_info.value }
+    body: { patient_id: patient_id.value, cid_code: cid_code.value, json_form_info: json_form_info.value }
   });
   await navigateTo('/prescriptions');
 };
@@ -44,7 +45,7 @@ const submit = async () => {
         </div>
         <div class="form-group">
           <label>Data *</label>
-          <input v-model="date_prescribed" type="date" required />
+          <input v-model="date_prescribed" type="date" disabled />
         </div>
       </div>
       <div class="form-group">
