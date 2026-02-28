@@ -5,7 +5,6 @@ export default defineEventHandler(async (event) => {
       id: event.context.params?.id,
     },
     data: {
-      name: body.name,
       information: body.information,
     },
   })

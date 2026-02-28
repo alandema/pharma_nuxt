@@ -71,7 +71,7 @@ async function main() {
       name: 'Alice Johnson',
       cpf: '123.456.789-01',
       gender: 'Female',
-      birth_date: '1985-03-15',
+      birth_date: new Date('1985-03-15T00:00:00.000Z'),
       phone: '(11) 98765-4321',
       zipcode: '01310-100',
       street: 'Av. Paulista',
@@ -87,7 +87,7 @@ async function main() {
       name: 'Bob Smith',
       cpf: '234.567.890-12',
       gender: 'Male',
-      birth_date: '1978-07-22',
+      birth_date: new Date('1978-07-22T00:00:00.000Z'),
       phone: '(11) 98765-1234',
       zipcode: '04543-907',
       street: 'Av. Brigadeiro Faria Lima',
@@ -103,7 +103,7 @@ async function main() {
       name: 'Carol Martinez',
       cpf: '345.678.901-23',
       gender: 'Female',
-      birth_date: '1992-11-03',
+      birth_date: new Date('1992-11-03T00:00:00.000Z'),
       phone: '(11) 98765-5678',
       zipcode: '05508-000',
       street: 'Av. Rebouças',
@@ -119,7 +119,7 @@ async function main() {
       name: 'David Lee',
       cpf: '456.789.012-34',
       gender: 'Male',
-      birth_date: '1965-05-18',
+      birth_date: new Date('1965-05-18T00:00:00.000Z'),
       phone: '(11) 98765-9012',
       zipcode: '01452-002',
       street: 'Rua Augusta',
@@ -135,7 +135,7 @@ async function main() {
       name: 'Emma Wilson',
       cpf: '567.890.123-45',
       gender: 'Female',
-      birth_date: '2000-09-25',
+      birth_date: new Date('2000-09-25T00:00:00.000Z'),
       phone: '(11) 98765-3456',
       zipcode: '01414-001',
       street: 'Rua Haddock Lobo',
@@ -163,7 +163,7 @@ async function main() {
     {
       patient_id: createdPatients[0].id,
       prescribed_by: doctor1.id,
-      date_prescribed: '2026-02-10',
+      date_prescribed: new Date('2026-02-10T00:00:00.000Z'),
       json_form_info: JSON.stringify({
         medication: 'Aspirin Complex',
         dosage: '500mg',
@@ -175,7 +175,7 @@ async function main() {
     {
       patient_id: createdPatients[1].id,
       prescribed_by: doctor1.id,
-      date_prescribed: '2026-02-12',
+      date_prescribed: new Date('2026-02-12T00:00:00.000Z'),
       json_form_info: JSON.stringify({
         medication: 'Losartan',
         dosage: '50mg',
@@ -187,7 +187,7 @@ async function main() {
     {
       patient_id: createdPatients[2].id,
       prescribed_by: doctor1.id,
-      date_prescribed: '2026-02-13',
+      date_prescribed: new Date('2026-02-13T00:00:00.000Z'),
       json_form_info: JSON.stringify({
         medication: 'Amoxicillin',
         dosage: '500mg',
@@ -199,7 +199,7 @@ async function main() {
     {
       patient_id: createdPatients[3].id,
       prescribed_by: doctor2.id,
-      date_prescribed: '2026-02-14',
+      date_prescribed: new Date('2026-02-14T00:00:00.000Z'),
       json_form_info: JSON.stringify({
         medication: 'Metformin',
         dosage: '850mg',
@@ -211,7 +211,7 @@ async function main() {
     {
       patient_id: createdPatients[4].id,
       prescribed_by: doctor2.id,
-      date_prescribed: '2026-02-15',
+      date_prescribed: new Date('2026-02-15T00:00:00.000Z'),
       json_form_info: JSON.stringify({
         medication: 'Vitamin D3',
         dosage: '2000 IU',
@@ -223,7 +223,7 @@ async function main() {
     {
       patient_id: createdPatients[0].id,
       prescribed_by: doctor2.id,
-      date_prescribed: '2026-01-15',
+      date_prescribed: new Date('2026-01-15T00:00:00.000Z'),
       json_form_info: JSON.stringify({
         medication: 'Omega-3',
         dosage: '1000mg',
@@ -235,7 +235,7 @@ async function main() {
     {
       patient_id: createdPatients[1].id,
       prescribed_by: doctor2.id,
-      date_prescribed: '2026-01-20',
+      date_prescribed: new Date('2026-01-20T00:00:00.000Z'),
       json_form_info: JSON.stringify({
         medication: 'Atorvastatin',
         dosage: '20mg',
@@ -247,7 +247,7 @@ async function main() {
     {
       patient_id: createdPatients[2].id,
       prescribed_by: doctor1.id,
-      date_prescribed: '2026-01-25',
+      date_prescribed: new Date('2026-01-25T00:00:00.000Z'),
       json_form_info: JSON.stringify({
         medication: 'Ibuprofen',
         dosage: '400mg',

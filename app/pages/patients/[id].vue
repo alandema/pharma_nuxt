@@ -61,7 +61,7 @@ const transferPatient = async () => {
   transferSuccess.value = ''
   if (!selectedDoctorId.value) { transferError.value = 'Por favor, selecione um médico.'; return }
   try {
-    const result = await $fetch(`/api/patients/${route.params.id}/transfer`, {
+    const result = await $fetch<{ transferred_to: string }>(`/api/patients/${route.params.id}/transfer`, {
       method: 'POST',
       body: { doctor_id: selectedDoctorId.value },
     })

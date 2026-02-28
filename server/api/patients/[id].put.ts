@@ -6,6 +6,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const body = await readBody(event)
+  const birthDate = body.birth_date ? new Date(`${body.birth_date}T00:00:00.000Z`) : null
   const patient = await prisma.patient.update({
     where,
     data: {
@@ -13,7 +14,7 @@ export default defineEventHandler(async (event) => {
       rg: body.rg,
       gender: body.gender,
       cpf: body.cpf,
-      birth_date: body.birth_date,
+      birth_date: birthDate,
       phone: body.phone,
       zipcode: body.zipcode,
       street: body.street,

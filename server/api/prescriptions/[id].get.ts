@@ -10,6 +10,17 @@ export default defineEventHandler(async (event) => {
       }
     },
   });
+
+  if (!prescription) return null;
   
-  return prescription;
+  return {
+    ...prescription,
+    date_prescribed: prescription.date_prescribed.toISOString().slice(0, 10),
+    patient: {
+      ...prescription.patient,
+      birth_date: prescription.patient.birth_date
+        ? prescription.patient.birth_date.toISOString().slice(0, 10)
+        : null,
+    },
+  };
 });

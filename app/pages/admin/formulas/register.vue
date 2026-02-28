@@ -4,12 +4,18 @@
 const name = ref('')
 const information = ref('')
 
+const toast = useToast()
+
 const submit = async () => {
-  await $fetch('/api/formulas', {
-    method: 'POST',
-    body: { name: name.value, information: information.value }
-  })
-  navigateTo('/admin/formulas')
+  try {
+    await $fetch('/api/formulas', {
+      method: 'POST',
+      body: { name: name.value, information: information.value }
+    })
+    navigateTo('/admin/formulas')
+  } catch (error: any) {
+    toast.add(error.data?.message ?? 'Algo deu errado', 'error')
+  }
 }
 
 </script>

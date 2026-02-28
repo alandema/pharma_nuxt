@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
     rg: patient.rg,
     gender: patient.gender,
     cpf: patient.cpf,
-    birth_date: patient.birth_date,
+    birth_date: patient.birth_date ? patient.birth_date.toISOString().slice(0, 10) : null,
     phone: patient.phone,
     zipcode: patient.zipcode,
     street: patient.street,
@@ -38,6 +38,9 @@ export default defineEventHandler(async (event) => {
     medical_history: patient.medical_history,
     registered_by: patient.registered_by,
     registered_by_username: patient.user?.username ?? null,
-    prescriptions: patient.prescriptions,
+    prescriptions: patient.prescriptions.map((prescription) => ({
+      ...prescription,
+      date_prescribed: prescription.date_prescribed.toISOString().slice(0, 10),
+    })),
   };
 })

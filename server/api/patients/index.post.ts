@@ -2,6 +2,7 @@ export default defineEventHandler(async (event) => {
   const user = event.context.user;
 
   const body = await readBody(event)
+  const birthDate = body.birth_date ? new Date(`${body.birth_date}T00:00:00.000Z`) : null
   const patient = await prisma.patient.create({
     data: {
       registered_by: user.userId,
@@ -9,7 +10,7 @@ export default defineEventHandler(async (event) => {
       rg: body.rg,
       gender: body.gender,
       cpf: body.cpf,
-      birth_date: body.birth_date,
+      birth_date: birthDate,
       phone: body.phone,
       zipcode: body.zipcode,
       street: body.street,

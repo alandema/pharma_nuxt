@@ -61,7 +61,7 @@ export default defineEventHandler(async (event) => {
     data: {
       patient_id: body.patient_id,
       prescribed_by: user.userId,
-      date_prescribed: new Date().toISOString().slice(0, 10),
+      date_prescribed: new Date(),
       json_form_info: formInfo,
     },
   });
@@ -71,6 +71,6 @@ export default defineEventHandler(async (event) => {
   return {
     id: prescription.id,
     patient_id: prescription.patient_id,
-    date_prescribed: prescription.date_prescribed,
+    date_prescribed: prescription.date_prescribed.toISOString().slice(0, 10),
   };
 });

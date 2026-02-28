@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-const {data: formulas}  = await useFetch('/api/formulas',
+const {data: formulas}  = await useFetch<Array<{id: string; name: string}>>('/api/formulas',
     {
         method: 'GET',
     }

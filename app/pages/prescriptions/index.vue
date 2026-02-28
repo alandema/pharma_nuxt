@@ -24,10 +24,17 @@ type PrescriptionResponse = {
   totalPages: number;
 };
 
+type Patient = {
+  id: string;
+  name: string;
+};
+
 const page = ref(1);
 const selectedPatientId = ref('');
+const startDate = ref('');
+const endDate = ref('');
 
-const { data: patients } = await useFetch('/api/patients', {
+const { data: patients } = await useFetch<Patient[]>('/api/patients', {
   method: 'GET',
 });
 
@@ -35,9 +42,11 @@ const { data: response, refresh } = await useFetch<PrescriptionResponse>('/api/p
   method: 'GET',
   query: {
     page,
-    patientId: selectedPatientId
+    patientId: selectedPatientId,
+    startDate,
+    endDate
   },
-  watch: [page, selectedPatientId]
+  watch: [page, selectedPatientId, startDate, endDate]
 });
 
 const goToPage = (newPage: number) => {
@@ -51,6 +60,8 @@ const filterByPatient = () => {
 
 const clearFilter = () => {
   selectedPatientId.value = '';
+  startDate.value = '';
+  endDate.value = '';
   page.value = 1;
 };
 
@@ -68,7 +79,11 @@ const clearFilter = () => {
       <option value="">Todos</option>
       <option v-for="patient in patients" :key="patient.id" :value="patient.id">{{ patient.name }}</option>
     </select>
-    <button v-if="selectedPatientId" class="btn-sm" @click="clearFilter">✕ Limpar</button>
+    <label>De:</label>
+    <input v-model="startDate" type="date" @change="filterByPatient" />
+    <label>Até:</label>
+    <input v-model="endDate" type="date" @change="filterByPatient" />
+    <button v-if="selectedPatientId || startDate || endDate" class="btn-sm" @click="clearFilter">✕ Limpar</button>
   </div>
 
   <div class="card">

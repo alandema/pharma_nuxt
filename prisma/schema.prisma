@@ -29,7 +29,7 @@ model Patient {
   rg              String?
   gender          String?
   cpf             String?        @unique
-  birth_date      String?        @map("birth_date")
+  birth_date      DateTime?      @db.Date @map("birth_date")
   phone           String?
   zipcode         String?
   street          String?
@@ -51,7 +51,7 @@ model Prescription {
   id              String   @id @default(uuid())
   patient_id      String   @map("patient_id")
   prescribed_by   String?  @map("prescribed_by")
-  date_prescribed String   @map("date_prescribed")
+  date_prescribed DateTime @db.Date @map("date_prescribed")
   json_form_info  Json     @map("json_form_info")
   created_at      DateTime @default(now()) @map("created_at")
   patient         Patient  @relation(fields: [patient_id], references: [id], onDelete: Cascade)
