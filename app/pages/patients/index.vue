@@ -13,16 +13,17 @@ const isAdmin = computed(() => (me.value as any)?.role === 'admin')
     <template v-if="patients?.length">
       <table class="list-table">
         <thead>
-          <tr><th>Paciente</th></tr>
+          <tr>
+            <th>Paciente</th>
+            <th>CPF</th>
+            <th v-if="isAdmin">Médico</th>
+          </tr>
         </thead>
         <tbody>
-          <tr v-for="patient in patients" :key="patient.id">
-            <td>
-              <NuxtLink :to="`/patients/${patient.id}`">
-                {{ patient.name }} <span class="text-muted">{{ patient.cpf }}</span>
-                <span v-if="isAdmin" class="text-muted"> — {{ patient.user?.username }}</span>
-              </NuxtLink>
-            </td>
+          <tr v-for="patient in patients" :key="patient.id" @click="navigateTo(`/patients/${patient.id}`)">
+            <td>{{ patient.name }}</td>
+            <td><span class="text-muted">{{ patient.cpf || '—' }}</span></td>
+            <td v-if="isAdmin"><span class="text-muted">{{ patient.user?.username || '—' }}</span></td>
           </tr>
         </tbody>
       </table>

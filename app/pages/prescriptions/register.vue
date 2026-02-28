@@ -1,16 +1,19 @@
 <script setup lang="ts">
+type Formula = { id: string; name: string; information?: string | null };
+type PrescriptionFormulaInput = { formula_id: string; posology: string };
 
 const getTodayDate = () => new Date().toISOString().split('T')[0];
 
 const route = useRoute();
 const patient_id = ref((route.query.patient_id as string) || '');
-const json_form_info = ref((route.query.json_form_info as string) || '');
 const date_prescribed = ref(getTodayDate());
-const cid_code = ref('');
+const cid_code = ref((route.query.cid_code as string) || '');
+const formulasInput = ref<PrescriptionFormulaInput[]>([]);
 
-const [{ data: patients }, { data: cidsData }] = await Promise.all([
+const [{ data: patients }, { data: cidsData }, { data: formulas }] = await Promise.all([
   useFetch('/api/patients'),
-  useAsyncData('cids', () => queryCollection('cids').first())
+  useAsyncData('cids', () => queryCollection('cids').first()),
+  useFetch<Formula[]>('/api/formulas')
 ]);
 
 const cids = computed(() => {
@@ -18,13 +21,45 @@ const cids = computed(() => {
   return [...codes].sort((a, b) => a.name.localeCompare(b.name));
 });
 
+const parseFormulasFromQuery = () => {
+  const formulasQuery = route.query.formulas as string | undefined;
+  if (!formulasQuery) return;
+  try {
+    const parsed = JSON.parse(formulasQuery);
+    if (Array.isArray(parsed)) {
+      formulasInput.value = parsed
+        .slice(0, 10)
+        .map((item: { formula_id?: string; posology?: string }) => ({
+          formula_id: item.formula_id || '',
+          posology: item.posology || '',
+        }));
+    }
+  } catch {}
+};
+
+const addFormula = () => {
+  if (formulasInput.value.length >= 10) return;
+  formulasInput.value.push({ formula_id: '', posology: '' });
+};
+
+const removeFormula = (index: number) => {
+  formulasInput.value.splice(index, 1);
+};
+
 const submit = async () => {
+  const cleanedFormulas = formulasInput.value
+    .map((item) => ({ formula_id: item.formula_id, posology: item.posology.trim() }))
+    .filter((item) => item.formula_id && item.posology);
+
   await $fetch('/api/prescriptions', {
     method: 'POST',
-    body: { patient_id: patient_id.value, cid_code: cid_code.value, json_form_info: json_form_info.value }
+    body: { patient_id: patient_id.value, cid_code: cid_code.value, formulas: cleanedFormulas }
   });
   await navigateTo('/prescriptions');
 };
+
+parseFormulasFromQuery();
+if (!formulasInput.value.length) addFormula();
 
 </script>
 
@@ -56,8 +91,27 @@ const submit = async () => {
         </select>
       </div>
       <div class="form-group">
-        <label>Detalhes da Prescrição *</label>
-        <textarea v-model="json_form_info" placeholder="Insira os detalhes da prescrição" rows="10" required></textarea>
+        <label>Fórmulas Prescritas *</label>
+        <div v-for="(item, index) in formulasInput" :key="index" class="card mb-2" style="padding: .75rem;">
+          <div class="form-row">
+            <div class="form-group" style="flex: 1;">
+              <label>Fórmula {{ index + 1 }} *</label>
+              <select v-model="item.formula_id" required>
+                <option value="" disabled>Selecione uma fórmula</option>
+                <option v-for="formula in formulas" :key="formula.id" :value="formula.id">{{ formula.name }}</option>
+              </select>
+            </div>
+            <div style="display:flex;align-items:flex-end;">
+              <button v-if="formulasInput.length > 1" type="button" class="btn-danger" @click="removeFormula(index)">Remover</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Posologia *</label>
+            <textarea v-model="item.posology" placeholder="Ex: Tomar 1 cápsula a cada 8 horas" rows="3" required></textarea>
+          </div>
+        </div>
+        <button type="button" class="btn-sm" @click="addFormula" :disabled="formulasInput.length >= 10">+ Adicionar Fórmula</button>
+        <p class="text-muted" style="margin-top:.5rem">{{ formulasInput.length }}/10 fórmulas</p>
       </div>
       <button type="submit">Salvar Prescrição</button>
     </form>

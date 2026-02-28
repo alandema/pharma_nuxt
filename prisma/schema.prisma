@@ -52,7 +52,7 @@ model Prescription {
   patient_id      String   @map("patient_id")
   prescribed_by   String?  @map("prescribed_by")
   date_prescribed String   @map("date_prescribed")
-  json_form_info  String   @map("json_form_info")
+  json_form_info  Json     @map("json_form_info")
   created_at      DateTime @default(now()) @map("created_at")
   patient         Patient  @relation(fields: [patient_id], references: [id], onDelete: Cascade)
   user            User?    @relation(fields: [prescribed_by], references: [id], onDelete: SetNull)

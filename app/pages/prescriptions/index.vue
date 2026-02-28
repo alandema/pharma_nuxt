@@ -5,7 +5,7 @@ type Prescription = {
   patient_id: string;
   prescribed_by: string | null;
   date_prescribed: string;
-  json_form_info: string;
+  json_form_info: Record<string, unknown> | string;
   created_at: string;
   patient: {
     id: string;
@@ -78,8 +78,8 @@ const clearFilter = () => {
           <tr><th>Data</th><th>Paciente</th><th>Médico</th></tr>
         </thead>
         <tbody>
-          <tr v-for="prescription in response.prescriptions" :key="prescription.id">
-            <td><NuxtLink :to="`/prescriptions/${prescription.id}`">{{ prescription.date_prescribed }}</NuxtLink></td>
+          <tr v-for="prescription in response.prescriptions" :key="prescription.id" @click="navigateTo(`/prescriptions/${prescription.id}`)">
+            <td>{{ prescription.date_prescribed }}</td>
             <td>{{ prescription.patient.name }}</td>
             <td><span v-if="prescription.user" class="text-muted">{{ prescription.user.username }}</span><span v-else class="text-muted">—</span></td>
           </tr>

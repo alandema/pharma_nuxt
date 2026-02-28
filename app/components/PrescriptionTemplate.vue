@@ -21,9 +21,15 @@ type User = {
 type Prescription = {
   id: string;
   date_prescribed: string;
-  json_form_info: string;
+  json_form_info: Record<string, unknown> | string;
   patient: Patient;
   user: User;
+};
+
+type ParsedPrescriptionInfo = {
+  cid_code?: string;
+  formulas?: { formula_id?: string; formula_name?: string; posology?: string }[];
+  [key: string]: unknown;
 };
 
 type CidEntry = {
@@ -36,11 +42,14 @@ const props = defineProps<{
   cids?: CidEntry[];
 }>();
 
-const formInfo = computed<Record<string, unknown>>(() => {
+const formInfo = computed<ParsedPrescriptionInfo>(() => {
   try {
-    return JSON.parse(props.prescription.json_form_info);
+    if (typeof props.prescription.json_form_info === 'string') {
+      return JSON.parse(props.prescription.json_form_info);
+    }
+    return props.prescription.json_form_info as ParsedPrescriptionInfo;
   } catch {
-    return { details: props.prescription.json_form_info };
+    return {};
   }
 });
 
@@ -52,8 +61,10 @@ const cidLabel = computed(() => {
 });
 
 const detailEntries = computed(() =>
-  Object.entries(formInfo.value).filter(([key]) => key !== 'cid_code')
+  Object.entries(formInfo.value).filter(([key]) => key !== 'cid_code' && key !== 'formulas')
 );
+
+const formulas = computed(() => formInfo.value.formulas || []);
 
 const formattedDate = computed(() => {
   const dateStr = props.prescription.date_prescribed;
@@ -142,7 +153,22 @@ const { brand } = useAppConfig();
     </div>
 
     <!-- Prescription details -->
-    <table class="details-table">
+    <table v-if="formulas.length" class="details-table">
+      <thead>
+        <tr>
+          <th class="detail-key">Fórmula</th>
+          <th class="detail-value">Posologia</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(item, index) in formulas" :key="`${item.formula_id || index}`">
+          <td class="detail-key">{{ item.formula_name || item.formula_id || `Fórmula ${index + 1}` }}</td>
+          <td class="detail-value">{{ item.posology || '' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table v-else class="details-table">
       <tbody>
         <template v-if="detailEntries.length > 0">
           <tr v-for="[key, value] in detailEntries" :key="key">

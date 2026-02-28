@@ -273,6 +273,7 @@ input:disabled, select:disabled, textarea:disabled { background: var(--c-bg); co
   border-bottom: 1px solid var(--c-border);
   text-align: left;
 }
+.list-table tbody tr { cursor: pointer; }
 .list-table tbody tr:hover { background: #FAFAF5; }
 .list-table a {
   color: var(--c-text);

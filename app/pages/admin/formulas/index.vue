@@ -20,8 +20,8 @@ const {data: formulas}  = await useFetch('/api/formulas',
           <tr><th>Fórmula</th></tr>
         </thead>
         <tbody>
-          <tr v-for="formula in formulas" :key="formula.id">
-            <td><NuxtLink :to="`/admin/formulas/${formula.id}`">{{ formula.name }}</NuxtLink></td>
+          <tr v-for="formula in formulas" :key="formula.id" @click="navigateTo(`/admin/formulas/${formula.id}`)">
+            <td>{{ formula.name }}</td>
           </tr>
         </tbody>
       </table>

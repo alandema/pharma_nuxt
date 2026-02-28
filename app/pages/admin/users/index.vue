@@ -20,8 +20,8 @@ const {data: users}  = await useFetch('/api/users/admin',
           <tr><th>Usuário</th><th>Papel</th></tr>
         </thead>
         <tbody>
-          <tr v-for="user in users" :key="user.id">
-            <td><NuxtLink :to="`/admin/users/${user.id}`">{{ user.username }}</NuxtLink></td>
+          <tr v-for="user in users" :key="user.id" @click="navigateTo(`/admin/users/${user.id}`)">
+            <td>{{ user.username }}</td>
             <td style="text-align:right"><span :class="['badge', user.role === 'admin' ? 'badge-admin' : 'badge-user']">{{ user.role }}</span></td>
           </tr>
         </tbody>

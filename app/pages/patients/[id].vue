@@ -26,8 +26,21 @@ type Prescription = {
   id: string;
   patient_id: string;
   date_prescribed: string;
-  json_form_info: string;
+  json_form_info: Record<string, unknown> | string;
   created_at: string;
+}
+
+const prescriptionSummary = (jsonFormInfo: Record<string, unknown> | string) => {
+  const parsed = typeof jsonFormInfo === 'string'
+    ? (() => { try { return JSON.parse(jsonFormInfo) } catch { return {} } })()
+    : jsonFormInfo;
+
+  const formulas = Array.isArray((parsed as { formulas?: unknown[] }).formulas)
+    ? ((parsed as { formulas?: { formula_name?: string }[] }).formulas || [])
+    : [];
+
+  if (!formulas.length) return 'Sem fórmulas';
+  return formulas.slice(0, 2).map((item) => item.formula_name || 'Fórmula').join(', ') + (formulas.length > 2 ? '...' : '');
 }
 
 type Doctor = { id: string; username: string; role: string }
@@ -99,9 +112,9 @@ const save = async (data: Record<string, string>) => {
           <tr><th>Data</th><th>Resumo</th></tr>
         </thead>
         <tbody>
-          <tr v-for="prescription in patient.prescriptions" :key="prescription.id">
-            <td><NuxtLink :to="`/prescriptions/${prescription.id}`"><strong>{{ prescription.date_prescribed }}</strong></NuxtLink></td>
-            <td><span class="text-muted">{{ prescription.json_form_info.substring(0, 60) }}...</span></td>
+          <tr v-for="prescription in patient.prescriptions" :key="prescription.id" @click="navigateTo(`/prescriptions/${prescription.id}`)">
+            <td><strong>{{ prescription.date_prescribed }}</strong></td>
+            <td><span class="text-muted">{{ prescriptionSummary(prescription.json_form_info) }}</span></td>
           </tr>
         </tbody>
       </table>

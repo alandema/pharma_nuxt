@@ -24,7 +24,7 @@ type Prescription = {
   patient_id: string;
   prescribed_by: string | null;
   date_prescribed: string;
-  json_form_info: string;
+  json_form_info: Record<string, unknown> | string;
   created_at: string;
   patient: Patient;
   user: User | null;
