@@ -90,7 +90,7 @@ const clearFilter = () => {
     <template v-if="response?.prescriptions?.length">
       <table class="list-table">
         <thead>
-          <tr><th>Data</th><th>Paciente</th><th>Médico</th></tr>
+          <tr><th>Data</th><th>Paciente</th><th>Prescritor</th></tr>
         </thead>
         <tbody>
           <tr v-for="prescription in response.prescriptions" :key="prescription.id" @click="navigateTo(`/prescriptions/${prescription.id}`)">

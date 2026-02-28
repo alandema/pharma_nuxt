@@ -31,7 +31,7 @@ async function main() {
     create: {
       username: 'doctor1',
       password_hash: doctorHash,
-      role: 'doctor',
+      role: 'prescritor',
       is_active: true,
     },
   });
@@ -43,7 +43,7 @@ async function main() {
     create: {
       username: 'doctor2',
       password_hash: doctorHash,
-      role: 'doctor',
+      role: 'prescritor',
       is_active: true,
     },
   });
@@ -292,8 +292,8 @@ async function main() {
   console.log('\n✅ Database seeding completed successfully!');
   console.log('\nTest credentials:');
   console.log('  Admin: username=admin, password=admin123');
-  console.log('  Doctor: username=doctor1, password=doctor123');
-  console.log('  Doctor: username=doctor2, password=doctor123');
+  console.log('  Prescritor: username=doctor1, password=doctor123');
+  console.log('  Prescritor: username=doctor2, password=doctor123');
 
   await prisma.$disconnect();
 }

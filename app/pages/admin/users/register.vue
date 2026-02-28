@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const username = ref('')
 const password = ref('')
-const role = ref('user')
+const role = ref('prescritor')
 const handleSubmit = async () => {
   try {
     const data = await $fetch('/api/auth/signup', {
@@ -36,7 +36,7 @@ const handleSubmit = async () => {
       <div class="form-group">
         <label>Função *</label>
         <select v-model="role" required>
-          <option value="user">Usuário</option>
+          <option value="prescritor">Prescritor</option>
           <option value="admin">Administrador</option>
         </select>
       </div>

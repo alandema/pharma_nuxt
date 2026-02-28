@@ -24,11 +24,11 @@ export default defineEventHandler(async (event) => {
     data: {
       username,
       password_hash: hash,
-      role: 'user',
+      role: 'prescritor',
     },
   });
 
-  console.log('User created:', username, 'role:', 'user');
+  console.log('User created:', username, 'role:', 'prescritor');
   
   return {
     success: true,

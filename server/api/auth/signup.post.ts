@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
 
   const token = getCookie(event, 'AccessToken'); // Get the 'token' cookie
 
-  const { username, password, role } = body;
+  const { username, password, role = 'prescritor' } = body;
   
   if (!username || !password) { 
     throw createError({
@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
 
   const hash = await bcrypt.hash(password, 10);
 
-  if (role !== 'user'){
+  if (role !== 'prescritor'){
     try {
         const decoded = jwt.verify(token!, JWT_SECRET!) as JwtPayload;
         if (decoded.role !== 'admin') {

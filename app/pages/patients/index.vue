@@ -16,7 +16,7 @@ const isAdmin = computed(() => (me.value as any)?.role === 'admin')
           <tr>
             <th>Paciente</th>
             <th>CPF</th>
-            <th v-if="isAdmin">Médico</th>
+            <th v-if="isAdmin">Prescritor</th>
           </tr>
         </thead>
         <tbody>

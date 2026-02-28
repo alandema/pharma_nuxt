@@ -43,7 +43,7 @@ const prescriptionSummary = (jsonFormInfo: Record<string, unknown> | string) => 
   return formulas.slice(0, 2).map((item) => item.formula_name || 'Fórmula').join(', ') + (formulas.length > 2 ? '...' : '');
 }
 
-type Doctor = { id: string; username: string; role: string }
+type Prescritor = { id: string; username: string; role: string }
 
 const route = useRoute()
 const { data: patient, refresh } = await useFetch<Patient>(`/api/patients/${route.params.id}`, { method: 'GET' })
@@ -51,23 +51,23 @@ const { data: me } = await useFetch('/api/users/me')
 const isAdmin = computed(() => (me.value as any)?.role === 'admin')
 const canDelete = computed(() => isAdmin.value || (me.value as any)?.userId === patient.value?.registered_by)
 
-const { data: allUsers } = await useFetch<Doctor[]>('/api/users/admin', { method: 'GET' })
-const doctors = computed(() => allUsers.value?.filter(u => u.role === 'doctor') ?? [])
-const selectedDoctorId = ref('')
+const { data: allUsers } = await useFetch<Prescritor[]>('/api/users/admin', { method: 'GET' })
+const prescritores = computed(() => allUsers.value?.filter(u => u.role === 'prescritor') ?? [])
+const selectedPrescritorId = ref('')
 const transferError = ref('')
 const transferSuccess = ref('')
 const transferPatient = async () => {
   transferError.value = ''
   transferSuccess.value = ''
-  if (!selectedDoctorId.value) { transferError.value = 'Por favor, selecione um médico.'; return }
+  if (!selectedPrescritorId.value) { transferError.value = 'Por favor, selecione um prescritor.'; return }
   try {
     const result = await $fetch<{ transferred_to: string }>(`/api/patients/${route.params.id}/transfer`, {
       method: 'POST',
-      body: { doctor_id: selectedDoctorId.value },
+      body: { prescritor_id: selectedPrescritorId.value },
     })
     await refresh()
     transferSuccess.value = `Paciente transferido com sucesso para ${result.transferred_to}.`
-    selectedDoctorId.value = ''
+    selectedPrescritorId.value = ''
   } catch (err: any) {
     transferError.value = err?.data?.statusMessage ?? 'Falha na transferência.'
   }
@@ -124,15 +124,15 @@ const save = async (data: Record<string, string>) => {
 
   <div v-if="isAdmin" class="card">
     <h2>Transferir Paciente</h2>
-    <p class="text-muted mb-2">Médico atual: <strong>{{ patient?.registered_by_username ?? patient?.registered_by }}</strong></p>
+    <p class="text-muted mb-2">Prescritor atual: <strong>{{ patient?.registered_by_username ?? patient?.registered_by }}</strong></p>
     <div class="gap-row">
-      <select v-model="selectedDoctorId" style="flex:1">
-        <option value="" disabled>Selecione um médico</option>
-        <option v-for="doctor in doctors" :key="doctor.id" :value="doctor.id" :disabled="doctor.id === patient?.registered_by">
-          {{ doctor.username }}{{ doctor.id === patient?.registered_by ? ' (atual)' : '' }}
+      <select v-model="selectedPrescritorId" style="flex:1">
+        <option value="" disabled>Selecione um prescritor</option>
+        <option v-for="prescritor in prescritores" :key="prescritor.id" :value="prescritor.id" :disabled="prescritor.id === patient?.registered_by">
+          {{ prescritor.username }}{{ prescritor.id === patient?.registered_by ? ' (atual)' : '' }}
         </option>
       </select>
-      <button class="btn-primary" @click="transferPatient" :disabled="!selectedDoctorId">Transferir</button>
+      <button class="btn-primary" @click="transferPatient" :disabled="!selectedPrescritorId">Transferir</button>
     </div>
     <p v-if="transferSuccess" style="color:var(--c-success);margin-top:.5rem">{{ transferSuccess }}</p>
     <p v-if="transferError" style="color:var(--c-danger);margin-top:.5rem">{{ transferError }}</p>

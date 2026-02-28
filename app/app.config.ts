@@ -1,6 +1,6 @@
 export default defineAppConfig({
   brand: {
-    name: 'amma Farmácia de Manipulação',
+    name: 'amma - Prescrições',
     shortName: 'amma',
     subtitle: 'Sistema de Prescrição Farmacêutica',
   }

@@ -10,25 +10,25 @@ export default defineEventHandler(async (event) => {
 
   const patientId = event.context.params?.id;
   const body = await readBody(event);
-  const { doctor_id } = body;
+  const { prescritor_id } = body;
 
-  if (!doctor_id) {
+  if (!prescritor_id) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Bad Request: doctor_id is required',
+      statusMessage: 'Bad Request: prescritor_id is required',
     });
   }
 
-  // Verify the target doctor exists and has role 'doctor'
-  const targetDoctor = await prisma.user.findUnique({
-    where: { id: doctor_id },
+  // Verify the target prescritor exists and has role 'prescritor'
+  const targetPrescritor = await prisma.user.findUnique({
+    where: { id: prescritor_id },
     select: { id: true, username: true, role: true },
   });
 
-  if (!targetDoctor || targetDoctor.role !== 'doctor') {
+  if (!targetPrescritor || targetPrescritor.role !== 'prescritor') {
     throw createError({
       statusCode: 404,
-      statusMessage: 'Target doctor not found or is not a doctor',
+      statusMessage: 'Target prescritor not found or is not a prescritor',
     });
   }
 
@@ -47,7 +47,7 @@ export default defineEventHandler(async (event) => {
 
   const updated = await prisma.patient.update({
     where: { id: patientId },
-    data: { registered_by: doctor_id },
+    data: { registered_by: prescritor_id },
     select: { id: true, name: true, registered_by: true },
   });
 
@@ -55,6 +55,6 @@ export default defineEventHandler(async (event) => {
     id: updated.id,
     name: updated.name,
     registered_by: updated.registered_by,
-    transferred_to: targetDoctor.username,
+    transferred_to: targetPrescritor.username,
   };
 });

@@ -9,7 +9,7 @@ export const prisma = new PrismaClient({ adapter })
 const args = process.argv.slice(2);
 const params: Record<string, string> = {};
 
-// Parse flag style: --username alice --password secret --role doctor
+// Parse flag style: --username alice --password secret --role prescritor
 for (let i = 0; i < args.length; i++) {
   const a = args[i];
   if (a.startsWith('--')) {
