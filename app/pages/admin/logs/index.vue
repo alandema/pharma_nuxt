@@ -46,12 +46,19 @@ const goToPage = (n: number) => { page.value = n }
 
   <div class="card">
     <template v-if="response?.logs?.length">
-      <div class="list-item" v-for="log in response.logs" :key="log.id">
-        <span class="text-muted">{{ new Date(log.event_time).toLocaleString('pt-BR') }}</span>
-        — {{ log.message }}
-        <span v-if="log.user" class="text-muted"> ({{ log.user.username }})</span>
-        <span v-if="log.patient" class="text-muted"> → {{ log.patient.name }}</span>
-      </div>
+      <table class="list-table">
+        <thead>
+          <tr><th>Data/Hora</th><th>Mensagem</th><th>Usuário</th><th>Paciente</th></tr>
+        </thead>
+        <tbody>
+          <tr v-for="log in response.logs" :key="log.id">
+            <td><span class="text-muted">{{ new Date(log.event_time).toLocaleString('pt-BR') }}</span></td>
+            <td>{{ log.message }}</td>
+            <td><span class="text-muted">{{ log.user?.username || '—' }}</span></td>
+            <td><span class="text-muted">{{ log.patient?.name || '—' }}</span></td>
+          </tr>
+        </tbody>
+      </table>
     </template>
     <div v-else class="empty">Nenhum log encontrado.</div>
   </div>

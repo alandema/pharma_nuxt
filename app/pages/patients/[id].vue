@@ -94,12 +94,17 @@ const save = async (data: Record<string, string>) => {
   <div class="card mb-2">
     <h2>Prescrições</h2>
     <template v-if="patient?.prescriptions?.length">
-      <div class="list-item" v-for="prescription in patient.prescriptions" :key="prescription.id">
-        <NuxtLink :to="`/prescriptions/${prescription.id}`">
-          <strong>{{ prescription.date_prescribed }}</strong>
-          <span class="text-muted" style="margin-left:.5rem">{{ prescription.json_form_info.substring(0, 60) }}...</span>
-        </NuxtLink>
-      </div>
+      <table class="list-table">
+        <thead>
+          <tr><th>Data</th><th>Resumo</th></tr>
+        </thead>
+        <tbody>
+          <tr v-for="prescription in patient.prescriptions" :key="prescription.id">
+            <td><NuxtLink :to="`/prescriptions/${prescription.id}`"><strong>{{ prescription.date_prescribed }}</strong></NuxtLink></td>
+            <td><span class="text-muted">{{ prescription.json_form_info.substring(0, 60) }}...</span></td>
+          </tr>
+        </tbody>
+      </table>
     </template>
     <div v-else class="empty">Nenhuma prescrição encontrada.</div>
   </div>

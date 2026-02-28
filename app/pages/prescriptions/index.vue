@@ -73,12 +73,18 @@ const clearFilter = () => {
 
   <div class="card">
     <template v-if="response?.prescriptions?.length">
-      <div class="list-item" v-for="prescription in response.prescriptions" :key="prescription.id">
-        <NuxtLink :to="`/prescriptions/${prescription.id}`">
-          {{ prescription.date_prescribed }} — {{ prescription.patient.name }}
-          <span v-if="prescription.user" class="text-muted"> ({{ prescription.user.username }})</span>
-        </NuxtLink>
-      </div>
+      <table class="list-table">
+        <thead>
+          <tr><th>Data</th><th>Paciente</th><th>Médico</th></tr>
+        </thead>
+        <tbody>
+          <tr v-for="prescription in response.prescriptions" :key="prescription.id">
+            <td><NuxtLink :to="`/prescriptions/${prescription.id}`">{{ prescription.date_prescribed }}</NuxtLink></td>
+            <td>{{ prescription.patient.name }}</td>
+            <td><span v-if="prescription.user" class="text-muted">{{ prescription.user.username }}</span><span v-else class="text-muted">—</span></td>
+          </tr>
+        </tbody>
+      </table>
     </template>
     <div v-else class="empty">Nenhuma prescrição encontrada.</div>
   </div>

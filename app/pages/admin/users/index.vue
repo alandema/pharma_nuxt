@@ -15,10 +15,17 @@ const {data: users}  = await useFetch('/api/users/admin',
   </div>
   <div class="card">
     <template v-if="users?.length">
-      <div class="list-item" v-for="user in users" :key="user.id">
-        <NuxtLink :to="`/admin/users/${user.id}`">{{ user.username }}</NuxtLink>
-        <span :class="['badge', user.role === 'admin' ? 'badge-admin' : 'badge-user']">{{ user.role }}</span>
-      </div>
+      <table class="list-table">
+        <thead>
+          <tr><th>Usuário</th><th>Papel</th></tr>
+        </thead>
+        <tbody>
+          <tr v-for="user in users" :key="user.id">
+            <td><NuxtLink :to="`/admin/users/${user.id}`">{{ user.username }}</NuxtLink></td>
+            <td style="text-align:right"><span :class="['badge', user.role === 'admin' ? 'badge-admin' : 'badge-user']">{{ user.role }}</span></td>
+          </tr>
+        </tbody>
+      </table>
     </template>
     <div v-else class="empty">Nenhum usuário cadastrado.</div>
   </div>

@@ -15,9 +15,16 @@ const {data: formulas}  = await useFetch('/api/formulas',
   </div>
   <div class="card">
     <template v-if="formulas?.length">
-      <div class="list-item" v-for="formula in formulas" :key="formula.id">
-        <NuxtLink :to="`/admin/formulas/${formula.id}`">{{ formula.name }}</NuxtLink>
-      </div>
+      <table class="list-table">
+        <thead>
+          <tr><th>Fórmula</th></tr>
+        </thead>
+        <tbody>
+          <tr v-for="formula in formulas" :key="formula.id">
+            <td><NuxtLink :to="`/admin/formulas/${formula.id}`">{{ formula.name }}</NuxtLink></td>
+          </tr>
+        </tbody>
+      </table>
     </template>
     <div v-else class="empty">Nenhuma fórmula cadastrada.</div>
   </div>

@@ -263,23 +263,22 @@ input:disabled, select:disabled, textarea:disabled { background: var(--c-bg); co
 .form-row  { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
 /* ── Lists / Tables ──────────────────────────── */
-.list-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.list-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.list-table th,
+.list-table td {
   padding: .75rem 1rem;
   border-bottom: 1px solid var(--c-border);
-  transition: background .1s;
+  text-align: left;
 }
-.list-item:last-child { border-bottom: none; }
-.list-item:hover { background: #FAFAF5; }
-
-.list-item a {
-  flex: 1;
+.list-table tbody tr:hover { background: #FAFAF5; }
+.list-table a {
   color: var(--c-text);
   font-weight: 500;
 }
-.list-item a:hover { color: var(--c-gold-dark); text-decoration: none; }
+.list-table a:hover { color: var(--c-gold-dark); text-decoration: none; }
 
 .badge {
   font-size: .75rem;
