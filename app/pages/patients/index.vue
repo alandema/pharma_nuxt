@@ -1,5 +1,13 @@
 <script setup lang="ts">
-const { data: patients } = await useFetch('/api/patients', { method: 'GET' })
+interface Patient {
+  id: string;
+  name: string;
+  user: { username: string; };
+  cpf: string | null;
+  last_prescription_date?: string;
+}
+
+const { data: patients } = await useFetch<Patient[]>('/api/patients', { method: 'GET' })
 const { data: me } = await useFetch('/api/users/me')
 const isAdmin = computed(() => (me.value as any)?.role === 'admin')
 </script>
@@ -15,14 +23,14 @@ const isAdmin = computed(() => (me.value as any)?.role === 'admin')
         <thead>
           <tr>
             <th>Paciente</th>
-            <th>CPF</th>
+            <th>Última Prescrição</th>
             <th v-if="isAdmin">Prescritor</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="patient in patients" :key="patient.id" @click="navigateTo(`/patients/${patient.id}`)">
             <td>{{ patient.name }}</td>
-            <td><span class="text-muted">{{ patient.cpf || '—' }}</span></td>
+            <td><span class="text-muted">{{ patient.last_prescription_date || '—' }}</span></td>
             <td v-if="isAdmin"><span class="text-muted">{{ patient.user?.username || '—' }}</span></td>
           </tr>
         </tbody>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 
 type User = { id: string; username: string; role: string; is_active: boolean }
+type Me = { userId: string }  // Add this type definition
 
 const route = useRoute()
 const { data: user, refresh } = await useFetch<User>(`/api/users/admin/${route.params.id}`, { method: 'GET' })
@@ -15,6 +16,9 @@ async function deleteUser() {
   await $fetch(`/api/users/admin/${route.params.id}`, { method: 'DELETE' })
   navigateTo('/admin/users')
 }
+
+const { data: me } = await useFetch<Me>('/api/users/me')
+
 </script>
 
 <template>
@@ -31,9 +35,10 @@ async function deleteUser() {
       <label>Status</label>
       <p><span :class="['badge', user.is_active ? 'badge-active' : 'badge-inactive']">{{ user.is_active ? 'Ativo' : 'Inativo' }}</span></p>
     </div>
-    <div class="btn-group">
+    <div v-if="me?.userId !== user.id" class="btn-group">
       <button @click="toggleActive">{{ user.is_active ? 'Desativar' : 'Ativar' }}</button>
       <button class="btn-danger" @click="deleteUser">Excluir Usuário</button>
     </div>
+    <div v-else class="alert">Você não pode desativar ou excluir seu próprio usuário.</div>
   </div>
 </template>

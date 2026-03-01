@@ -8,5 +8,16 @@ export default defineEventHandler(async (event) => {
     orderBy: { name: 'asc' },
   });
 
+  // get last prescription date for each patient
+  for (const patient of patients) {
+    const lastPrescription = await prisma.prescription.findFirst({
+      where: { patient_id: patient.id },
+      orderBy: { date_prescribed: 'desc' },
+      select: { date_prescribed: true },
+    });
+    (patient as any).last_prescription_date = lastPrescription ? lastPrescription.date_prescribed.toISOString().split('T')[0] : null;
+  }
+
+
   return patients;
 })

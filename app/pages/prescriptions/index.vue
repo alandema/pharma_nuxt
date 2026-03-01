@@ -34,6 +34,9 @@ const selectedPatientId = ref('');
 const startDate = ref('');
 const endDate = ref('');
 
+const { data: me } = await useFetch('/api/users/me')
+const isAdmin = computed(() => (me.value as any)?.role === 'admin')
+
 const { data: patients } = await useFetch<Patient[]>('/api/patients', {
   method: 'GET',
 });
@@ -90,13 +93,13 @@ const clearFilter = () => {
     <template v-if="response?.prescriptions?.length">
       <table class="list-table">
         <thead>
-          <tr><th>Data</th><th>Paciente</th><th>Prescritor</th></tr>
+          <tr><th>Data</th><th>Paciente</th><th v-if="isAdmin">Prescritor</th></tr>
         </thead>
         <tbody>
           <tr v-for="prescription in response.prescriptions" :key="prescription.id" @click="navigateTo(`/prescriptions/${prescription.id}`)">
             <td>{{ prescription.date_prescribed }}</td>
             <td>{{ prescription.patient.name }}</td>
-            <td><span v-if="prescription.user" class="text-muted">{{ prescription.user.username }}</span><span v-else class="text-muted">—</span></td>
+            <td v-if="isAdmin"><span class="text-muted">{{ prescription.user?.username || '—' }}</span></td>
           </tr>
         </tbody>
       </table>
