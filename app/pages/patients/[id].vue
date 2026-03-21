@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useInputFormatting } from '../../composables/useInputFormatting'
 
 type Patient = {
   id: string;
@@ -48,6 +49,8 @@ const prescriptionSummary = (jsonFormInfo: Record<string, unknown> | string) => 
 type Prescritor = { id: string; username: string; role: string }
 
 const route = useRoute()
+const toast = useToast()
+const { isBrazilCountry, isValidBirthDate } = useInputFormatting()
 const { data: patient, refresh } = await useFetch<Patient>(`/api/patients/${route.params.id}`, { method: 'GET' })
 const { data: me } = await useFetch('/api/users/me')
 const isAdmin = computed(() => (me.value as any)?.role === 'admin')
@@ -87,9 +90,24 @@ const initialData = computed(() => {
 })
 
 const save = async (data: Record<string, string>) => {
-  await $fetch(`/api/patients/${route.params.id}`, { method: 'PUT', body: data })
-  refresh()
-  await navigateTo('/patients')
+  if (data.birth_date && !isValidBirthDate(data.birth_date)) {
+    toast.add('Data de nascimento inválida.', 'error')
+    return
+  }
+
+  if (isBrazilCountry(data.country) && !data.zipcode) {
+    toast.add('CEP é obrigatório para pacientes brasileiros.', 'error')
+    return
+  }
+
+  try {
+    await $fetch(`/api/patients/${route.params.id}`, { method: 'PUT', body: data })
+    await refresh()
+    toast.add('Paciente atualizado com sucesso!', 'success')
+    await navigateTo('/patients')
+  } catch (error: any) {
+    toast.add(error?.data?.message ?? 'Falha ao atualizar paciente', 'error')
+  }
 }
 </script>
 

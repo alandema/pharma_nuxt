@@ -1,8 +1,11 @@
 <script setup lang="ts">
+import { useInputFormatting } from '../../../composables/useInputFormatting'
+
 const toast = useToast()
 const route = useRoute()
 const { data: user, refresh } = await useFetch<any>(`/api/users/admin/${route.params.id}`)
 const { data: me } = await useFetch<any>('/api/users/me')
+const { formatBrazilPhoneInput, formatCepInput, isValidBirthDate, normalizeText } = useInputFormatting()
 const { data: profs } = await useAsyncData('profs', () => queryCollection('professionals').first())
 const { data: genders } = await useAsyncData('genders', () => queryCollection('genders').first())
 
@@ -18,6 +21,36 @@ const selectedProf = computed(() => profs.value?.professionals?.find((p: any) =>
 onMounted(async () => { states.value = await $fetch<any[]>('https://servicodados.ibge.gov.br/api/v1/localidades/estados') })
 watch(() => f.value.state, async (uf) => { cities.value = uf ? await $fetch<any[]>(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`) : [] }, { immediate: true })
 
+watch(() => f.value.phone, (value) => {
+  const formatted = formatBrazilPhoneInput(value)
+  if (formatted !== value) f.value.phone = formatted
+}, { immediate: true })
+
+watch(() => f.value.zipcode, (value) => {
+  const formatted = formatCepInput(value)
+  if (formatted !== value) f.value.zipcode = formatted
+}, { immediate: true })
+
+const normalizeForm = () => ({
+  ...f.value,
+  email: normalizeText(f.value.email),
+  full_name: normalizeText(f.value.full_name, { titleCase: true }),
+  cpf: normalizeText(f.value.cpf),
+  gender: normalizeText(f.value.gender, { titleCase: true }),
+  birth_date: normalizeText(f.value.birth_date),
+  phone: formatBrazilPhoneInput(f.value.phone),
+  professional_type: normalizeText(f.value.professional_type, { titleCase: true }),
+  council: normalizeText(f.value.council),
+  council_number: normalizeText(f.value.council_number),
+  council_state: normalizeText(f.value.council_state).toUpperCase(),
+  zipcode: formatCepInput(f.value.zipcode),
+  street: normalizeText(f.value.street, { titleCase: true }),
+  address_number: normalizeText(f.value.address_number),
+  complement: normalizeText(f.value.complement, { titleCase: true }),
+  city: normalizeText(f.value.city, { titleCase: true }),
+  state: normalizeText(f.value.state).toUpperCase(),
+})
+
 async function toggleActive() { await $fetch(`/api/users/admin/${route.params.id}`, { method: 'PATCH', body: {} }); await refresh() }
 async function deleteUser() {
   if (!confirm(`Excluir usuário "${user.value?.username}"?`)) return
@@ -25,8 +58,25 @@ async function deleteUser() {
   navigateTo('/admin/users')
 }
 async function saveSettings() {
-  await $fetch(`/api/users/admin/${route.params.id}`, { method: 'PATCH', body: f.value })
-  toast.add("Usuário atualizado", 'success'); await refresh()
+  const payload = normalizeForm()
+
+  if (!payload.zipcode) {
+    toast.add('CEP é obrigatório para usuários/profissionais.', 'error')
+    return
+  }
+
+  if (payload.birth_date && !isValidBirthDate(payload.birth_date)) {
+    toast.add('Data de nascimento inválida.', 'error')
+    return
+  }
+
+  try {
+    await $fetch(`/api/users/admin/${route.params.id}`, { method: 'PATCH', body: payload })
+    toast.add('Usuário atualizado', 'success')
+    await refresh()
+  } catch (error: any) {
+    toast.add(error?.data?.message || 'Erro ao atualizar usuário', 'error')
+  }
 }
 </script>
 
@@ -52,7 +102,7 @@ async function saveSettings() {
         <select v-model="f.gender"><option v-for="g in genders?.genders" :key="g.id" :value="g.name">{{ g.name }}</option></select>
       </div>
       <div class="form-group"><label>Nascimento</label><input v-model="f.birth_date" type="date" /></div>
-      <div class="form-group"><label>Telefone</label><input v-model="f.phone" /></div>
+      <div class="form-group"><label>Telefone</label><input v-model="f.phone" inputmode="numeric" placeholder="+55 (00) 00000-0000" /></div>
 
       <div class="section-title">Informações Profissionais</div>
       <div class="form-group"><label>Tipo Profissional</label>
@@ -74,7 +124,7 @@ async function saveSettings() {
       </div>
 
       <div class="section-title">Endereço Profissional</div>
-      <div class="form-group"><label>CEP</label><input v-model="f.zipcode" /></div>
+      <div class="form-group"><label>CEP</label><input v-model="f.zipcode" inputmode="numeric" placeholder="00000-000" /></div>
       <div class="form-group"><label>Estado</label><select v-model="f.state"><option v-for="s in states" :key="s.id" :value="s.sigla">{{ s.nome }}</option></select></div>
       <div class="form-group"><label>Cidade</label><select v-model="f.city"><option v-for="c in cities" :key="c.id" :value="c.nome">{{ c.nome }}</option></select></div>
       <div class="form-group" style="grid-column: 1 / -1"><label>Endereço</label><input v-model="f.street" /></div>

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-
-
 type Formula = { id: string; name: string; information?: string }
 
 const route = useRoute()
@@ -8,13 +6,16 @@ const { data: formula, refresh } = await useFetch<Formula>(`/api/formulas/${rout
   method: 'GET'
 })
 
-const name = ref(formula.value?.name || '')
 const information = ref(formula.value?.information || '')
 
 const save = async () => {
+  const payload = {
+    information: information.value,
+  }
+
   await $fetch(`/api/formulas/${route.params.id}`, {
     method: 'PUT',
-    body: { information: information.value }
+    body: payload
   })
   refresh()
   await navigateTo('/admin/formulas')
