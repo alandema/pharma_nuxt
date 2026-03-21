@@ -1,33 +1,9 @@
 import sgMail from '@sendgrid/mail';
-import PDFDocument from 'pdfkit';
 import fs from 'node:fs';
 import path from 'node:path';
 
 if (process.env.SENDGRID_API_KEY) {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-}
-
-function generatePDFData(body: any, doctorName: string, patientName: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const doc = new PDFDocument();
-    const chunks: Buffer[] = [];
-    doc.on('data', (chunk) => chunks.push(chunk));
-    doc.on('end', () => {
-      resolve(Buffer.concat(chunks).toString('base64'));
-    });
-    
-    doc.fontSize(20).text('Prescription', { align: 'center' });
-    doc.moveDown();
-    doc.fontSize(14).text(`Doctor: ${doctorName}`);
-    doc.text(`Patient: ${patientName}`);
-    doc.moveDown();
-    body.formulas.forEach((f: any) => {
-      doc.text(`- Medication: ${f.formula_name}`);
-      doc.text(`  Posology: ${f.posology}`);
-      doc.moveDown();
-    });
-    doc.end();
-  });
 }
 
 export default defineEventHandler(async (event) => {
@@ -104,7 +80,8 @@ export default defineEventHandler(async (event) => {
   ]);
 
   if (prescriber && patient && process.env.SENDGRID_API_KEY) {
-    const attachPDF = await generatePDFData(formInfo, prescriber.username, patient.name);
+    const attachPDFBuffer = await generatePDFDocument(formInfo, prescriber.username, patient.name);
+    const attachPDF = attachPDFBuffer.toString('base64');
     
     const formulasHtml = formInfo.formulas.map(f => `<li><b>${f.formula_name}</b>: ${f.posology}</li>`).join('');
     
@@ -115,10 +92,10 @@ export default defineEventHandler(async (event) => {
       patientHtml = patientHtml.replace('{{patientName}}', patient.name)
                                .replace('{{doctorName}}', prescriber.username)
                                .replace('{{formulasList}}', formulasHtml);
-                               
+      console.log("Sending email to patient:", patient.email);                        
       await sgMail.send({
         to: patient.email,
-        from: 'no-reply@pharmanext.com', 
+        from: 'plataforma@ammafarmacia.com.br', 
         subject: 'Sua Nova Prescrição - Pharma Next',
         html: patientHtml,
         attachments: [
@@ -131,18 +108,20 @@ export default defineEventHandler(async (event) => {
         ],
       }).catch(e => console.error("SendGrid Error (Patient):", e.response?.body || e));
     }
+    console.log("Patient email sent (if applicable).");
 
     // Email for the prescriber (doctor)
+    console.log("Prescriber email info:", { email: prescriber.email, send_email: prescriber.send_email });
     if (prescriber.email && prescriber.send_email) {
       const doctorTemplatePath = path.resolve(process.cwd(), 'server/templates/prescription_doctor.html');
       let doctorHtml = fs.readFileSync(doctorTemplatePath, 'utf-8');
       doctorHtml = doctorHtml.replace('{{patientName}}', patient.name)
                              .replace('{{doctorName}}', prescriber.username)
                              .replace('{{formulasList}}', formulasHtml);
-                             
+      console.log("Sending email to doctor:", prescriber.email);
       await sgMail.send({
         to: prescriber.email,
-        from: 'no-reply@pharmanext.com', 
+        from: 'plataforma@ammafarmacia.com.br', 
         subject: 'Cópia Extra: Prescrição Salva - Pharma Next',
         html: doctorHtml,
         attachments: [

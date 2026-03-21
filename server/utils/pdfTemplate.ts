@@ -1,0 +1,27 @@
+import PDFDocument from 'pdfkit';
+
+export function generatePDFDocument(body: any, doctorName: string, patientName: string): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument();
+    const chunks: Buffer[] = [];
+    doc.on('data', (chunk) => chunks.push(chunk));
+    doc.on('end', () => {
+      resolve(Buffer.concat(chunks));
+    });
+    doc.on('error', reject);
+    
+    doc.fontSize(20).text('Prescription', { align: 'center' });
+    doc.moveDown();
+    doc.fontSize(14).text(`Doctor: ${doctorName}`);
+    doc.text(`Patient: ${patientName}`);
+    doc.moveDown();
+    
+    const formulas = Array.isArray(body?.formulas) ? body.formulas : [];
+    formulas.forEach((f: any) => {
+      doc.text(`- Medication: ${f.formula_name}`);
+      doc.text(`  Posology: ${f.posology}`);
+      doc.moveDown();
+    });
+    doc.end();
+  });
+}

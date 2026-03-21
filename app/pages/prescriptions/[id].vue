@@ -42,7 +42,7 @@ const { data: prescription } = await useFetch<Prescription>(
 );
 
 const openPrintPage = () => {
-  window.open(`/prescriptions/print/${route.params.id}`, '_blank');
+  window.open(`/api/prescriptions/${route.params.id}/pdf`, '_blank');
 };
 
 const formInfo = computed(() => {
