@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
   const body = await readBody<{
     patient_id?: string;
     cid_code?: string;
-    formulas?: { formula_id?: string; posology?: string }[];
+    formulas?: { formula_id?: string; description?: string }[];
   }>(event);
 
   const formulaItems = Array.isArray(body.formulas) ? body.formulas : [];
@@ -34,36 +34,44 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Máximo de 10 fórmulas por prescrição.' });
   }
 
-  const hasInvalidFormulaItem = formulaItems.some((item: { formula_id?: string; posology?: string }) =>
-    !item?.formula_id || !String(item.posology || '').trim()
+  const hasInvalidFormulaItem = formulaItems.some((item: { formula_id?: string; description?: string }) =>
+    !item?.formula_id || !String(item.description || '').trim()
   );
 
   if (hasInvalidFormulaItem) {
-    throw createError({ statusCode: 400, statusMessage: 'Cada fórmula deve ter fórmula e posologia.' });
+    throw createError({ statusCode: 400, statusMessage: 'Cada fórmula deve ter fórmula e descrição.' });
   }
 
-  const normalizedFormulaItems = formulaItems.map((item: { formula_id?: string; posology?: string }) => ({
+  const normalizedFormulaItems = formulaItems.map((item: { formula_id?: string; description?: string }) => ({
     formula_id: String(item.formula_id),
-    posology: String(item.posology).trim(),
+    description: String(item.description).trim(),
   }));
 
-  const formulaIds = Array.from(new Set(normalizedFormulaItems.map((item) => item.formula_id)));
-  const formulas = await prisma.formulas.findMany({
-    where: { id: { in: formulaIds } },
-    select: { id: true, name: true }
-  });
-
-  if (formulas.length !== formulaIds.length) {
-    throw createError({ statusCode: 400, statusMessage: 'Uma ou mais fórmulas são inválidas.' });
+  const dbFormulaIds = Array.from(new Set(normalizedFormulaItems.filter(item => item.formula_id !== 'free').map((item) => item.formula_id)));
+  
+  let formulas: { id: string, name: string }[] = [];
+  if (dbFormulaIds.length > 0) {
+    formulas = await prisma.formulas.findMany({
+      where: { id: { in: dbFormulaIds } },
+      select: { id: true, name: true }
+    });
+    
+    if (formulas.length !== dbFormulaIds.length) {
+      throw createError({ statusCode: 400, statusMessage: 'Uma ou mais fórmulas são inválidas.' });
+    }
   }
 
-  const formulaMap = new Map(formulas.map((formula) => [formula.id, formula.name]));
+  const formulaMap = new Map([
+    ...formulas.map((formula) => [formula.id, formula.name] as [string, string]),
+    ['free', '']
+  ]);
+
   const formInfo = {
     cid_code: body.cid_code,
     formulas: normalizedFormulaItems.map((item) => ({
       formula_id: item.formula_id,
       formula_name: formulaMap.get(item.formula_id) || '',
-      posology: item.posology,
+      description: item.description,
     })),
   };
 

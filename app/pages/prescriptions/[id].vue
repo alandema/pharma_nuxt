@@ -28,7 +28,7 @@ type Prescription = {
   pdf_url?: string | null;
   json_form_info: {
     cid_code?: string;
-    formulas?: { formula_id: string; formula_name?: string; posology: string }[];
+    formulas?: { formula_id: string; formula_name?: string; description: string }[];
   } | string;
   created_at: string;
   patient: Patient;
@@ -65,9 +65,9 @@ const reuse = () => {
   const q = new URLSearchParams({
     patient_id: prescription.value!.patient_id,
     cid_code: String(formInfo.value.cid_code || ''),
-    formulas: JSON.stringify(formulas.value.map((item: { formula_id: string; posology: string }) => ({
+    formulas: JSON.stringify(formulas.value.map((item: { formula_id: string; description: string }) => ({
       formula_id: item.formula_id,
-      posology: item.posology,
+      description: item.description,
     }))),
   });
   navigateTo(`/prescriptions/register?${q}`);
@@ -108,12 +108,12 @@ const reuse = () => {
       <p v-if="formInfo.cid_code" class="text-muted mb-2">CID: <strong>{{ formInfo.cid_code }}</strong></p>
       <table v-if="formulas.length" class="list-table">
         <thead>
-          <tr><th>Fórmula</th><th>Posologia</th></tr>
+          <tr><th>Fórmula</th><th>Descrição</th></tr>
         </thead>
         <tbody>
           <tr v-for="(item, index) in formulas" :key="`${item.formula_id}-${index}`">
-            <td>{{ item.formula_name || item.formula_id }}</td>
-            <td style="white-space: pre-wrap;">{{ item.posology }}</td>
+            <td>{{ item.formula_id === 'free' ? 'Livre' : (item.formula_name || item.formula_id) }}</td>
+            <td style="white-space: pre-wrap;">{{ item.description }}</td>
           </tr>
         </tbody>
       </table>
