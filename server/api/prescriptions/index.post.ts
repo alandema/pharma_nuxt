@@ -1,4 +1,5 @@
 import sgMail from '@sendgrid/mail';
+import { put } from '@vercel/blob';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -79,84 +80,72 @@ export default defineEventHandler(async (event) => {
     prisma.patient.findUnique({ where: { id: body.patient_id } })
   ]);
 
-  if (prescriber && patient && process.env.SENDGRID_API_KEY) {
+  if (prescriber && patient) {
     const attachPDFBuffer = await generatePDFDocument(formInfo, prescriber.username, patient.name);
-    const attachPDF = attachPDFBuffer.toString('base64');
     
-    const formulasHtml = formInfo.formulas.map(f => `<li><b>${f.formula_name}</b>: ${f.posology}</li>`).join('');
+    const dateStr = new Date().toISOString().slice(0, 10);
+    const blob = await put(`prescriptions/${user.userId}/${dateStr}/${prescription.id}.pdf`, attachPDFBuffer, { access: 'public' });
     
-    // Email for the patient
-    if (patient.email && patient.send_email) {
-      const patientTemplatePath = path.resolve(process.cwd(), 'server/templates/prescription_patient.html');
-      let patientHtml = fs.readFileSync(patientTemplatePath, 'utf-8');
-      patientHtml = patientHtml.replace('{{patientName}}', patient.name)
-                               .replace('{{doctorName}}', prescriber.username)
-                               .replace('{{formulasList}}', formulasHtml);
-      console.log("Sending email to patient:", patient.email);                        
-      await sgMail.send({
-        to: patient.email,
-        from: 'plataforma@ammafarmacia.com.br', 
-        subject: 'Sua Nova Prescrição - Pharma Next',
-        html: patientHtml,
-        attachments: [
-          {
-            content: attachPDF,
-            filename: `prescription-${prescription.id}.pdf`,
-            type: 'application/pdf',
-            disposition: 'attachment',
-          },
-        ],
-      }).catch(e => console.error("SendGrid Error (Patient):", e.response?.body || e));
-    }
-    console.log("Patient email sent (if applicable).");
+    await prisma.prescription.update({
+      where: { id: prescription.id },
+      data: { pdf_url: blob.url }
+    });
 
-    // Email for the prescriber (doctor)
-    console.log("Prescriber email info:", { email: prescriber.email, send_email: prescriber.send_email });
-    if (prescriber.email && prescriber.send_email) {
-      const doctorTemplatePath = path.resolve(process.cwd(), 'server/templates/prescription_doctor.html');
-      let doctorHtml = fs.readFileSync(doctorTemplatePath, 'utf-8');
-      doctorHtml = doctorHtml.replace('{{patientName}}', patient.name)
-                             .replace('{{doctorName}}', prescriber.username)
-                             .replace('{{formulasList}}', formulasHtml);
-      console.log("Sending email to doctor:", prescriber.email);
-      await sgMail.send({
-        to: prescriber.email,
-        from: 'plataforma@ammafarmacia.com.br', 
-        subject: 'Cópia Extra: Prescrição Salva - Pharma Next',
-        html: doctorHtml,
-        attachments: [
-          {
-            content: attachPDF,
-            filename: `prescription-${prescription.id}.pdf`,
-            type: 'application/pdf',
-            disposition: 'attachment',
-          },
-        ],
-      }).catch(e => console.error("SendGrid Error (Doctor):", e.response?.body || e));
-    }
+    if (process.env.SENDGRID_API_KEY) {
+      const formulasHtml = formInfo.formulas.map(f => `<li><b>${f.formula_name}</b>: ${f.posology}</li>`).join('');
+      
+      // Email for the patient
+      if (patient.email && patient.send_email) {
+        const patientTemplatePath = path.resolve(process.cwd(), 'server/templates/prescription_patient.html');
+        let patientHtml = fs.readFileSync(patientTemplatePath, 'utf-8');
+        patientHtml = patientHtml.replace('{{patientName}}', patient.name)
+                                 .replace('{{doctorName}}', prescriber.username)
+                                 .replace('{{formulasList}}', formulasHtml)
+                                 .replace('{{pdfUrl}}', blob.url);
+        console.log("Sending email to patient:", patient.email);                        
+        await sgMail.send({
+          to: patient.email,
+          from: 'plataforma@ammafarmacia.com.br', 
+          subject: 'Sua Nova Prescrição - Pharma Next',
+          html: patientHtml,
+        }).catch(e => console.error("SendGrid Error (Patient):", e.response?.body || e));
+      }
+      console.log("Patient email sent (if applicable).");
 
-    const pharmacyTemplatePath = path.resolve(process.cwd(), 'server/templates/prescription_pharmacy.html');
-    let pharmacyHtml = fs.readFileSync(pharmacyTemplatePath, 'utf-8');
-    pharmacyHtml = pharmacyHtml.replace('{{patientName}}', patient.name)
+      // Email for the prescriber (doctor)
+      console.log("Prescriber email info:", { email: prescriber.email, send_email: prescriber.send_email });
+      if (prescriber.email && prescriber.send_email) {
+        const doctorTemplatePath = path.resolve(process.cwd(), 'server/templates/prescription_doctor.html');
+        let doctorHtml = fs.readFileSync(doctorTemplatePath, 'utf-8');
+        doctorHtml = doctorHtml.replace('{{patientName}}', patient.name)
                                .replace('{{doctorName}}', prescriber.username)
-                               .replace('{{formulasList}}', formulasHtml);
-    const emailsToSend = (process.env.ALWAYS_SEND_EMAILS || '').split(',').map(email => email.trim()).filter(email => email);
-    for (const email of emailsToSend) {
-      console.log("Sending email to always-send address:", email);
-      await sgMail.send({
-        to: email,
-        from: 'plataforma@ammafarmacia.com.br',
-        subject: 'Cópia Extra: Prescrição Salva - Pharma Next',
-        html: pharmacyHtml,
-        attachments: [
-          {
-            content: attachPDF,
-            filename: `prescription-${prescription.id}.pdf`,
-            type: 'application/pdf',
-            disposition: 'attachment',
-          },
-        ],
-      }).catch(e => console.error("SendGrid Error (Pharmacy):", e.response?.body || e));
+                               .replace('{{formulasList}}', formulasHtml)
+                               .replace('{{pdfUrl}}', blob.url);
+        console.log("Sending email to doctor:", prescriber.email);
+        await sgMail.send({
+          to: prescriber.email,
+          from: 'plataforma@ammafarmacia.com.br', 
+          subject: 'Cópia Extra: Prescrição Salva - Pharma Next',
+          html: doctorHtml,
+        }).catch(e => console.error("SendGrid Error (Doctor):", e.response?.body || e));
+      }
+
+      const pharmacyTemplatePath = path.resolve(process.cwd(), 'server/templates/prescription_pharmacy.html');
+      let pharmacyHtml = fs.readFileSync(pharmacyTemplatePath, 'utf-8');
+      pharmacyHtml = pharmacyHtml.replace('{{patientName}}', patient.name)
+                                 .replace('{{doctorName}}', prescriber.username)
+                                 .replace('{{formulasList}}', formulasHtml)
+                                 .replace('{{pdfUrl}}', blob.url);
+      const emailsToSend = (process.env.ALWAYS_SEND_EMAILS || '').split(',').map(email => email.trim()).filter(email => email);
+      for (const email of emailsToSend) {
+        console.log("Sending email to always-send address:", email);
+        await sgMail.send({
+          to: email,
+          from: 'plataforma@ammafarmacia.com.br',
+          subject: 'Cópia Extra: Prescrição Salva - Pharma Next',
+          html: pharmacyHtml,
+        }).catch(e => console.error("SendGrid Error (Pharmacy):", e.response?.body || e));
+      }
     }
   }
 

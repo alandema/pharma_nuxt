@@ -25,6 +25,7 @@ type Prescription = {
   patient_id: string;
   prescribed_by: string | null;
   date_prescribed: string;
+  pdf_url?: string | null;
   json_form_info: {
     cid_code?: string;
     formulas?: { formula_id: string; formula_name?: string; posology: string }[];
@@ -42,7 +43,11 @@ const { data: prescription } = await useFetch<Prescription>(
 );
 
 const openPrintPage = () => {
-  window.open(`/api/prescriptions/${route.params.id}/pdf`, '_blank');
+  if (prescription.value?.pdf_url) {
+    window.open(prescription.value.pdf_url, '_blank');
+  } else {
+    alert("PDF não disponível para esta prescrição.");
+  }
 };
 
 const formInfo = computed(() => {
