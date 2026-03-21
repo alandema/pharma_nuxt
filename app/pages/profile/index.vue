@@ -1,0 +1,87 @@
+<script setup lang="ts">
+const { data: me, refresh } = await useFetch<any>('/api/users/me')
+const { data: profs } = await useAsyncData('profs', () => queryCollection('professionals').first())
+const { data: genders } = await useAsyncData('genders', () => queryCollection('genders').first())
+
+const states = ref<any[]>([])
+const cities = ref<any[]>([])
+const successMessage = ref('')
+
+const form = ref({ ...me.value })
+if (form.value.birth_date) form.value.birth_date = form.value.birth_date.split('T')[0]
+if (!form.value.specialties) form.value.specialties = []
+
+const selectedProf = computed(() => profs.value?.professionals?.find((p: any) => p.name === form.value.professional_type))
+
+onMounted(async () => { states.value = await $fetch<any[]>('https://servicodados.ibge.gov.br/api/v1/localidades/estados') })
+watch(() => form.value.state, async (uf) => { cities.value = uf ? await $fetch<any[]>(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`) : [] }, { immediate: true })
+
+const save = async () => {
+  successMessage.value = ''
+  await $fetch('/api/users/me', { method: 'PUT', body: form.value })
+  successMessage.value = 'Configurações atualizadas!'
+  await refresh()
+}
+</script>
+
+<template>
+  <div class="page-header">
+    <h1>Meu Perfil</h1>
+  </div>
+  <div class="card" style="max-width: 800px; margin: 0 auto;">
+    <div v-if="successMessage" class="alert alert-success">{{ successMessage }}</div>
+    <form @submit.prevent="save" class="grid-form">
+      <div class="section-title">Informações de Acesso</div>
+      <div class="form-group"><label>E-mail</label><input v-model="form.email" disabled /></div>
+      <div class="form-group"><label>Senha</label><input type="password" placeholder="********" disabled /></div>
+      
+      <div class="section-title">Informações Pessoais</div>
+      <div class="form-group"><label>Nome Completo</label><input v-model="form.full_name" /></div>
+      <div class="form-group"><label>CPF</label><input v-model="form.cpf" disabled /></div>
+      
+      <div class="form-group"><label>Sexo</label>
+        <select v-model="form.gender"><option v-for="g in genders?.genders" :key="g.id" :value="g.name">{{ g.name }}</option></select>
+      </div>
+      <div class="form-group"><label>Data de nascimento</label><input v-model="form.birth_date" type="date" /></div>
+      
+      <div class="form-group"><label>Telefone</label><input v-model="form.phone" /></div>
+      
+      <div class="section-title">Informações Profissionais</div>
+      <div class="form-group"><label>Tipo de Profissional</label><input v-model="form.professional_type" disabled /></div>
+
+      <div class="form-group"><label>Conselho</label><input v-model="form.council" disabled /></div>
+      <div class="form-group"><label>Número do Conselho</label><input v-model="form.council_number" disabled /></div>
+      <div class="form-group"><label>UF Conselho</label><input v-model="form.council_state" disabled /></div>
+      
+      <div class="form-group" style="grid-column: 1 / -1" v-if="selectedProf">
+        <label>Especialidades (Apenas visualização)</label>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap">
+          <label v-for="spec in selectedProf.specialties" :key="spec" style="display:flex;align-items:center;gap:0.5rem"><input type="checkbox" :value="spec" v-model="form.specialties" disabled /> {{spec}}</label>
+        </div>
+      </div>
+
+      <div class="section-title">Endereço Profissional</div>
+      <div class="form-group"><label>CEP</label><input v-model="form.zipcode" /></div>
+      <div class="form-group"><label>Estado</label><select v-model="form.state"><option v-for="s in states" :key="s.id" :value="s.sigla">{{ s.nome }}</option></select></div>
+      <div class="form-group"><label>Cidade</label><select v-model="form.city" :disabled="!cities.length"><option v-for="c in cities" :key="c.id" :value="c.nome">{{ c.nome }}</option></select></div>
+      <div class="form-group" style="grid-column: 1 / -1"><label>Endereço</label><input v-model="form.street" /></div>
+      <div class="form-group"><label>Número</label><input v-model="form.address_number" /></div>
+      <div class="form-group"><label>Complemento</label><input v-model="form.complement" /></div>
+
+      <div class="form-group" style="grid-column: 1 / -1; display:flex; gap:0.5rem; align-items:center; margin-top: 1rem;">
+        <input type="checkbox" id="se_me" v-model="form.send_email" />
+        <label for="se_me" style="margin:0">Receber e-mails de cópia das prescrições</label>
+      </div>
+
+      <div class="form-group" style="grid-column: 1 / -1">
+        <button type="submit">Salvar Perfil</button>
+      </div>
+    </form>
+  </div>
+</template>
+
+<style scoped>
+.grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.section-title { grid-column: 1 / -1; margin-top: 1.5rem; margin-bottom: 0.25rem; font-weight: 600; font-size: 1.1rem; border-bottom: 1px solid #ddd; padding-bottom: 0.25rem; color: #333; }
+.card { padding: 1.5rem; }
+</style>

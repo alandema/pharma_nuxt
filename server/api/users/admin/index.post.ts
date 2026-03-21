@@ -5,7 +5,7 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
 
 
-  const { username, password, role = 'prescritor', email} = body;
+  const { username, password, role = 'prescritor', email, full_name, cpf, gender, birth_date, phone, professional_type, council, council_number, council_state, specialties, zipcode, street, address_number, complement, city, state } = body;
   if (!email) {
     throw createError({ statusCode: 400, statusMessage: 'E-mail é obrigatório' });
   }
@@ -35,11 +35,10 @@ export default defineEventHandler(async (event) => {
   const hash = await bcrypt.hash(password, 10);
   const user = await prisma.user.create({
     data: {
-      username,
-      password_hash: hash,
-      email: email,
-      send_email: true,
-      role,
+      username, password_hash: hash, email, send_email: true, role,
+      full_name, cpf, gender, birth_date: birth_date ? new Date(birth_date) : null, phone,
+      professional_type, council, council_number, council_state, specialties,
+      zipcode, street, address_number, complement, city, state
     },
   });
 

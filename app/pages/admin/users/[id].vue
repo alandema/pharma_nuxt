@@ -1,78 +1,92 @@
 <script setup lang="ts">
-
-type User = { id: string; username: string; role: string; is_active: boolean; email?: string; send_email?: boolean }
-type Me = { userId: string }  // Add this type definition
-
 const toast = useToast()
-
 const route = useRoute()
-const { data: user, refresh } = await useFetch<User>(`/api/users/admin/${route.params.id}`, { method: 'GET' })
+const { data: user, refresh } = await useFetch<any>(`/api/users/admin/${route.params.id}`)
+const { data: me } = await useFetch<any>('/api/users/me')
+const { data: profs } = await useAsyncData('profs', () => queryCollection('professionals').first())
+const { data: genders } = await useAsyncData('genders', () => queryCollection('genders').first())
 
-const email = ref(user.value?.email || '')
-const sendEmail = ref(user.value?.send_email ?? true)
+const states = ref<any[]>([])
+const cities = ref<any[]>([])
 
-async function toggleActive() {
-  await $fetch(`/api/users/admin/${route.params.id}`, { method: 'PATCH' })
-  await refresh()
-}
+const f = ref({ ...user.value })
+if (f.value.birth_date) f.value.birth_date = f.value.birth_date.split('T')[0]
+if (!f.value.specialties) f.value.specialties = []
 
+const selectedProf = computed(() => profs.value?.professionals?.find((p: any) => p.name === f.value.professional_type))
+
+onMounted(async () => { states.value = await $fetch<any[]>('https://servicodados.ibge.gov.br/api/v1/localidades/estados') })
+watch(() => f.value.state, async (uf) => { cities.value = uf ? await $fetch<any[]>(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`) : [] }, { immediate: true })
+
+async function toggleActive() { await $fetch(`/api/users/admin/${route.params.id}`, { method: 'PATCH', body: {} }); await refresh() }
 async function deleteUser() {
-  if (!confirm(`Excluir usuário "${user.value?.username}"? Seus pacientes serão transferidos para você.`)) return
+  if (!confirm(`Excluir usuário "${user.value?.username}"?`)) return
   await $fetch(`/api/users/admin/${route.params.id}`, { method: 'DELETE' })
-  toast.add('Usuário excluído com sucesso. Seus pacientes foram transferidos para você.', 'success')
   navigateTo('/admin/users')
 }
-
-const { data: me } = await useFetch<Me>('/api/users/me')
-
 async function saveSettings() {
-  await $fetch(`/api/users/admin/${route.params.id}`, { 
-    method: 'PATCH', 
-    body: { 
-      email: email.value, 
-      send_email: sendEmail.value 
-    } // ✅ Correto: Enviando os valores reais
-  })
-
-  toast.add("As configurações do usuário foram atualizadas com sucesso.", 'success')
-  await refresh()
+  await $fetch(`/api/users/admin/${route.params.id}`, { method: 'PATCH', body: f.value })
+  toast.add("Usuário atualizado", 'success'); await refresh()
 }
-
 </script>
 
 <template>
   <div class="page-header">
-    <h1>Detalhes do Usuário</h1>
+    <h1>Editar Usuário: {{ user?.username }}</h1>
     <button @click="navigateTo('/admin/users')">← Voltar</button>
   </div>
   <div v-if="user" class="card">
-    <div class="form-row mb-2">
-      <div><label>Usuário</label><p style="font-size:1.1rem;font-weight:600">{{ user.username }}</p></div>
-      <div><label>Função</label><p><span :class="['badge', user.role === 'admin' ? 'badge-admin' : 'badge-user']">{{ user.role }}</span></p></div>
-    </div>
-    <div class="mb-2">
-      <label>Status</label>
-      <p><span :class="['badge', user.is_active ? 'badge-active' : 'badge-inactive']">{{ user.is_active ? 'Ativo' : 'Inativo' }}</span></p>
-    </div>
-
-      <form @submit.prevent="saveSettings">
-        <div class="form-group">
-          <label>E-mail</label>
-          <input required v-model="email" type="email" placeholder="usuario@email.com" />
-        </div>
-        <div class="form-group" style="display:flex;align-items:center;gap:0.5rem">
-          <input type="checkbox" id="au_se" v-model="sendEmail" />
-          <label for="au_se" style="margin:0">Permitir envios por e-mail</label>
-        </div>
-        <div class="btn-group" style="margin-top:1rem">
-          <button type="submit">Salvar Alterações</button>
-        </div>
-      </form>
-
-    <div v-if="me?.userId !== user.id" class="btn-group">
+    <div v-if="me?.userId !== user.id" class="btn-group" style="margin-bottom:1rem">
       <button @click="toggleActive">{{ user.is_active ? 'Desativar' : 'Ativar' }}</button>
-      <button class="btn-danger" @click="deleteUser">Excluir Usuário</button>
+      <button class="btn-danger" @click="deleteUser">Excluir</button>
     </div>
-    <div v-else class="alert">Você não pode desativar ou excluir seu próprio usuário.</div>
+    <form @submit.prevent="saveSettings" class="grid-form">
+      <div class="section-title">Informações de Acesso</div>
+      <div class="form-group"><label>Email</label><input v-model="f.email" type="email" required /></div>
+      <div class="form-group" style="display:flex;align-items:flex-end;padding-bottom:0.5rem"><label style="display:flex;align-items:center;gap:0.5rem;margin:0"><input type="checkbox" v-model="f.send_email" /> Receber E-mails</label></div>
+      
+      <div class="section-title">Informações Pessoais</div>
+      <div class="form-group"><label>Nome Completo</label><input v-model="f.full_name" /></div>
+      <div class="form-group"><label>CPF</label><input v-model="f.cpf" /></div>
+      <div class="form-group"><label>Gênero</label>
+        <select v-model="f.gender"><option v-for="g in genders?.genders" :key="g.id" :value="g.name">{{ g.name }}</option></select>
+      </div>
+      <div class="form-group"><label>Nascimento</label><input v-model="f.birth_date" type="date" /></div>
+      <div class="form-group"><label>Telefone</label><input v-model="f.phone" /></div>
+
+      <div class="section-title">Informações Profissionais</div>
+      <div class="form-group"><label>Tipo Profissional</label>
+        <select v-model="f.professional_type">
+          <option v-for="p in profs?.professionals" :key="p.id" :value="p.name">{{ p.name }}</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Conselho</label><input v-model="f.council" disabled /></div>
+      <div class="form-group"><label>Número do Conselho</label><input v-model="f.council_number" /></div>
+      <div class="form-group"><label>UF Conselho</label>
+        <select v-model="f.council_state"><option v-for="s in states" :key="s.id" :value="s.sigla">{{ s.sigla }}</option></select>
+      </div>
+
+      <div class="form-group" style="grid-column: 1 / -1" v-if="selectedProf">
+        <label>Especialidades</label>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap">
+          <label v-for="spec in selectedProf.specialties" :key="spec"><input type="checkbox" :value="spec" v-model="f.specialties"/> {{spec}}</label>
+        </div>
+      </div>
+
+      <div class="section-title">Endereço Profissional</div>
+      <div class="form-group"><label>CEP</label><input v-model="f.zipcode" /></div>
+      <div class="form-group"><label>Estado</label><select v-model="f.state"><option v-for="s in states" :key="s.id" :value="s.sigla">{{ s.nome }}</option></select></div>
+      <div class="form-group"><label>Cidade</label><select v-model="f.city"><option v-for="c in cities" :key="c.id" :value="c.nome">{{ c.nome }}</option></select></div>
+      <div class="form-group" style="grid-column: 1 / -1"><label>Endereço</label><input v-model="f.street" /></div>
+      <div class="form-group"><label>Número</label><input v-model="f.address_number" /></div>
+      <div class="form-group"><label>Complemento</label><input v-model="f.complement" /></div>
+
+      <div class="form-group" style="grid-column: 1 / -1; margin-top: 1rem;"><button type="submit">Salvar Alterações</button></div>
+    </form>
   </div>
 </template>
+<style scoped>
+.grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.section-title { grid-column: 1 / -1; margin-top: 1rem; margin-bottom: 0.5rem; font-weight: 600; font-size: 1.1rem; border-bottom: 1px solid #eee; padding-bottom: 0.25rem; color: #444; }
+.card { padding: 1.5rem; }
+</style>

@@ -25,5 +25,9 @@
       <div class="dash-icon">📜</div>
       <div class="dash-label">Logs</div>
     </div>
+    <div class="dash-card" @click="navigateTo('/profile')">
+      <div class="dash-icon">⚙️</div>
+      <div class="dash-label">Meu Perfil</div>
+    </div>
   </div>
 </template>

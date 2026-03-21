@@ -22,9 +22,12 @@ export default defineEventHandler((event) => {
         
         // Fetch fresh db state
         return prisma.user.findUnique({
-            where: { id: decoded.userId },
-            select: { id: true, username: true, role: true, email: true, send_email: true }
-        }).then(user => ({ userId: user?.id, username: user?.username, role: user?.role, email: user?.email, send_email: user?.send_email }))
+            where: { id: decoded.userId }
+        }).then(user => {
+            if (!user) return null;
+            const { password_hash, ...safeUser } = user;
+            return safeUser;
+        })
     } catch (err) {
         throw createError({
             statusCode: 401,

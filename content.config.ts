@@ -22,6 +22,13 @@ export default defineContentConfig({
       schema: z.object({
         platform_roles: z.array(z.object({ id: z.number(), code: z.string()}))
       })
+    }),
+    professionals: defineCollection({
+      type: 'data',
+      source: 'professionals.yml',
+      schema: z.object({
+        professionals: z.array(z.object({ id: z.number(), name: z.string(), council: z.string(), specialties: z.array(z.string()) }))
+      })
     })
   }
 })

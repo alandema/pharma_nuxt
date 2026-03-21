@@ -1,0 +1,67 @@
+export default defineEventHandler(async (event) => {
+  const body = await readBody(event)
+  const { doctorCpf, doctorPassword, base64Pdf } = body
+
+  const clientId = process.env.SAFEID_CLIENT_ID
+  const clientSecret = process.env.SAFEID_CLIENT_SECRET
+  const redirectUri = process.env.SAFEID_REDIRECT_URI
+
+  try {
+    // 1. Get identifierCA
+    const authCaRes = await $fetch<any>('https://pscsafeweb.safewebpss.com.br/Service/Microservice/OAuth/api/v0/oauth/authorize-ca', {
+      method: 'POST',
+      body: {
+        client_id: clientId,
+        login_hint: doctorCpf,
+        redirect_uri: redirectUri,
+        lifetime: 1800
+      }
+    })
+    
+    // Check if user authorized it (if successful, we get identifierCA)
+    if (!authCaRes.identifierCA) throw new Error('Failed to get identifierCA')
+
+    // 2. Get access_token using identifierCA + doctor's actual password
+    const tokenRes = await $fetch<any>('https://pscsafeweb.safewebpss.com.br/Service/Microservice/OAuth/api/v0/oauth/pwd_authorize', {
+      method: 'POST',
+      body: {
+        client_id: clientId,
+        client_secret: clientSecret,
+        username: doctorCpf,
+        password: `${authCaRes.identifierCA}${doctorPassword}`, // Concatenated as per docs
+        grant_type: 'password',
+        scope: 'single_signature',
+        lifetime: 900
+      }
+    })
+
+    if (!tokenRes.access_token) throw new Error('Failed to get access token')
+
+    // 3. Sign the PDF (ICP)
+    const signRes = await $fetch<any>('https://pscsafeweb.safewebpss.com.br/Service/Microservice/OAuth/api/v0/oauth/signature-icp', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${tokenRes.access_token}`
+      },
+      body: {
+        file: {
+          id: `prescription-${Date.now()}`,
+          alias: "Receita Medica",
+          content: base64Pdf,
+          signature_type: 2, // 2 = PAdES (Required for PDFs)
+          signature_policy: 1 // 1 = AD-RT (Default/Common)
+        }
+      }
+    })
+
+    // Return the signed base64 PDF to the client
+    return {
+      success: true,
+      signedPdfBase64: signRes.signatures.raw_signature
+    }
+
+  } catch (error) {
+    console.error("Signature Error:", error)
+    return createError({ statusCode: 500, message: 'Failed to sign document' })
+  }
+})

@@ -6,9 +6,14 @@ export default defineEventHandler(async (event) => {
   const user = await prisma.user.findUnique({ where: { id }, select: { is_active: true } })
   if (!user) throw createError({ statusCode: 404, statusMessage: 'User not found' })
 
-  const updateData: any = {
-    email: body.email,
-    send_email: body.send_email,
+  const updateData: any = { ...body }
+  delete updateData.id
+  delete updateData.password
+  delete updateData.username
+  if (updateData.birth_date) {
+    updateData.birth_date = new Date(updateData.birth_date)
+  } else if (updateData.birth_date === '') {
+    updateData.birth_date = null
   }
   
   if (body.send_email && !body.email) {
@@ -24,7 +29,6 @@ export default defineEventHandler(async (event) => {
   const updated = await prisma.user.update({
     where: { id },
     data: updateData,
-    select: { id: true, username: true, role: true, is_active: true, email: true, send_email: true },
   })
 
   return updated

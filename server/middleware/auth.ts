@@ -5,7 +5,6 @@ const JWT_SECRET = process.env.JWT_SECRET
 
 export default defineEventHandler((event) => {
   const url = getRequestURL(event);
-  console.log('New request: ' + url);
 
   // Define public routes that don't require authentication
   const publicRoutes = [
@@ -48,7 +47,6 @@ export default defineEventHandler((event) => {
   try {
     decoded = jwt.verify(token, JWT_SECRET!) as JwtPayload;
 
-    console.log('Decoded token:', decoded);
     event.context.user = decoded; // Set user in context
   } catch (err) {
     throw createError({
