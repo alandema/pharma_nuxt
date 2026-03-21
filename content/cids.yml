@@ -1,4 +1,7 @@
 codes:
+  - id: 0
+    code: Outro
+    name: Outro
   - id: 1
     code: E29.1
     name: Hipofunção testicular

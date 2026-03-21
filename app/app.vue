@@ -8,7 +8,7 @@
         <span class="nav-home" @click="navigateTo(user.role === 'admin' ? '/admin' : '/')">Início</span>
       </div>
       <div class="nav-actions">
-        <span class="text-muted" style="font-size:.8rem">{{ user.username }}</span>
+        <span class="text-muted" style="font-size:.8rem; cursor:pointer;" @click="navigateTo('/profile')">{{ user.username }}</span>
         <button class="btn-sm" @click="handleLogout">Sair</button>
       </div>
     </nav>

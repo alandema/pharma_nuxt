@@ -8,5 +8,6 @@ export default defineEventHandler(async (event) => {
       patient_id: body.patient_id || null,
     }
   })
+  
   return { success: true }
 })

@@ -11,6 +11,8 @@ export default defineEventHandler(async (event) => {
     where,
     data: {
       name: body.name,
+      email: body.email,
+      send_email: body.send_email,
       rg: body.rg,
       gender: body.gender,
       cpf: body.cpf,

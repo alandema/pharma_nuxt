@@ -8,6 +8,7 @@ const route = useRoute();
 const patient_id = ref((route.query.patient_id as string) || '');
 const date_prescribed = ref(getTodayDate());
 const cid_code = ref((route.query.cid_code as string) || '');
+const manual_cid = ref('');
 const formulasInput = ref<PrescriptionFormulaInput[]>([]);
 
 const [{ data: patients }, { data: cidsData }, { data: formulas }] = await Promise.all([
@@ -20,6 +21,12 @@ const cids = computed(() => {
   const codes = cidsData.value?.codes ?? [];
   return [...codes].sort((a, b) => a.name.localeCompare(b.name));
 });
+
+// If the prepopulated cid_code is not empty, not 'Outro', and not in the list of CIDs, it means it's a manual CID from reuse.
+if (cid_code.value && cid_code.value !== 'Outro' && !cids.value.some(c => c.code === cid_code.value)) {
+  manual_cid.value = cid_code.value;
+  cid_code.value = 'Outro';
+}
 
 const parseFormulasFromQuery = () => {
   const formulasQuery = route.query.formulas as string | undefined;
@@ -51,9 +58,11 @@ const submit = async () => {
     .map((item) => ({ formula_id: item.formula_id, posology: item.posology.trim() }))
     .filter((item) => item.formula_id && item.posology);
 
+  const finalCid = cid_code.value === 'Outro' ? manual_cid.value.trim() : cid_code.value;
+
   await $fetch('/api/prescriptions', {
     method: 'POST',
-    body: { patient_id: patient_id.value, cid_code: cid_code.value, formulas: cleanedFormulas }
+    body: { patient_id: patient_id.value, cid_code: finalCid, formulas: cleanedFormulas }
   });
   await navigateTo('/prescriptions');
 };
@@ -89,6 +98,9 @@ if (!formulasInput.value.length) addFormula();
           <option value="" disabled>Selecione um código CID</option>
           <option v-for="c in cids" :key="c.code" :value="c.code">{{ c.code }} – {{ c.name }}</option>
         </select>
+      </div>
+      <div class="form-group" v-if="cid_code === 'Outro'">
+        <input v-model="manual_cid" type="text" placeholder="Digite o CID" required />
       </div>
       <div class="form-group">
         <label>Fórmulas Prescritas *</label>

@@ -3,6 +3,8 @@
 type Patient = {
   id: string;
   name: string;
+  email?: string;
+  send_email?: boolean;
   registered_by: string;
   registered_by_username?: string | null;
   rg?: string;
@@ -81,7 +83,7 @@ const deletePatient = async () => {
 
 const initialData = computed(() => {
   const p = patient.value
-  return p ? { name: p.name, rg: p.rg || '', gender: p.gender || '', cpf: p.cpf || '', birth_date: p.birth_date || '', phone: p.phone || '', zipcode: p.zipcode || '', street: p.street || '', district: p.district || '', house_number: p.house_number || '', additional_info: p.additional_info || '', country: p.country || '', state: p.state || '', city: p.city || '', medical_history: p.medical_history || '' } : undefined
+  return p ? { name: p.name, email: p.email || '', send_email: p.send_email, rg: p.rg || '', gender: p.gender || '', cpf: p.cpf || '', birth_date: p.birth_date ? p.birth_date.split('T')[0] : '', phone: p.phone || '', zipcode: p.zipcode || '', street: p.street || '', district: p.district || '', house_number: p.house_number || '', additional_info: p.additional_info || '', country: p.country || '', state: p.state || '', city: p.city || '', medical_history: p.medical_history || '' } : undefined
 })
 
 const save = async (data: Record<string, string>) => {

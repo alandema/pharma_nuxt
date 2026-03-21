@@ -2,11 +2,18 @@ export default defineEventHandler(async (event) => {
   const user = event.context.user;
 
   const body = await readBody(event)
+
+  if(body.send_email && !body.email) {
+    throw createError({ statusCode: 400, statusMessage: 'E-mail é obrigatório para receber notificações.' });
+  }
+
   const birthDate = body.birth_date ? new Date(`${body.birth_date}T00:00:00.000Z`) : null
   const patient = await prisma.patient.create({
     data: {
       registered_by: user.userId,
       name: body.name,
+      email: body.email,
+      send_email: body.send_email,
       rg: body.rg,
       gender: body.gender,
       cpf: body.cpf,
@@ -23,6 +30,7 @@ export default defineEventHandler(async (event) => {
       medical_history: body.medical_history,
     },
   })
+
   await prisma.log.create({ data: { event_time: new Date(), message: `Cadastrou paciente: ${patient.name}`, user_id: user.userId, patient_id: patient.id } })
 
   return {

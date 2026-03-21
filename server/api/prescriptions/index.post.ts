@@ -1,3 +1,35 @@
+import sgMail from '@sendgrid/mail';
+import PDFDocument from 'pdfkit';
+import fs from 'node:fs';
+import path from 'node:path';
+
+if (process.env.SENDGRID_API_KEY) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+}
+
+function generatePDFData(body: any, doctorName: string, patientName: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument();
+    const chunks: Buffer[] = [];
+    doc.on('data', (chunk) => chunks.push(chunk));
+    doc.on('end', () => {
+      resolve(Buffer.concat(chunks).toString('base64'));
+    });
+    
+    doc.fontSize(20).text('Prescription', { align: 'center' });
+    doc.moveDown();
+    doc.fontSize(14).text(`Doctor: ${doctorName}`);
+    doc.text(`Patient: ${patientName}`);
+    doc.moveDown();
+    body.formulas.forEach((f: any) => {
+      doc.text(`- Medication: ${f.formula_name}`);
+      doc.text(`  Posology: ${f.posology}`);
+      doc.moveDown();
+    });
+    doc.end();
+  });
+}
+
 export default defineEventHandler(async (event) => {
   const user = event.context.user;
   const body = await readBody<{
@@ -65,6 +97,65 @@ export default defineEventHandler(async (event) => {
       json_form_info: formInfo,
     },
   });
+
+  const [prescriber, patient] = await Promise.all([
+    prisma.user.findUnique({ where: { id: user.userId } }),
+    prisma.patient.findUnique({ where: { id: body.patient_id } })
+  ]);
+
+  if (prescriber && patient && process.env.SENDGRID_API_KEY) {
+    const attachPDF = await generatePDFData(formInfo, prescriber.username, patient.name);
+    
+    const formulasHtml = formInfo.formulas.map(f => `<li><b>${f.formula_name}</b>: ${f.posology}</li>`).join('');
+    
+    // Email for the patient
+    if (patient.email && patient.send_email) {
+      const patientTemplatePath = path.resolve(process.cwd(), 'server/templates/prescription_patient.html');
+      let patientHtml = fs.readFileSync(patientTemplatePath, 'utf-8');
+      patientHtml = patientHtml.replace('{{patientName}}', patient.name)
+                               .replace('{{doctorName}}', prescriber.username)
+                               .replace('{{formulasList}}', formulasHtml);
+                               
+      await sgMail.send({
+        to: patient.email,
+        from: 'no-reply@pharmanext.com', 
+        subject: 'Sua Nova Prescrição - Pharma Next',
+        html: patientHtml,
+        attachments: [
+          {
+            content: attachPDF,
+            filename: `prescription-${prescription.id}.pdf`,
+            type: 'application/pdf',
+            disposition: 'attachment',
+          },
+        ],
+      }).catch(e => console.error("SendGrid Error (Patient):", e.response?.body || e));
+    }
+
+    // Email for the prescriber (doctor)
+    if (prescriber.email && prescriber.send_email) {
+      const doctorTemplatePath = path.resolve(process.cwd(), 'server/templates/prescription_doctor.html');
+      let doctorHtml = fs.readFileSync(doctorTemplatePath, 'utf-8');
+      doctorHtml = doctorHtml.replace('{{patientName}}', patient.name)
+                             .replace('{{doctorName}}', prescriber.username)
+                             .replace('{{formulasList}}', formulasHtml);
+                             
+      await sgMail.send({
+        to: prescriber.email,
+        from: 'no-reply@pharmanext.com', 
+        subject: 'Cópia Extra: Prescrição Salva - Pharma Next',
+        html: doctorHtml,
+        attachments: [
+          {
+            content: attachPDF,
+            filename: `prescription-${prescription.id}.pdf`,
+            type: 'application/pdf',
+            disposition: 'attachment',
+          },
+        ],
+      }).catch(e => console.error("SendGrid Error (Doctor):", e.response?.body || e));
+    }
+  }
 
   await prisma.log.create({ data: { event_time: new Date(), message: `Prescreveu para paciente`, user_id: user.userId, patient_id: body.patient_id } })
 

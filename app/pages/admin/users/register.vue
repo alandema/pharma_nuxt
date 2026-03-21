@@ -1,11 +1,16 @@
 <script setup lang="ts">
 const username = ref('')
 const password = ref('')
+const email = ref('')
+const phone_number = ref('')
 const role = ref('prescritor')
 const { add: addToast } = useToast()
 
 const usernameRegex = /^[a-z0-9_]+$/
 const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const brazilianPhoneRegex = /^\(?\d{2}\)?[\s-]?\d{4,5}-?\d{4}$/
+
 
 const handleSubmit = async () => {
   if (!usernameRegex.test(username.value) || username.value.length > 25) {
@@ -14,7 +19,12 @@ const handleSubmit = async () => {
   if (!passwordRegex.test(password.value) || password.value.length > 25) {
     return addToast('Senha inválida', 'error')
   }
-
+  if (!email.value || !emailRegex.test(email.value)) {
+    return addToast('E-mail inválido', 'error')
+  }
+  if (!phone_number.value || !brazilianPhoneRegex.test(phone_number.value)) {
+    return addToast('Telefone inválido', 'error')
+  }
   try {
     await $fetch('/api/users/admin', {
       method: 'POST',
@@ -22,6 +32,8 @@ const handleSubmit = async () => {
         username: username.value,
         password: password.value,
         role: role.value,
+        email: email.value,
+        phone_number: phone_number.value,
       },
     })
     addToast('Usuário criado com sucesso!', 'success')
@@ -51,6 +63,8 @@ const handleSubmit = async () => {
           <option value="admin">Administrador</option>
         </select>
       </div>
+      <div class="form-group"><label>E-mail *</label><input v-model="email" type="email" placeholder="usuario@email.com" required/></div>
+      <div class="form-group"><label>Telefone</label><input type="number" v-model="phone_number" placeholder="(00) 00000-0000" /></div>
       <button type="submit">Criar Usuário</button>
     </form>
   </div>

@@ -1,9 +1,10 @@
 <script setup lang="ts">
-const props = defineProps<{ initial?: Record<string, string>, submitLabel?: string }>()
-const emit = defineEmits<{ submit: [data: Record<string, string>] }>()
+const props = defineProps<{ initial?: Record<string, any>, submitLabel?: string }>()
+const emit = defineEmits<{ submit: [data: Record<string, any>] }>()
 
 const f = reactive({
   name: '', rg: '', gender: '', cpf: '', birth_date: '', phone: '',
+  email: '', send_email: true,
   zipcode: '', street: '', district: '', house_number: '',
   additional_info: '', country: '', state: '', city: '', medical_history: ''
 })
@@ -26,6 +27,10 @@ watch(() => f.state, async (uf) => { f.city = ''; cities.value = uf ? await $fet
   <form @submit.prevent="emit('submit', { ...f })">
     <div class="form-group"><label>Nome *</label><input v-model="f.name" placeholder="Nome completo" required /></div>
     <div class="form-row">
+      <div class="form-group"><label>E-mail *</label><input required v-model="f.email" type="email" placeholder="paciente@email.com" /></div>
+      <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;margin-top:1.5rem"><input type="checkbox" id="pe" v-model="f.send_email" checked="true" /><label for="pe" style="margin:0">Receber e-mails</label></div>
+    </div>
+    <div class="form-row">
       <div class="form-group"><label>CPF</label><input v-model="f.cpf" placeholder="000.000.000-00" /></div>
       <div class="form-group"><label>RG</label><input v-model="f.rg" placeholder="RG" /></div>
     </div>
@@ -34,7 +39,7 @@ watch(() => f.state, async (uf) => { f.city = ''; cities.value = uf ? await $fet
       <div class="form-group"><label>Data de Nascimento</label><input v-model="f.birth_date" type="date" /></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>Telefone</label><input v-model="f.phone" placeholder="(00) 00000-0000" /></div>
+      <div class="form-group"><label>Telefone *</label><input required v-model="f.phone" placeholder="(00) 00000-0000" /></div>
       <div class="form-group"><label>CEP</label><input v-model="f.zipcode" placeholder="00000-000" /></div>
     </div>
     <div class="form-row">

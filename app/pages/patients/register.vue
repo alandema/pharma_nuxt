@@ -1,8 +1,17 @@
 <script setup lang="ts">
+
+const toast = useToast()
+
 const submit = async (data: Record<string, string>) => {
-  await $fetch('/api/patients', { method: 'POST', body: data })
-  await navigateTo('/patients')
+  try {
+    await $fetch('/api/patients', { method: 'POST', body: data })
+    toast.add('Paciente registrado com sucesso!', 'success')
+    await navigateTo('/patients')
+  } catch (error: any) {
+    toast.add(error.data?.message ?? 'Algo deu errado', 'error')
+  }
 }
+
 </script>
 
 <template>

@@ -18,6 +18,8 @@ async function main() {
     update: {},
     create: {
       username: 'admin',
+      email: 'admin@pharmanext.test',
+      send_email: true,
       password_hash: adminHash,
       role: 'admin',
       is_active: true,
@@ -30,6 +32,8 @@ async function main() {
     update: {},
     create: {
       username: 'doctor1',
+      email: 'doctor1@pharmanext.test',
+      send_email: true,
       password_hash: doctorHash,
       role: 'prescritor',
       is_active: true,
@@ -42,6 +46,8 @@ async function main() {
     update: {},
     create: {
       username: 'doctor2',
+      email: 'doctor2@pharmanext.test',
+      send_email: false,
       password_hash: doctorHash,
       role: 'prescritor',
       is_active: true,
@@ -69,6 +75,8 @@ async function main() {
   const patients = [
     {
       name: 'Alice Johnson',
+      email: 'alice@pharmanext.test',
+      send_email: true,
       cpf: '123.456.789-01',
       gender: 'Female',
       birth_date: new Date('1985-03-15T00:00:00.000Z'),
@@ -85,6 +93,8 @@ async function main() {
     },
     {
       name: 'Bob Smith',
+      email: 'bob@pharmanext.test',
+      send_email: false,
       cpf: '234.567.890-12',
       gender: 'Male',
       birth_date: new Date('1978-07-22T00:00:00.000Z'),
@@ -101,6 +111,8 @@ async function main() {
     },
     {
       name: 'Carol Martinez',
+      email: 'carol@pharmanext.test',
+      send_email: true,
       cpf: '345.678.901-23',
       gender: 'Female',
       birth_date: new Date('1992-11-03T00:00:00.000Z'),
@@ -117,6 +129,8 @@ async function main() {
     },
     {
       name: 'David Lee',
+      email: 'david@pharmanext.test',
+      send_email: true,
       cpf: '456.789.012-34',
       gender: 'Male',
       birth_date: new Date('1965-05-18T00:00:00.000Z'),
@@ -133,6 +147,8 @@ async function main() {
     },
     {
       name: 'Emma Wilson',
+      email: 'emma@pharmanext.test',
+      send_email: false,
       cpf: '567.890.123-45',
       gender: 'Female',
       birth_date: new Date('2000-09-25T00:00:00.000Z'),
@@ -151,8 +167,10 @@ async function main() {
 
   const createdPatients = [];
   for (const patient of patients) {
-    const created = await prisma.patient.create({
-      data: patient,
+    const created = await prisma.patient.upsert({
+      where: { cpf: patient.cpf },
+      update: patient,
+      create: patient,
     });
     createdPatients.push(created);
   }

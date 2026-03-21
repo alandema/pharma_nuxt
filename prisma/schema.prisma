@@ -10,6 +10,8 @@ datasource db {
 model User {
   id            String         @id @default(uuid())
   username      String         @unique
+  email         String?        @unique
+  send_email    Boolean        @default(true)
   password_hash String         @map("password_hash")
   role          String
   is_active     Boolean        @default(true)
@@ -26,6 +28,8 @@ model Patient {
   registered_by   String
   user            User           @relation(fields: [registered_by], references: [id], onDelete: SetNull)
   name            String
+  email           String?        @unique
+  send_email      Boolean        @default(true)
   rg              String?
   gender          String?
   cpf             String?        @unique
