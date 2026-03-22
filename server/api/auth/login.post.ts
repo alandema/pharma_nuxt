@@ -1,7 +1,8 @@
 import bcrypt from "bcryptjs";
 import jwt from 'jsonwebtoken';
 import { JwtPayload } from 'jsonwebtoken';
-const JWT_SECRET = process.env.JWT_SECRET
+const config = useRuntimeConfig()
+const JWT_SECRET = config.jwtSecret
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -45,7 +46,7 @@ export default defineEventHandler(async (event) => {
     // set token in httpOnly cookie
     setCookie(event, 'AccessToken', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: config.public.nodeEnv === 'production',
       maxAge: 60 * 60 * 24 * 7, // 7 days
       sameSite: 'lax',
       path: '/'

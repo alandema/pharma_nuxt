@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 export default defineEventHandler(async (event) => {
+  const config = useRuntimeConfig();
   const user = event.context.user;
 
   const body = await readBody<{
@@ -119,12 +120,12 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Paciente ou prescritor inválido para salvar.' });
   }
 
-  const sendgridApiKey = process.env.SENDGRID_API_KEY;
+  const sendgridApiKey = config.sendgridApiKey;
   if (!sendgridApiKey) {
     throw createError({ statusCode: 500, statusMessage: 'SENDGRID_API_KEY é obrigatório para criar prescrições.' });
   }
 
-  const alwaysSendEmailsRaw = process.env.ALWAYS_SEND_EMAILS;
+  const alwaysSendEmailsRaw = config.alwaysSendEmails;
   if (alwaysSendEmailsRaw === undefined) {
     throw createError({ statusCode: 500, statusMessage: 'ALWAYS_SEND_EMAILS é obrigatório para criar prescrições.' });
   }

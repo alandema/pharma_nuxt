@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const config = useRuntimeConfig(event)
-  const activationSecret = config.activationTokenSecret || process.env.JWT_SECRET
+  const activationSecret = config.activationTokenSecret
 
   if (!activationSecret) {
     throw createError({ statusCode: 500, statusMessage: 'ACTIVATION token secret não configurado' })

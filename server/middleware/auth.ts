@@ -1,7 +1,8 @@
 import jwt from 'jsonwebtoken';
 import { JwtPayload } from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET
+const config = useRuntimeConfig()
+const JWT_SECRET = config.jwtSecret
 
 export default defineEventHandler((event) => {
   const url = getRequestURL(event);

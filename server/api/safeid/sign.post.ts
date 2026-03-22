@@ -2,9 +2,10 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const { doctorCpf, doctorPassword, base64Pdf } = body
 
-  const clientId = process.env.SAFEID_CLIENT_ID
-  const clientSecret = process.env.SAFEID_CLIENT_SECRET
-  const redirectUri = process.env.SAFEID_REDIRECT_URI
+  const config = useRuntimeConfig()
+  const clientId = config.safeidClientId
+  const clientSecret = config.safeidClientSecret
+  const redirectUri = config.safeidRedirectUri
 
   if (!clientId || !clientSecret || !redirectUri) {
     throw createError({ statusCode: 500, statusMessage: 'Configuração SafeID incompleta.' })

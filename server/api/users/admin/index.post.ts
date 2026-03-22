@@ -78,17 +78,17 @@ export default defineEventHandler(async (event) => {
   }
 
   const hash = await bcrypt.hash(password, 10);
-  const activationSecret = config.activationTokenSecret || process.env.JWT_SECRET
+  const activationSecret = config.activationTokenSecret
   if (!activationSecret) {
     throw createError({ statusCode: 500, statusMessage: 'ACTIVATION token secret não configurado' })
   }
 
-  const activationBaseUrl = config.activationBaseUrl || process.env.ACTIVATION_BASE_URL
+  const activationBaseUrl = config.activationBaseUrl
   if (!activationBaseUrl) {
     throw createError({ statusCode: 500, statusMessage: 'ACTIVATION base URL não configurada' })
   }
 
-  const sendgridApiKey = process.env.SENDGRID_API_KEY
+  const sendgridApiKey = config.sendgridApiKey
   if (!sendgridApiKey) {
     throw createError({ statusCode: 500, statusMessage: 'SENDGRID_API_KEY é obrigatório para ativação de conta' })
   }
