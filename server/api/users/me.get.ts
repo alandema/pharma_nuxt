@@ -28,27 +28,8 @@ export default defineEventHandler(async (event) => {
 
     const user = await prisma.user.findUnique({
             where: { id: decoded.userId },
-            select: {
-                id: true,
-                email: true,
-                username: true,
-                full_name: true,
-                cpf: true,
-                gender: true,
-                birth_date: true,
-                phone: true,
-                zipcode: true,
-                street: true,
-                address_number: true,
-                complement: true,
-                city: true,
-                state: true,
-                professional_type: true,
-                council: true,
-                council_number: true,
-                council_state: true,
-                specialties: true,
-                send_email: true
+            omit:{
+                password_hash: true,
             }
         })
     if (user){
