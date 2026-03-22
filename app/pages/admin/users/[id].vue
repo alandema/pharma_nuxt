@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useInputFormatting } from '../../../composables/useInputFormatting'
+import { GENDER_OPTIONS } from '#shared/utils/commonOptions'
 
 const toast = useToast()
 const route = useRoute()
@@ -7,7 +8,6 @@ const { data: user, refresh } = await useFetch<any>(`/api/users/admin/${route.pa
 const { data: me } = await useFetch<any>('/api/users/me')
 const { formatBrazilPhoneInput, formatCepInput, isValidBirthDate, normalizeText } = useInputFormatting()
 const { data: profs } = await useAsyncData('profs', () => queryCollection('professionals').first())
-const { data: genders } = await useAsyncData('genders', () => queryCollection('genders').first())
 
 const states = ref<any[]>([])
 const cities = ref<any[]>([])
@@ -97,7 +97,7 @@ async function saveSettings() {
       <div class="form-group"><label>Nome Completo</label><input v-model="f.full_name" /></div>
       <div class="form-group"><label>CPF</label><input v-model="f.cpf" /></div>
       <div class="form-group"><label>Gênero</label>
-        <select v-model="f.gender"><option v-for="g in genders?.genders" :key="g.id" :value="g.name">{{ g.name }}</option></select>
+        <select v-model="f.gender"><option value="">Selecione</option><option v-for="gender in GENDER_OPTIONS" :key="gender" :value="gender">{{ gender }}</option></select>
       </div>
       <div class="form-group"><label>Nascimento</label><input v-model="f.birth_date" type="date" /></div>
       <div class="form-group"><label>Telefone</label><input v-model="f.phone" inputmode="numeric" placeholder="+55 (00) 00000-0000" /></div>

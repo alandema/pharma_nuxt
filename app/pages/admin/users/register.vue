@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useInputFormatting } from '../../../composables/useInputFormatting'
+import { GENDER_OPTIONS } from '#shared/utils/commonOptions'
 
 const f = ref({
   username: '', password: '', email: '',
@@ -12,7 +13,6 @@ const { add: addToast } = useToast()
 const { formatBrazilPhoneInput, formatCepInput, isValidBirthDate, normalizeText } = useInputFormatting()
 
 const { data: profs } = await useAsyncData('profs', () => queryCollection('professionals').first())
-const { data: genders } = await useAsyncData('genders', () => queryCollection('genders').first())
 
 const states = ref<any[]>([])
 const cities = ref<any[]>([])
@@ -115,7 +115,7 @@ const submit = async () => {
       <div class="form-group"><label>Nome Completo *</label><input v-model="f.full_name" required /></div>
       <div class="form-group"><label>CPF *</label><input v-model="f.cpf" required /></div>
       <div class="form-group"><label>Gênero *</label>
-        <select v-model="f.gender" required><option v-for="g in genders?.genders" :key="g.id" :value="g.name">{{ g.name }}</option></select>
+        <select v-model="f.gender" required><option value="" disabled>Selecione</option><option v-for="gender in GENDER_OPTIONS" :key="gender" :value="gender">{{ gender }}</option></select>
       </div>
       <div class="form-group"><label>Nascimento *</label><input v-model="f.birth_date" type="date" required /></div>
       <div class="form-group"><label>Telefone *</label><input v-model="f.phone" inputmode="tel" placeholder="Ex: +55 11 91234-5678" required /></div>

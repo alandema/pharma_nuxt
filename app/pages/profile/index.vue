@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { useInputFormatting } from '../../composables/useInputFormatting'
+import { GENDER_OPTIONS } from '#shared/utils/commonOptions'
 
 const { data: me, refresh } = await useFetch<any>('/api/users/me')
 const { data: profs } = await useAsyncData('profs', () => queryCollection('professionals').first())
-const { data: genders } = await useAsyncData('genders', () => queryCollection('genders').first())
 const { formatBrazilPhoneInput, formatCepInput, isValidBirthDate, normalizeText } = useInputFormatting()
 
 const states = ref<any[]>([])
@@ -84,7 +84,7 @@ const save = async () => {
       <div class="form-group"><label>CPF</label><input v-model="form.cpf" disabled /></div>
       
       <div class="form-group"><label>Sexo</label>
-        <select v-model="form.gender"><option v-for="g in genders?.genders" :key="g.id" :value="g.name">{{ g.name }}</option></select>
+        <select v-model="form.gender"><option value="">Selecione</option><option v-for="gender in GENDER_OPTIONS" :key="gender" :value="gender">{{ gender }}</option></select>
       </div>
       <div class="form-group"><label>Data de nascimento</label><input v-model="form.birth_date" type="date" /></div>
       

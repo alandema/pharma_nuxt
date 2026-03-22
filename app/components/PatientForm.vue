@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useInputFormatting } from '../composables/useInputFormatting'
+import { GENDER_OPTIONS } from '#shared/utils/commonOptions'
 
 const props = defineProps<{ initial?: Record<string, any>, submitLabel?: string }>()
 const emit = defineEmits<{ submit: [data: Record<string, any>] }>()
@@ -13,7 +14,6 @@ const f = reactive({
 })
 if (props.initial) Object.assign(f, props.initial)
 
-const { data: gendersData } = await useAsyncData('genders', () => queryCollection('genders').first())
 const { data: countries } = await useFetch<any[]>('https://servicodados.ibge.gov.br/api/v1/localidades/paises')
 const states = ref<any[]>([])
 const cities = ref<any[]>([])
@@ -80,7 +80,7 @@ const submitForm = () => {
       <div class="form-group"><label>RG</label><input v-model="f.rg" placeholder="RG" /></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>Gênero</label><select v-model="f.gender"><option value="">Selecione</option><option v-for="g in gendersData?.genders" :key="g.id" :value="g.name">{{ g.name }}</option></select></div>
+      <div class="form-group"><label>Gênero</label><select v-model="f.gender"><option value="">Selecione</option><option v-for="gender in GENDER_OPTIONS" :key="gender" :value="gender">{{ gender }}</option></select></div>
       <div class="form-group"><label>Data de Nascimento</label><input v-model="f.birth_date" type="date" /></div>
     </div>
     <div class="form-row">
