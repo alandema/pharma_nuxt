@@ -1,33 +1,22 @@
 import sgMail from '@sendgrid/mail';
 import { put } from '@vercel/blob';
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 
 export default defineEventHandler(async (event) => {
   const user = event.context.user;
 
-  const sendgridApiKey = process.env.SENDGRID_API_KEY;
-  if (!sendgridApiKey) {
-    throw createError({ statusCode: 500, statusMessage: 'SENDGRID_API_KEY é obrigatório para criar prescrições.' });
-  }
-
-  const alwaysSendEmailsRaw = process.env.ALWAYS_SEND_EMAILS;
-  if (alwaysSendEmailsRaw === undefined) {
-    throw createError({ statusCode: 500, statusMessage: 'ALWAYS_SEND_EMAILS é obrigatório para criar prescrições.' });
-  }
-
-  const alwaysSendEmails = alwaysSendEmailsRaw
-    .split(',')
-    .map((email) => email.trim())
-    .filter((email) => email.length > 0);
-
-  sgMail.setApiKey(sendgridApiKey);
-
   const body = await readBody<{
     patient_id?: string;
     cid_code?: string;
     formulas?: { formula_id?: string; description?: string }[];
+    preview_only?: boolean;
+    preview_pdf_base64?: string;
+    preview_pdf_hash?: string;
   }>(event);
+
+  const isPreviewOnly = body.preview_only === true;
 
   if (!Array.isArray(body.formulas)) {
     throw createError({ statusCode: 400, statusMessage: 'Fórmulas devem ser enviadas como array.' });
@@ -92,6 +81,61 @@ export default defineEventHandler(async (event) => {
     })),
   };
 
+  const [prescriber, patient] = await Promise.all([
+    prisma.user.findUnique({ where: { id: user.userId } }),
+    prisma.patient.findUnique({ where: { id: body.patient_id } })
+  ]);
+
+  if (isPreviewOnly) {
+    if (!prescriber || !patient) {
+      throw createError({ statusCode: 400, statusMessage: 'Não foi possível gerar preview para este paciente/prescritor.' });
+    }
+
+    const previewBuffer = await generatePDFDocument(formInfo, prescriber.username, patient.name);
+    const previewHash = createHash('sha256').update(previewBuffer).digest('hex');
+
+    return {
+      pdf_base64: previewBuffer.toString('base64'),
+      pdf_hash: previewHash,
+    };
+  }
+
+  if (typeof body.preview_pdf_base64 !== 'string' || body.preview_pdf_base64.length === 0) {
+    throw createError({ statusCode: 400, statusMessage: 'Preview PDF é obrigatório para salvar.' });
+  }
+
+  if (typeof body.preview_pdf_hash !== 'string' || body.preview_pdf_hash.length === 0) {
+    throw createError({ statusCode: 400, statusMessage: 'Hash do preview é obrigatório.' });
+  }
+
+  const attachPDFBuffer = Buffer.from(body.preview_pdf_base64, 'base64');
+  const previewHash = createHash('sha256').update(attachPDFBuffer).digest('hex');
+
+  if (previewHash !== body.preview_pdf_hash) {
+    throw createError({ statusCode: 400, statusMessage: 'Preview PDF inválido.' });
+  }
+
+  if (!prescriber || !patient) {
+    throw createError({ statusCode: 400, statusMessage: 'Paciente ou prescritor inválido para salvar.' });
+  }
+
+  const sendgridApiKey = process.env.SENDGRID_API_KEY;
+  if (!sendgridApiKey) {
+    throw createError({ statusCode: 500, statusMessage: 'SENDGRID_API_KEY é obrigatório para criar prescrições.' });
+  }
+
+  const alwaysSendEmailsRaw = process.env.ALWAYS_SEND_EMAILS;
+  if (alwaysSendEmailsRaw === undefined) {
+    throw createError({ statusCode: 500, statusMessage: 'ALWAYS_SEND_EMAILS é obrigatório para criar prescrições.' });
+  }
+
+  const alwaysSendEmails = alwaysSendEmailsRaw
+    .split(',')
+    .map((email) => email.trim())
+    .filter((email) => email.length > 0);
+
+  sgMail.setApiKey(sendgridApiKey);
+
   const prescription = await prisma.prescription.create({
     data: {
       patient_id: body.patient_id,
@@ -101,32 +145,23 @@ export default defineEventHandler(async (event) => {
     },
   });
 
-  const [prescriber, patient] = await Promise.all([
-    prisma.user.findUnique({ where: { id: user.userId } }),
-    prisma.patient.findUnique({ where: { id: body.patient_id } })
-  ]);
+  const dateStr = new Date().toISOString().slice(0, 10);
+  const blob = await put(`prescriptions/${user.userId}/${dateStr}/${prescription.id}.pdf`, attachPDFBuffer, { access: 'public' });
 
-  if (prescriber && patient) {
-    const attachPDFBuffer = await generatePDFDocument(formInfo, prescriber.username, patient.name);
-    
-    const dateStr = new Date().toISOString().slice(0, 10);
-    const blob = await put(`prescriptions/${user.userId}/${dateStr}/${prescription.id}.pdf`, attachPDFBuffer, { access: 'public' });
-    
-    await prisma.prescription.update({
-      where: { id: prescription.id },
-      data: { pdf_url: blob.url }
-    });
+  await prisma.prescription.update({
+    where: { id: prescription.id },
+    data: { pdf_url: blob.url }
+  });
 
-    if (patient.email && patient.send_email) {
-      await sendPatientEmail(patient.email, patient.name, prescriber.username, blob.url);
-    }
-
-    if (prescriber.email && prescriber.send_email) {
-      await sendPrescriberEmail(prescriber.email, prescriber.username, patient.name, blob.url);
-    }
-
-    await sendPharmacyEmail(patient.name, blob.url, alwaysSendEmails);
+  if (patient.email && patient.send_email) {
+    await sendPatientEmail(patient.email, patient.name, prescriber.username, blob.url);
   }
+
+  if (prescriber.email && prescriber.send_email) {
+    await sendPrescriberEmail(prescriber.email, prescriber.username, patient.name, blob.url);
+  }
+
+  await sendPharmacyEmail(patient.name, blob.url, alwaysSendEmails);
 
   await prisma.log.create({ data: { event_time: new Date(), message: `Prescreveu para paciente`, user_id: user.userId, patient_id: body.patient_id } })
 
