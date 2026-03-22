@@ -1,34 +1,41 @@
 import jwt from 'jsonwebtoken';
 import { JwtPayload } from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET
+const config = useRuntimeConfig()
+const JWT_SECRET = config.jwtSecret
 
-export default defineEventHandler((event) => {
+export default defineEventHandler(async (event) => {
 
-    console.log('Received request for /api/users/me')
-    // get user info from cookie using prisma
     const token = getCookie(event, 'AccessToken'); // Get the 'token' cookie
 
     if (!token) {
         throw createError({
             statusCode: 401,
-            statusMessage: 'Unauthorized: No token provided'
+            statusMessage: 'Não Autorizado'
         });
     }
 
-    // Verify the token and extract user information
+    let decoded: JwtPayload;
+
     try {
-        const decoded = jwt.verify(token, JWT_SECRET!) as JwtPayload;
-        
-        // Fetch fresh db state
-        return prisma.user.findUnique({
-            where: { id: decoded.userId },
-            select: { id: true, username: true, role: true, email: true, send_email: true }
-        }).then(user => ({ userId: user?.id, username: user?.username, role: user?.role, email: user?.email, send_email: user?.send_email }))
+        decoded = jwt.verify(token, JWT_SECRET!) as JwtPayload;
     } catch (err) {
         throw createError({
             statusCode: 401,
-            statusMessage: 'Unauthorized: Invalid token'
+            statusMessage: 'Não Autorizado'
         });
     }
+
+    const user = await prisma.user.findUnique({
+            where: { id: decoded.userId },
+            omit:{
+                password_hash: true,
+            }
+        })
+    if (user){
+        if (user.birth_date) {
+            user.birth_date = <any> new Date(user.birth_date).toISOString().split('T')[0]
+        }
+    }
+    return user;
 })

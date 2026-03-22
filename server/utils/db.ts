@@ -1,5 +1,6 @@
 import { PrismaClient } from '~prisma/client'
 import { PrismaNeon } from '@prisma/adapter-neon'
 
-const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL })
+const config = useRuntimeConfig()
+const adapter = new PrismaNeon({ connectionString: config.databaseUrl })
 export const prisma = new PrismaClient({ adapter })

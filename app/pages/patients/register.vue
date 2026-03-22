@@ -1,8 +1,20 @@
 <script setup lang="ts">
+import { useInputFormatting } from '../../composables/useInputFormatting'
 
 const toast = useToast()
+const { isBrazilCountry, isValidBirthDate } = useInputFormatting()
 
 const submit = async (data: Record<string, string>) => {
+  if (data.birth_date && !isValidBirthDate(data.birth_date)) {
+    toast.add('Data de nascimento inválida.', 'error')
+    return
+  }
+
+  if (isBrazilCountry(data.country) && !data.zipcode) {
+    toast.add('CEP é obrigatório para pacientes brasileiros.', 'error')
+    return
+  }
+
   try {
     await $fetch('/api/patients', { method: 'POST', body: data })
     toast.add('Paciente registrado com sucesso!', 'success')

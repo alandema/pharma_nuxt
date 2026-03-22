@@ -1,16 +1,23 @@
 <script setup lang="ts">
+import { useInputFormatting } from '../../../composables/useInputFormatting'
 
 
 const name = ref('')
 const information = ref('')
+const { normalizeText } = useInputFormatting()
 
 const toast = useToast()
 
 const submit = async () => {
+  const payload = {
+    name: normalizeText(name.value, { titleCase: true }),
+    information: information.value,
+  }
+
   try {
     await $fetch('/api/formulas', {
       method: 'POST',
-      body: { name: name.value, information: information.value }
+      body: payload
     })
     navigateTo('/admin/formulas')
   } catch (error: any) {

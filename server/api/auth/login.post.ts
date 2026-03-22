@@ -1,7 +1,8 @@
 import bcrypt from "bcryptjs";
 import jwt from 'jsonwebtoken';
 import { JwtPayload } from 'jsonwebtoken';
-const JWT_SECRET = process.env.JWT_SECRET
+const config = useRuntimeConfig()
+const JWT_SECRET = config.jwtSecret
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -18,6 +19,7 @@ export default defineEventHandler(async (event) => {
     { where: { username },
     select: { id: true, password_hash: true, username: true, role: true, is_active: true }
     });
+
   if (!existing) {
     throw createError({
       statusCode: 401,
@@ -33,7 +35,7 @@ export default defineEventHandler(async (event) => {
   }
 
   if (!existing.is_active) {
-    throw createError({ statusCode: 403, statusMessage: 'A conta está desativada' });
+    throw createError({ statusCode: 403, statusMessage: 'Conta inativa. Ative a conta pelo link enviado no e-mail.' });
   }
 
   const token = jwt.sign(
@@ -45,15 +47,14 @@ export default defineEventHandler(async (event) => {
     // set token in httpOnly cookie
     setCookie(event, 'AccessToken', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: config.public.nodeEnv === 'production',
       maxAge: 60 * 60 * 24 * 7, // 7 days
       sameSite: 'lax',
       path: '/'
     })
 
     return {
-      message: 'Login realizado com sucesso',
-      role: existing.role
+      message: 'Login realizado com sucesso'
     };
 
 })

@@ -14,5 +14,9 @@ function navigate(path: string) { return navigateTo({ path }) }
       <div class="dash-icon">📋</div>
       <div class="dash-label">Prescrições</div>
     </div>
+    <div class="dash-card" @click="navigate('/profile')">
+      <div class="dash-icon">⚙️</div>
+      <div class="dash-label">Meu Perfil</div>
+    </div>
   </div>
 </template>

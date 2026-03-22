@@ -1,10 +1,16 @@
+import { normalizeText } from '../../utils/inputNormalization';
+
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
 
+  const name = normalizeText(body.name, { titleCase: true })
 
-  // strip formula name and put name into Title Case format
-
-  const name = body.name.trim().toLowerCase().split(' ').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+  if (!name) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Nome da fórmula é obrigatório',
+    });
+  }
 
   //check if formula with same name already exists
   const existingFormula = await prisma.formulas.findUnique({

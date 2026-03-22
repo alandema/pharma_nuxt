@@ -1,15 +1,16 @@
 import jwt from 'jsonwebtoken';
 import { JwtPayload } from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET
+const config = useRuntimeConfig()
+const JWT_SECRET = config.jwtSecret
 
 export default defineEventHandler((event) => {
   const url = getRequestURL(event);
-  console.log('New request: ' + url);
 
   // Define public routes that don't require authentication
   const publicRoutes = [
     '/api/auth/login',
+    '/api/auth/activate',
     '/auth/login',
     '/_nuxt/',  // Nuxt internal assets
     '/css/',
@@ -48,7 +49,6 @@ export default defineEventHandler((event) => {
   try {
     decoded = jwt.verify(token, JWT_SECRET!) as JwtPayload;
 
-    console.log('Decoded token:', decoded);
     event.context.user = decoded; // Set user in context
   } catch (err) {
     throw createError({
@@ -58,7 +58,7 @@ export default defineEventHandler((event) => {
   }
 
   if (adminRoutes.some(route => url.pathname.startsWith(route))) {
-    if (decoded.role !== 'admin') {
+    if (decoded.role !== 'admin' && decoded.role !== 'superadmin') {
       throw createError({
         statusCode: 403,
         statusMessage: 'Forbidden: Admins only'
