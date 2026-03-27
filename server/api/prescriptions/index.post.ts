@@ -147,7 +147,10 @@ export default defineEventHandler(async (event) => {
   });
 
   const dateStr = new Date().toISOString().slice(0, 10);
-  const blob = await put(`prescriptions/${user.userId}/${dateStr}/${prescription.id}.pdf`, attachPDFBuffer, { access: 'public' });
+  const timestamp = Date.now();
+  const sanitizedUsername = await sanitizeName(patient.name);
+  const prescriptionName = `${sanitizedUsername}_${timestamp}`;
+  const blob = await put(`prescriptions/${user.userId}/${dateStr}/${prescriptionName}.pdf`, attachPDFBuffer, { access: 'public' });
 
   await prisma.prescription.update({
     where: { id: prescription.id },
@@ -219,3 +222,13 @@ async function sendPatientEmail(patientEmail: string, patientName: string, presc
           html: patientHtml,
         });
       }
+    
+async function sanitizeName(name: string): Promise<string> {
+  // Remove accents and not american characters
+  let sanitized = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+  // substitute spaces for underscores
+  sanitized = sanitized.replace(/\s+/g, '_');
+  return sanitized;
+
+}
