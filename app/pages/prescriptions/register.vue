@@ -308,7 +308,7 @@ onBeforeUnmount(() => {
           <select v-model="patient_id" required>
             <option value="" disabled>Selecione um paciente</option>
             <option
-              v-if="selectedPatientFallback && !patients.some((patient) => patient.id === selectedPatientFallback.id)"
+              v-if="selectedPatientFallback && !patients.some((patient) => patient.id === selectedPatientFallback!.id)"
               :value="selectedPatientFallback.id"
             >
               {{ selectedPatientFallback.name }}
