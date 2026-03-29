@@ -5,6 +5,7 @@ import { validatePassword } from '../../../utils/credentials';
 import {
   normalizeBirthDate,
   normalizeBrazilCep,
+  normalizeBrazilCpf,
   normalizeBrazilPhone,
   normalizeBoolean,
   normalizeText,
@@ -56,7 +57,7 @@ export default defineEventHandler(async (event) => {
       email: normalizeText(email)?.toLowerCase() ?? null,
       send_email: normalizeBoolean(body.send_email),
       full_name: normalizeText(full_name, { titleCase: true }),
-      cpf: normalizeText(cpf),
+      cpf: normalizeBrazilCpf(cpf, true),
       gender: normalizeText(gender, { titleCase: true }),
       birth_date: normalizeBirthDate(birth_date),
       phone: normalizeBrazilPhone(phone),

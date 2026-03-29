@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { useInputFormatting } from '../composables/useInputFormatting'
+import { useToast } from '../composables/useToast'
 import { GENDER_OPTIONS } from '#shared/utils/commonOptions'
 
 const props = defineProps<{ initial?: Record<string, any>, submitLabel?: string }>()
 const emit = defineEmits<{ submit: [data: Record<string, any>] }>()
-const { formatBrazilPhoneInput, formatCepInput, isBrazilCountry, normalizeText, isValidBirthDate } = useInputFormatting()
+const { add: addToast } = useToast()
+const { formatBrazilPhoneInput, formatCepInput, formatCpfInput, isValidBrazilCpf, isBrazilCountry, normalizeText, isValidBirthDate } = useInputFormatting()
 
 const f = reactive({
   name: '', rg: '', gender: '', cpf: '', birth_date: '', phone: '',
@@ -41,8 +43,21 @@ watch(() => f.zipcode, (value) => {
   if (formatted !== value) f.zipcode = formatted
 }, { immediate: true })
 
+watch(() => f.cpf, (value) => {
+  const formatted = formatCpfInput(value)
+  if (formatted !== value) f.cpf = formatted
+}, { immediate: true })
+
 const submitForm = () => {
-  if (f.birth_date && !isValidBirthDate(f.birth_date)) return
+  if (f.birth_date && !isValidBirthDate(f.birth_date)) {
+    addToast('Data de nascimento inválida.', 'error')
+    return
+  }
+
+  if (f.cpf && !isValidBrazilCpf(f.cpf)) {
+    addToast('CPF inválido. Verifique os dígitos informados.', 'error')
+    return
+  }
 
   const payload = {
     ...f,
@@ -50,7 +65,7 @@ const submitForm = () => {
     email: normalizeText(f.email),
     rg: normalizeText(f.rg),
     gender: normalizeText(f.gender, { titleCase: true }),
-    cpf: normalizeText(f.cpf),
+    cpf: formatCpfInput(f.cpf),
     birth_date: normalizeText(f.birth_date),
     phone: formatBrazilPhoneInput(f.phone),
     zipcode: isBrazilCountry(f.country) ? formatCepInput(f.zipcode) : '',
@@ -76,7 +91,7 @@ const submitForm = () => {
       <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;margin-top:1.5rem"><input type="checkbox" id="pe" v-model="f.send_email" checked="false" /><label for="pe" style="margin:0">Receber e-mails</label></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>CPF</label><input v-model="f.cpf" placeholder="000.000.000-00" /></div>
+      <div class="form-group"><label>CPF</label><input v-model="f.cpf" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" /></div>
       <div class="form-group"><label>RG</label><input v-model="f.rg" placeholder="RG" /></div>
     </div>
     <div class="form-row">
