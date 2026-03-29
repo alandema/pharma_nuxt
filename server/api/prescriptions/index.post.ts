@@ -1,10 +1,25 @@
 import sgMail from '@sendgrid/mail';
 import { put } from '@vercel/blob';
 import { createHash } from 'node:crypto';
-import fs from 'node:fs';
-import path from 'node:path';
 
 const config = useRuntimeConfig();
+const templateStorage = useStorage('assets/templates');
+const templateCache = new Map<string, string>();
+
+async function getEmailTemplate(filename: string): Promise<string> {
+  const cachedTemplate = templateCache.get(filename);
+  if (cachedTemplate) {
+    return cachedTemplate;
+  }
+
+  const template = await templateStorage.getItem<string>(filename);
+  if (typeof template !== 'string') {
+    throw createError({ statusCode: 500, statusMessage: `Template de e-mail ausente: ${filename}` });
+  }
+
+  templateCache.set(filename, template);
+  return template;
+}
 
 export default defineEventHandler(async (event) => {
   
@@ -184,50 +199,46 @@ export default defineEventHandler(async (event) => {
 
 
 async function sendPharmacyEmail(patientName: string, pdfUrl: string, alwaysSendEmails: string[]) {
-      const date = new Date().toLocaleDateString('pt-BR');
-      const pharmacyTemplatePath = path.resolve(process.cwd(), 'server/templates/prescription_pharmacy.html');
-      let pharmacyHtml = fs.readFileSync(pharmacyTemplatePath, 'utf-8');
-      pharmacyHtml = pharmacyHtml.replace('{{patientName}}', patientName)
-                                 .replace('{{pdfUrl}}', pdfUrl);
-      for (const email of alwaysSendEmails) {
-        await sgMail.send({
-          to: email,
-          from: config.fromEmail,
-          subject: `${patientName} - ${date} - Nova Prescrição Salva`,
-          html: pharmacyHtml,
-        });
-      }
+  const date = new Date().toLocaleDateString('pt-BR');
+  let pharmacyHtml = await getEmailTemplate('prescription_pharmacy.html');
+  pharmacyHtml = pharmacyHtml.replace('{{patientName}}', patientName)
+                             .replace('{{pdfUrl}}', pdfUrl);
+  for (const email of alwaysSendEmails) {
+    await sgMail.send({
+      to: email,
+      from: config.fromEmail,
+      subject: `${patientName} - ${date} - Nova Prescrição Salva`,
+      html: pharmacyHtml,
+    });
+  }
 }
 
 async function sendPrescriberEmail(prescriberEmail: string, prescriberName: string, patientName: string, pdfUrl: string) {
-        const doctorTemplatePath = path.resolve(process.cwd(), 'server/templates/prescription_prescriber.html');
-        let doctorHtml = fs.readFileSync(doctorTemplatePath, 'utf-8');
-        doctorHtml = doctorHtml.replace('{{patientName}}', patientName)
-                               .replace('{{prescriberName}}', prescriberName)
-                               .replace('{{pdfUrl}}', pdfUrl);
-        await sgMail.send({
-          to: prescriberEmail,
-          from: config.fromEmail, 
-          subject: `Prescrição gerada para - ${patientName}`,
-          html: doctorHtml,
-        });
+  let doctorHtml = await getEmailTemplate('prescription_prescriber.html');
+  doctorHtml = doctorHtml.replace('{{patientName}}', patientName)
+                         .replace('{{prescriberName}}', prescriberName)
+                         .replace('{{pdfUrl}}', pdfUrl);
+  await sgMail.send({
+    to: prescriberEmail,
+    from: config.fromEmail,
+    subject: `Prescrição gerada para - ${patientName}`,
+    html: doctorHtml,
+  });
 }
 
 async function sendPatientEmail(patientEmail: string, patientName: string, prescriberName: string, pdfUrl: string) {
-        
-        const patientTemplatePath = path.resolve(process.cwd(), 'server/templates/prescription_patient.html');
-        let patientHtml = fs.readFileSync(patientTemplatePath, 'utf-8');
-        patientHtml = patientHtml.replace('{{patientName}}', patientName)
-                                 .replace('{{prescriberName}}', prescriberName)
-                                 .replace('{{pdfUrl}}', pdfUrl);
-        console.log("Sending email to patient:", patientEmail);                        
-        await sgMail.send({
-          to: patientEmail,
-          from: config.fromEmail, 
-          subject: 'Sua Nova Prescrição - Pharma Next',
-          html: patientHtml,
-        });
-      }
+  let patientHtml = await getEmailTemplate('prescription_patient.html');
+  patientHtml = patientHtml.replace('{{patientName}}', patientName)
+                           .replace('{{prescriberName}}', prescriberName)
+                           .replace('{{pdfUrl}}', pdfUrl);
+  console.log("Sending email to patient:", patientEmail);
+  await sgMail.send({
+    to: patientEmail,
+    from: config.fromEmail,
+    subject: 'Sua Nova Prescrição - Pharma Next',
+    html: patientHtml,
+  });
+}
     
 async function sanitizeName(name: string): Promise<string> {
   // Remove accents and not american characters
