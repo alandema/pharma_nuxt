@@ -19,7 +19,7 @@ const submit = async () => {
       method: 'POST',
       body: payload
     })
-    navigateTo('/admin/formulas')
+    await navigateTo('/admin/formulas')
   } catch (error: any) {
     toast.add(error?.data?.statusMessage ?? error?.data?.message ?? 'Não foi possível salvar a fórmula. Tente novamente.', 'error')
   }

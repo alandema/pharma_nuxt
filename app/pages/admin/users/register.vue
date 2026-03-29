@@ -81,7 +81,7 @@ const submit = async () => {
   try {
     await $fetch('/api/users/admin', { method: 'POST', body: payload })
     addToast('Prescritor criado como inativo. Um e-mail de ativação foi enviado.', 'success')
-    navigateTo('/admin/users')
+    await navigateTo('/admin/users')
   } catch (error: any) {
     addToast(error?.data?.statusMessage ?? error?.data?.message ?? 'Não foi possível criar o prescritor. Verifique os dados e tente novamente.', 'error')
   }

@@ -7,14 +7,24 @@ type PrescriptionFormulaInput = { formula_id: string; description: string };
 type PreviewResponse = { pdf_base64: string; pdf_hash: string };
 type PaginationMetadata = { total: number; page: number; limit: number; totalPages: number };
 type PaginatedResponse<T> = { data: T[]; metadata: PaginationMetadata };
+type QueryValue = string | null | undefined | (string | null)[];
 
 const route = useRoute();
 const toast = useToast();
 const { getTodayInputDate } = useDateFormatting()
-const patient_id = ref((route.query.patient_id as string) || '');
+
+const getSingleQueryValue = (value: QueryValue) => {
+  if (Array.isArray(value)) {
+    return typeof value[0] === 'string' ? value[0] : ''
+  }
+
+  return typeof value === 'string' ? value : ''
+}
+
+const patient_id = ref(getSingleQueryValue(route.query.patient_id as QueryValue));
 const patientOptionsPage = ref(1);
 const date_prescribed = ref(getTodayInputDate());
-const cid_code = ref((route.query.cid_code as string) || '');
+const cid_code = ref(getSingleQueryValue(route.query.cid_code as QueryValue));
 const manual_cid = ref('');
 const formulaOptionsPage = ref(1);
 const formulasInput = ref<PrescriptionFormulaInput[]>([]);
@@ -75,26 +85,32 @@ const cids = computed(() => {
 });
 
 const parseFormulasFromQuery = () => {
-  const formulasQuery = route.query.formulas as string | undefined;
+  const formulasQuery = getSingleQueryValue(route.query.formulas as QueryValue);
   if (!formulasQuery) return;
-  const parsed = JSON.parse(formulasQuery);
 
-  if (!Array.isArray(parsed)) {
-    throw new Error('Parâmetro formulas inválido.');
+  try {
+    const parsed = JSON.parse(formulasQuery);
+
+    if (!Array.isArray(parsed)) {
+      throw new Error('Parâmetro formulas inválido.');
+    }
+
+    formulasInput.value = parsed
+      .slice(0, 10)
+      .map((item: { formula_id?: string; description?: string }) => {
+        if (typeof item.formula_id !== 'string' || typeof item.description !== 'string') {
+          throw new Error('Formato de fórmula inválido na URL.');
+        }
+
+        return {
+          formula_id: item.formula_id,
+          description: item.description,
+        };
+      });
+  } catch {
+    formulasInput.value = []
+    toast.add('Parâmetros de fórmulas inválidos na URL. Revise e tente novamente.', 'error')
   }
-
-  formulasInput.value = parsed
-    .slice(0, 10)
-    .map((item: { formula_id?: string; description?: string }) => {
-      if (typeof item.formula_id !== 'string' || typeof item.description !== 'string') {
-        throw new Error('Formato de fórmula inválido na URL.');
-      }
-
-      return {
-        formula_id: item.formula_id,
-        description: item.description,
-      };
-    });
 };
 
 const addFormula = () => {
