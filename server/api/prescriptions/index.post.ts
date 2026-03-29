@@ -4,8 +4,10 @@ import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 
+const config = useRuntimeConfig();
+
 export default defineEventHandler(async (event) => {
-  const config = useRuntimeConfig();
+  
   const user = event.context.user;
 
   const body = await readBody<{
@@ -89,10 +91,10 @@ export default defineEventHandler(async (event) => {
 
   if (isPreviewOnly) {
     if (!prescriber || !patient) {
-      throw createError({ statusCode: 400, statusMessage: 'Não foi possível gerar preview para este paciente/prescritor.' });
+      throw createError({ statusCode: 400, statusMessage: 'Não foi possível gerar pré-visualização para este paciente/prescritor.' });
     }
 
-    const previewBuffer = await generatePDFDocument(event, formInfo, prescriber, patient);
+    const previewBuffer = await generatePDFDocument(formInfo, prescriber, patient);
     const previewHash = createHash('sha256').update(previewBuffer).digest('hex');
 
     return {
@@ -102,18 +104,18 @@ export default defineEventHandler(async (event) => {
   }
 
   if (typeof body.preview_pdf_base64 !== 'string' || body.preview_pdf_base64.length === 0) {
-    throw createError({ statusCode: 400, statusMessage: 'Preview PDF é obrigatório para salvar.' });
+    throw createError({ statusCode: 400, statusMessage: 'PDF de pré-visualização é obrigatório para salvar.' });
   }
 
   if (typeof body.preview_pdf_hash !== 'string' || body.preview_pdf_hash.length === 0) {
-    throw createError({ statusCode: 400, statusMessage: 'Hash do preview é obrigatório.' });
+    throw createError({ statusCode: 400, statusMessage: 'Hash da pré-visualização é obrigatório.' });
   }
 
   const attachPDFBuffer = Buffer.from(body.preview_pdf_base64, 'base64');
   const previewHash = createHash('sha256').update(attachPDFBuffer).digest('hex');
 
   if (previewHash !== body.preview_pdf_hash) {
-    throw createError({ statusCode: 400, statusMessage: 'Preview PDF inválido.' });
+    throw createError({ statusCode: 400, statusMessage: 'PDF de pré-visualização inválido.' });
   }
 
   if (!prescriber || !patient) {
@@ -148,8 +150,8 @@ export default defineEventHandler(async (event) => {
 
   const dateStr = new Date().toISOString().slice(0, 10);
   const timestamp = Date.now();
-  const sanitizedUsername = await sanitizeName(patient.name);
-  const prescriptionName = `${sanitizedUsername}_${timestamp}`;
+  const sanitizedPatientName = await sanitizeName(patient.name);
+  const prescriptionName = `${sanitizedPatientName}_${timestamp}`;
   const blob = await put(`prescriptions/${user.userId}/${dateStr}/${prescriptionName}.pdf`, attachPDFBuffer, { access: 'public' });
 
   await prisma.prescription.update({
@@ -157,17 +159,21 @@ export default defineEventHandler(async (event) => {
     data: { pdf_url: blob.url }
   });
 
+
+  const prescriberName = prescriber.full_name ?? prescriber.email ?? 'Prescritor'
+
   if (patient.email && patient.send_email) {
-    await sendPatientEmail(patient.email, patient.name, prescriber.username, blob.url);
+    await sendPatientEmail(patient.email, patient.name, prescriberName, blob.url);
   }
 
   if (prescriber.email && prescriber.send_email) {
-    await sendPrescriberEmail(prescriber.email, prescriber.username, patient.name, blob.url);
+    await sendPrescriberEmail(prescriber.email, prescriberName, patient.name, blob.url);
   }
 
   await sendPharmacyEmail(patient.name, blob.url, alwaysSendEmails);
 
-  await prisma.log.create({ data: { event_time: new Date(), message: `Prescreveu para paciente`, user_id: user.userId, patient_id: body.patient_id } })
+
+  await prisma.log.create({ data: { event_time: new Date(), message: `Prescritor ${prescriberName} fez uma prescrição para paciente ${patient.name}`, user_id: user.userId, patient_id: body.patient_id } })
 
   return {
     id: prescription.id,
@@ -186,7 +192,7 @@ async function sendPharmacyEmail(patientName: string, pdfUrl: string, alwaysSend
       for (const email of alwaysSendEmails) {
         await sgMail.send({
           to: email,
-          from: 'plataforma@ammafarmacia.com.br',
+          from: config.fromEmail,
           subject: `${patientName} - ${date} - Nova Prescrição Salva`,
           html: pharmacyHtml,
         });
@@ -201,7 +207,7 @@ async function sendPrescriberEmail(prescriberEmail: string, prescriberName: stri
                                .replace('{{pdfUrl}}', pdfUrl);
         await sgMail.send({
           to: prescriberEmail,
-          from: 'plataforma@ammafarmacia.com.br', 
+          from: config.fromEmail, 
           subject: `Prescrição gerada para - ${patientName}`,
           html: doctorHtml,
         });
@@ -217,7 +223,7 @@ async function sendPatientEmail(patientEmail: string, patientName: string, presc
         console.log("Sending email to patient:", patientEmail);                        
         await sgMail.send({
           to: patientEmail,
-          from: 'plataforma@ammafarmacia.com.br', 
+          from: config.fromEmail, 
           subject: 'Sua Nova Prescrição - Pharma Next',
           html: patientHtml,
         });

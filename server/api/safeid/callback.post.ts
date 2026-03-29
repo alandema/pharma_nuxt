@@ -2,11 +2,11 @@ export default defineEventHandler(async (event) => {
   // 1. Read the POST body sent by the SafeWeb PSC
   const body = await readBody(event)
   
-  // 2. Check if the user denied the authorization
+  // 2. Check if the prescriber denied the authorization
   if (body.error === 'user_denied') { //
-    console.error('Doctor denied the authorization.')
-    // Handle the denial (e.g., update database status, redirect user to an error page)
-    return { success: false, message: 'Authorization denied' }
+    console.error('Prescriber denied the authorization.')
+    // Handle the denial (e.g., update database status, redirect prescriber to an error page)
+    return { success: false, message: 'Autorização negada.' }
   }
 
   // 3. Extract the successful data
@@ -25,5 +25,5 @@ export default defineEventHandler(async (event) => {
   }
 
   // Fallback for unexpected payloads
-  return createError({ statusCode: 400, message: 'Invalid payload' })
+  return createError({ statusCode: 400, message: 'Payload inválido.' })
 })

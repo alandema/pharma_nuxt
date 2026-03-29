@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useDateFormatting } from '../../composables/useDateFormatting'
 
 type Patient = {
   id: string;
@@ -15,9 +16,10 @@ type Patient = {
   state?: string | null;
 };
 
-type User = {
+type Prescriber = {
   id: string;
-  username: string;
+  email: string;
+  full_name: string;
 };
 
 type Prescription = {
@@ -32,10 +34,11 @@ type Prescription = {
   };
   created_at: string;
   patient: Patient;
-  user: User | null;
+  user: Prescriber | null;
 };
 
 const route = useRoute();
+const { formatDatePtBR, formatDateTimePtBR } = useDateFormatting()
 
 const { data: prescription } = await useFetch<Prescription>(
   `/api/prescriptions/${route.params.id}`,
@@ -84,10 +87,10 @@ const reuse = () => {
     <div class="card mb-2">
       <h2>Informações</h2>
       <div class="form-row">
-        <div><label>Data</label><p>{{ prescription.date_prescribed }}</p></div>
-        <div><label>Prescrito por</label><p>{{ prescription.user?.username || 'Desconhecido' }}</p></div>
+        <div><label>Data</label><p>{{ formatDatePtBR(prescription.date_prescribed) }}</p></div>
+        <div><label>Prescrito por</label><p>{{ prescription.user?.full_name || 'Desconhecido' }}</p></div>
       </div>
-      <div><label>Criado em</label><p>{{ new Date(prescription.created_at).toLocaleString('pt-BR') }}</p></div>
+      <div><label>Criado em</label><p>{{ formatDateTimePtBR(prescription.created_at) }}</p></div>
     </div>
 
     <div class="card mb-2">
@@ -95,7 +98,7 @@ const reuse = () => {
       <p><strong>{{ prescription.patient.name }}</strong></p>
       <p v-if="prescription.patient.cpf" class="text-muted">CPF: {{ prescription.patient.cpf }}</p>
       <p v-if="prescription.patient.phone" class="text-muted">Tel: {{ prescription.patient.phone }}</p>
-      <p v-if="prescription.patient.birth_date" class="text-muted">Nasc: {{ prescription.patient.birth_date }}</p>
+      <p v-if="prescription.patient.birth_date" class="text-muted">Nasc: {{ formatDatePtBR(prescription.patient.birth_date) }}</p>
     </div>
 
     <div class="card">

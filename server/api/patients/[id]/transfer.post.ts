@@ -4,7 +4,7 @@ export default defineEventHandler(async (event) => {
   if (user.role !== 'admin' && user.role !== 'superadmin') {
     throw createError({
       statusCode: 403,
-      statusMessage: 'Forbidden: only admins can transfer patients',
+      statusMessage: 'Acesso negado: apenas administradores podem transferir pacientes.',
     });
   }
 
@@ -15,20 +15,20 @@ export default defineEventHandler(async (event) => {
   if (!prescritor_id) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Bad Request: prescritor_id is required',
+      statusMessage: 'prescritor_id é obrigatório.',
     });
   }
 
   // Verify the target user exists and has role 'user'
   const targetPrescritor = await prisma.user.findUnique({
     where: { id: prescritor_id },
-    select: { id: true, username: true, role: true },
+    select: { id: true, full_name: true, email: true, role: true },
   });
 
   if (!targetPrescritor || targetPrescritor.role !== 'user') {
     throw createError({
       statusCode: 404,
-      statusMessage: 'Target user not found or is not a user',
+      statusMessage: 'Prescritor de destino não encontrado ou inválido.',
     });
   }
 
@@ -41,7 +41,7 @@ export default defineEventHandler(async (event) => {
   if (!existingPatient) {
     throw createError({
       statusCode: 404,
-      statusMessage: 'Patient not found',
+      statusMessage: 'Paciente não encontrado.',
     });
   }
 
@@ -55,6 +55,6 @@ export default defineEventHandler(async (event) => {
     id: updated.id,
     name: updated.name,
     registered_by: updated.registered_by,
-    transferred_to: targetPrescritor.username,
+    transferred_to: targetPrescritor.full_name ?? targetPrescritor.email,
   };
 });

@@ -128,7 +128,6 @@ const buildSubmitPayload = () => {
 
   if (canEditOwnIdentity.value) {
     payload.email = data.email
-    payload.username = data.username
   }
 
   if (canEditCpf.value) {
@@ -172,7 +171,6 @@ const handleSubmit = async () => {
     <form @submit.prevent="handleSubmit" class="grid-form">
       <div class="section-title">Informações de Acesso</div>
       <div class="form-group"><label>E-mail</label><input v-model="profile.email" :disabled="!canEditOwnIdentity" /></div>
-      <div class="form-group"><label>Login do Prescritor</label><input type="text" v-model="profile.username" :disabled="!canEditOwnIdentity" /></div>
       <div class="form-group"><label>Senha</label><input type="password" v-model="password" :disabled="!canEditPassword" placeholder="Deixe em branco para não alterar" /></div>
 
       

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useInputFormatting } from '../../composables/useInputFormatting'
+import { useDateFormatting } from '../../composables/useDateFormatting'
 
 type Patient = {
   id: string;
@@ -7,7 +8,7 @@ type Patient = {
   email?: string;
   send_email?: boolean;
   registered_by: string;
-  registered_by_username?: string | null;
+  registered_by_full_name?: string | null;
   rg?: string;
   gender?: string;
   cpf?: string;
@@ -43,11 +44,24 @@ const prescriptionSummary = (jsonFormInfo: Prescription['json_form_info']) => {
   return formulas.slice(0, 2).map((item) => item.formula_name).join(', ') + (formulas.length > 2 ? '...' : '');
 }
 
-type Prescritor = { id: string; username: string; role: string }
+type Prescritor = { id: string; email: string; role: string; full_name: string }
+
+type PaginationMetadata = {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+type PaginatedResponse<T> = {
+  data: T[];
+  metadata: PaginationMetadata;
+}
 
 const route = useRoute()
 const toast = useToast()
 const { isBrazilCountry, isValidBirthDate } = useInputFormatting()
+const { formatDatePtBR } = useDateFormatting()
 const { data: patient, refresh } = await useFetch<Patient>(`/api/patients/${route.params.id}`, { method: 'GET' })
 const { data: me } = await useFetch('/api/users/me')
 const isAdmin = computed(() => {
@@ -56,11 +70,32 @@ const isAdmin = computed(() => {
 })
 const canDelete = computed(() => isAdmin.value || (me.value as any)?.userId === patient.value?.registered_by)
 
-const { data: allUsersResponse } = await useFetch<any>('/api/users/admin', { method: 'GET', query: { limit: 1000 } })
-const prescritores = computed(() => allUsersResponse.value?.data?.filter((u: any) => u.role === 'user') ?? [])
+const prescritoresPage = ref(1)
+
+const { data: allPrescribersResponse } = await useFetch<PaginatedResponse<Prescritor>>('/api/users/admin', {
+  method: 'GET',
+  query: { page: prescritoresPage, limit: 10, role: 'user' },
+  watch: [prescritoresPage],
+})
+
+const prescritores = computed(() => allPrescribersResponse.value?.data ?? [])
+const prescritoresMetadata = computed(() => allPrescribersResponse.value?.metadata || { page: 1, totalPages: 1 })
 const selectedPrescritorId = ref('')
 const transferError = ref('')
 const transferSuccess = ref('')
+
+const nextPrescritoresPage = () => {
+  if (prescritoresPage.value < prescritoresMetadata.value.totalPages) {
+    prescritoresPage.value++
+  }
+}
+
+const prevPrescritoresPage = () => {
+  if (prescritoresPage.value > 1) {
+    prescritoresPage.value--
+  }
+}
+
 const transferPatient = async () => {
   transferError.value = ''
   transferSuccess.value = ''
@@ -106,7 +141,7 @@ const save = async (data: Record<string, string>) => {
     toast.add('Paciente atualizado com sucesso!', 'success')
     await navigateTo('/patients')
   } catch (error: any) {
-    toast.add(error?.data?.message ?? 'Falha ao atualizar paciente', 'error')
+    toast.add(error?.data?.statusMessage ?? error?.data?.message ?? 'Não foi possível atualizar o paciente. Tente novamente.', 'error')
   }
 }
 </script>
@@ -133,7 +168,7 @@ const save = async (data: Record<string, string>) => {
         </thead>
         <tbody>
           <tr v-for="prescription in patient.prescriptions" :key="prescription.id" @click="navigateTo(`/prescriptions/${prescription.id}`)">
-            <td><strong>{{ prescription.date_prescribed.split('T')[0] }}</strong></td>
+            <td><strong>{{ formatDatePtBR(prescription.date_prescribed) }}</strong></td>
             <td><span class="text-muted">{{ prescriptionSummary(prescription.json_form_info) }}</span></td>
           </tr>
         </tbody>
@@ -149,15 +184,20 @@ const save = async (data: Record<string, string>) => {
 
   <div v-if="isAdmin" class="card">
     <h2>Transferir Paciente</h2>
-    <p class="text-muted mb-2">Prescritor atual: <strong>{{ patient?.registered_by_username ?? patient?.registered_by }}</strong></p>
+    <p class="text-muted mb-2">Prescritor atual: <strong>{{ patient?.registered_by_full_name ?? patient?.registered_by }}</strong></p>
     <div class="gap-row">
       <select v-model="selectedPrescritorId" style="flex:1">
         <option value="" disabled>Selecione um prescritor</option>
         <option v-for="prescritor in prescritores" :key="prescritor.id" :value="prescritor.id" :disabled="prescritor.id === patient?.registered_by">
-          {{ prescritor.username }}{{ prescritor.id === patient?.registered_by ? ' (atual)' : '' }}
+          {{ prescritor.full_name }}{{ prescritor.id === patient?.registered_by ? ' (atual)' : '' }}
         </option>
       </select>
       <button class="btn-primary" @click="transferPatient" :disabled="!selectedPrescritorId">Transferir</button>
+    </div>
+    <div v-if="prescritoresMetadata.totalPages > 1" class="lookup-pagination" style="margin-top: 0.5rem;">
+      <button class="btn-sm" :disabled="prescritoresPage <= 1" @click="prevPrescritoresPage">Anterior</button>
+      <span>Página {{ prescritoresMetadata.page }} de {{ prescritoresMetadata.totalPages }}</span>
+      <button class="btn-sm" :disabled="prescritoresPage >= prescritoresMetadata.totalPages" @click="nextPrescritoresPage">Próxima</button>
     </div>
     <p v-if="transferSuccess" style="color:var(--c-success);margin-top:.5rem">{{ transferSuccess }}</p>
     <p v-if="transferError" style="color:var(--c-danger);margin-top:.5rem">{{ transferError }}</p>

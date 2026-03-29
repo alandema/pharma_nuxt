@@ -1,12 +1,6 @@
 import PDFDocument from 'pdfkit';
-import fs from 'fs';
-import path from 'path';
-import type { H3Event } from 'h3';
-import { queryCollection } from '@nuxt/content/server';
 
-export async function generatePDFDocument(event: H3Event, body: any, prescriber: any, patient: any): Promise<Buffer> {
-  const businessData = await queryCollection(event, 'business_info').first();
-
+export async function generatePDFDocument(body: any, prescriber: any, patient: any): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ size: 'A4', margin: 50 });
     const chunks: Buffer[] = [];
@@ -15,38 +9,27 @@ export async function generatePDFDocument(event: H3Event, body: any, prescriber:
       resolve(Buffer.concat(chunks));
     });
     doc.on('error', reject);
-    
-    // Add Logo
-    const logoPath = path.resolve('public', 'logo.png');
-    if (fs.existsSync(logoPath)) {
-      doc.image(logoPath, { width: 150, align: 'center' });
-      doc.moveDown(2);
-    } else {
-      doc.fontSize(24).text(businessData?.name || 'Amma Farmácia', { align: 'center' });
 
-      doc.moveDown(2);
-    }
-
-    if (businessData?.address) doc.fontSize(12).text(businessData.address, { align: 'center' });
-    if (businessData?.phone) doc.fontSize(12).text(businessData.phone, { align: 'center' });
-    if (businessData?.email || businessData?.website || businessData?.cnpj) {
-      const contactInfo = [businessData?.email, businessData?.website, businessData?.cnpj].filter(Boolean).join(' | ');
-      doc.fontSize(10).text(contactInfo, { align: 'center' });
-    }
+    const prescriberDisplayName = prescriber.full_name || prescriber.email || prescriber;
 
     // Header / Prescription Date
     doc.fontSize(12).text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, { align: 'right' });
+    // Precriber information
+    doc.fontSize(12).text(`Nome: ${prescriberDisplayName}`);
     doc.moveDown();
 
     // Patient & CID Info
     doc.fontSize(14).text('Informações do Paciente', { underline: true });
     doc.fontSize(12).text(`Nome: ${patient.name || patient}`);
-    if (body?.cid_code) {
-      doc.text(`CID: ${body.cid_code}`);
-    }
+    doc.fontSize(12).text(`Endereço: ${patient.street || ''} ${patient.address_number || ''} ${patient.city || ''} ${patient.state || ''}`.trim());
+    doc.fontSize(12).text(`Telefone: ${patient.phone || ''}`);
     doc.moveDown();
     
     // Formulas / Medicines
+        if (body?.cid_code) {
+      doc.text(`CID: ${body.cid_code}`);
+    }
+    doc.moveDown();
     doc.fontSize(14).text('Prescrição', { underline: true });
     doc.moveDown();
 
@@ -67,12 +50,9 @@ export async function generatePDFDocument(event: H3Event, body: any, prescriber:
     // Prescriber Info (Footer-ish)
     doc.moveDown(4);
     doc.fontSize(12).text('_____________________________________', { align: 'center' });
-    doc.text(`Dr(a). ${prescriber.full_name || prescriber.username || prescriber}`, { align: 'center' });
+    doc.text(`${prescriberDisplayName}`, { align: 'center' });
     if (prescriber.council && prescriber.council_number && prescriber.council_state) {
       doc.text(`${prescriber.council}: ${prescriber.council_number} / ${prescriber.council_state}`, { align: 'center' });
-    }
-    if (prescriber.professional_type) {
-      doc.text(`${prescriber.professional_type}`, { align: 'center' });
     }
 
     doc.end();

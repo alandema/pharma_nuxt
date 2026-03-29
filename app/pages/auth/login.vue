@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const username = ref('')
+const email = ref('')
 const password = ref('')
 const { add: addToast } = useToast()
 
@@ -9,13 +9,13 @@ const handleSubmit = async () => {
   try {
     const res = await $fetch('/api/auth/login', {
       method: 'POST',
-      body: { username: username.value, password: password.value },
+      body: { email: email.value, password: password.value },
     })
     addToast(res.message, 'success')
     await refreshNuxtData()
     await navigateTo('/')
   } catch (err: any) {
-    addToast(err.data?.message, 'error')
+    addToast(err?.data?.statusMessage ?? err?.data?.message ?? 'Falha no login. Verifique suas credenciais.', 'error')
   }
 }
 </script>
@@ -23,12 +23,12 @@ const handleSubmit = async () => {
 <template>
   <div class="auth-page">
     <div class="card auth-card">
-      <img src="/logo.png" alt="amma" class="auth-logo" />
+      <img src="/logo.png" alt="Logo da AMMA" class="auth-logo" />
       <p class="text-muted auth-sub">{{ brand.subtitle }}</p>
       <form @submit.prevent="handleSubmit">
         <div class="form-group">
-          <label>Usuário</label>
-          <input v-model="username" type="text" placeholder="Digite seu usuário" required />
+          <label>E-mail</label>
+          <input v-model="email" type="email" placeholder="Digite seu e-mail" required />
         </div>
         <div class="form-group">
           <label>Senha</label>

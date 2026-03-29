@@ -6,8 +6,7 @@ import { PrismaNeon } from '@prisma/adapter-neon'
 const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL })
 const prisma = new PrismaClient({ adapter })
 
-type SeedUser = {
-  username: string;
+type SeedPrescriber = {
   password: string;
   role: 'admin' | 'user' | 'superadmin';
   email: string;
@@ -18,11 +17,9 @@ type SeedUser = {
   gender: string;
   birth_date: Date;
   phone: string;
-  professional_type: string;
   council: string;
   council_number: string;
   council_state: string;
-  specialties: string[];
   zipcode: string;
   street: string;
   address_number: string;
@@ -33,7 +30,7 @@ type SeedUser = {
 
 type SeedPatient = {
   key: string;
-  doctorUsername: string;
+  doctorEmail: string;
   name: string;
   email?: string;
   send_email: boolean;
@@ -63,10 +60,9 @@ type SeedPrescription = {
 async function main() {
   console.log('Starting database seed...');
 
-  // Create users (with complete profile fields expected by the current schema)
-  const users: SeedUser[] = [
+  // Create prescriber accounts (with complete profile fields expected by the current schema)
+  const prescribers: SeedPrescriber[] = [
     {
-      username: 'admin',
       password: 'admin123',
       role: 'admin',
       email: 'admin@pharmanext.test',
@@ -77,11 +73,9 @@ async function main() {
       gender: 'Masculino',
       birth_date: new Date('1980-01-10T00:00:00.000Z'),
       phone: '(11) 90000-0001',
-      professional_type: 'Administrador',
       council: 'N/A',
       council_number: 'N/A',
       council_state: 'SP',
-      specialties: ['Gestão'],
       zipcode: '01310-100',
       street: 'Av. Paulista',
       address_number: '1000',
@@ -90,7 +84,6 @@ async function main() {
       state: 'SP',
     },
     {
-      username: 'doctor1',
       password: 'doctor123',
       role: 'user',
       email: 'doctor1@pharmanext.test',
@@ -101,11 +94,9 @@ async function main() {
       gender: 'Feminino',
       birth_date: new Date('1987-03-20T00:00:00.000Z'),
       phone: '(11) 90000-0002',
-      professional_type: 'Médica',
       council: 'CRM',
       council_number: '154321',
       council_state: 'SP',
-      specialties: ['Clínica Médica', 'Cardiologia'],
       zipcode: '01415-000',
       street: 'Rua Oscar Freire',
       address_number: '450',
@@ -114,7 +105,6 @@ async function main() {
       state: 'SP',
     },
     {
-      username: 'doctor2',
       password: 'doctor123',
       role: 'user',
       email: 'doctor2@pharmanext.test',
@@ -125,11 +115,9 @@ async function main() {
       gender: 'Masculino',
       birth_date: new Date('1983-11-08T00:00:00.000Z'),
       phone: '(11) 90000-0003',
-      professional_type: 'Médico',
       council: 'CRM',
       council_number: '198765',
       council_state: 'SP',
-      specialties: ['Endocrinologia'],
       zipcode: '04538-133',
       street: 'Av. Brigadeiro Faria Lima',
       address_number: '3900',
@@ -139,64 +127,59 @@ async function main() {
     },
   ];
 
-  const userByUsername = new Map<string, { id: string; username: string; role: string }>();
-  for (const user of users) {
-    const passwordHash = await bcrypt.hash(user.password, 10);
+  const prescriberByEmail = new Map<string, { id: string; email: string; role: string }>();
+  for (const prescriber of prescribers) {
+    const passwordHash = await bcrypt.hash(prescriber.password, 10);
 
     const createdOrUpdated = await prisma.user.upsert({
-      where: { username: user.username },
+      where: { email: prescriber.email },
       update: {
-        email: user.email,
-        send_email: user.send_email,
+        email: prescriber.email,
+        send_email: prescriber.send_email,
         password_hash: passwordHash,
-        role: user.role,
-        is_active: user.is_active,
-        full_name: user.full_name,
-        cpf: user.cpf,
-        gender: user.gender,
-        birth_date: user.birth_date,
-        phone: user.phone,
-        professional_type: user.professional_type,
-        council: user.council,
-        council_number: user.council_number,
-        council_state: user.council_state,
-        specialties: user.specialties,
-        zipcode: user.zipcode,
-        street: user.street,
-        address_number: user.address_number,
-        complement: user.complement,
-        city: user.city,
-        state: user.state,
+        role: prescriber.role,
+        is_active: prescriber.is_active,
+        full_name: prescriber.full_name,
+        cpf: prescriber.cpf,
+        gender: prescriber.gender,
+        birth_date: prescriber.birth_date,
+        phone: prescriber.phone,
+        council: prescriber.council,
+        council_number: prescriber.council_number,
+        council_state: prescriber.council_state,
+        zipcode: prescriber.zipcode,
+        street: prescriber.street,
+        address_number: prescriber.address_number,
+        complement: prescriber.complement,
+        city: prescriber.city,
+        state: prescriber.state,
       },
       create: {
-        username: user.username,
-        email: user.email,
-        send_email: user.send_email,
+        email: prescriber.email,
+        send_email: prescriber.send_email,
         password_hash: passwordHash,
-        role: user.role,
-        is_active: user.is_active,
-        full_name: user.full_name,
-        cpf: user.cpf,
-        gender: user.gender,
-        birth_date: user.birth_date,
-        phone: user.phone,
-        professional_type: user.professional_type,
-        council: user.council,
-        council_number: user.council_number,
-        council_state: user.council_state,
-        specialties: user.specialties,
-        zipcode: user.zipcode,
-        street: user.street,
-        address_number: user.address_number,
-        complement: user.complement,
-        city: user.city,
-        state: user.state,
+        role: prescriber.role,
+        is_active: prescriber.is_active,
+        full_name: prescriber.full_name,
+        cpf: prescriber.cpf,
+        gender: prescriber.gender,
+        birth_date: prescriber.birth_date,
+        phone: prescriber.phone,
+        council: prescriber.council,
+        council_number: prescriber.council_number,
+        council_state: prescriber.council_state,
+        zipcode: prescriber.zipcode,
+        street: prescriber.street,
+        address_number: prescriber.address_number,
+        complement: prescriber.complement,
+        city: prescriber.city,
+        state: prescriber.state,
       },
-      select: { id: true, username: true, role: true },
+      select: { id: true, email: true, role: true },
     });
 
-    userByUsername.set(createdOrUpdated.username, createdOrUpdated);
-    console.log(`✓ Upserted user ${createdOrUpdated.username}`);
+    prescriberByEmail.set(createdOrUpdated.email, createdOrUpdated);
+    console.log(`✓ Upserted prescriber ${createdOrUpdated.email}`);
   }
 
   // Create formulas used by the prescription flow
@@ -221,17 +204,17 @@ async function main() {
   }
   console.log('✓ Upserted formulas');
 
-  const doctor1 = userByUsername.get('doctor1');
-  const doctor2 = userByUsername.get('doctor2');
+  const doctor1 = prescriberByEmail.get('doctor1@pharmanext.test');
+  const doctor2 = prescriberByEmail.get('doctor2@pharmanext.test');
   if (!doctor1 || !doctor2) {
-    throw new Error('Seed users were not created correctly.');
+    throw new Error('Seed prescribers were not created correctly.');
   }
 
   // Create patients associated with a single doctor (registered_by)
   const patients: SeedPatient[] = [
     {
       key: 'alice',
-      doctorUsername: 'doctor1',
+      doctorEmail: 'doctor1@pharmanext.test',
       name: 'Alice Johnson',
       email: 'alice@pharmanext.test',
       send_email: true,
@@ -252,7 +235,7 @@ async function main() {
     },
     {
       key: 'bob',
-      doctorUsername: 'doctor1',
+      doctorEmail: 'doctor1@pharmanext.test',
       name: 'Bob Smith',
       email: 'bob@pharmanext.test',
       send_email: false,
@@ -273,7 +256,7 @@ async function main() {
     },
     {
       key: 'carol',
-      doctorUsername: 'doctor1',
+      doctorEmail: 'doctor1@pharmanext.test',
       name: 'Carol Martinez',
       email: 'carol@pharmanext.test',
       send_email: true,
@@ -294,7 +277,7 @@ async function main() {
     },
     {
       key: 'david',
-      doctorUsername: 'doctor2',
+      doctorEmail: 'doctor2@pharmanext.test',
       name: 'David Lee',
       email: 'david@pharmanext.test',
       send_email: true,
@@ -315,7 +298,7 @@ async function main() {
     },
     {
       key: 'emma',
-      doctorUsername: 'doctor2',
+      doctorEmail: 'doctor2@pharmanext.test',
       name: 'Emma Wilson',
       email: 'emma@pharmanext.test',
       send_email: false,
@@ -338,9 +321,9 @@ async function main() {
 
   const patientByKey = new Map<string, { id: string; name: string; registered_by: string }>();
   for (const patient of patients) {
-    const doctor = userByUsername.get(patient.doctorUsername);
+    const doctor = prescriberByEmail.get(patient.doctorEmail);
     if (!doctor || doctor.role !== 'user') {
-      throw new Error(`Doctor ${patient.doctorUsername} not found or invalid role.`);
+      throw new Error(`Prescriber ${patient.doctorEmail} not found or invalid role.`);
     }
 
     const saved = await prisma.patient.upsert({
@@ -479,7 +462,7 @@ async function main() {
       }),
     };
 
-    // Business rule: the prescribing doctor must match the patient's current owner.
+    // Business rule: the prescribing prescriber must match the patient's current owner.
     const prescription = await prisma.prescription.create({
       data: {
         patient_id: patient.id,
@@ -505,7 +488,7 @@ async function main() {
 
   const registerEvents = patients.map((patient, index) => {
     const mappedPatient = patientByKey.get(patient.key);
-    const doctor = userByUsername.get(patient.doctorUsername);
+    const doctor = prescriberByEmail.get(patient.doctorEmail);
     if (!mappedPatient || !doctor) {
       throw new Error(`Failed to map patient ${patient.key} for log seed.`);
     }
@@ -520,7 +503,7 @@ async function main() {
 
   const prescriptionEvents = createdPrescriptionPairs.map((pair, index) => ({
     event_time: new Date(Date.UTC(2026, 1, 10 + index, 11, 0, 0)),
-    message: 'Prescreveu para paciente',
+    message: `Prescritor ${pair.user_id} fez uma prescrição para paciente ${pair.patient_id}`,
     user_id: pair.user_id,
     patient_id: pair.patient_id,
   }));
@@ -532,9 +515,9 @@ async function main() {
 
   console.log('\n✅ Database seeding completed successfully!');
   console.log('\nTest credentials:');
-  console.log('  Admin: username=admin, password=admin123');
-  console.log('  User: username=doctor1, password=doctor123');
-  console.log('  User: username=doctor2, password=doctor123');
+  console.log('  Admin: email=admin@pharmanext.test, password=admin123');
+  console.log('  Prescriber: email=doctor1@pharmanext.test, password=doctor123');
+  console.log('  Prescriber: email=doctor2@pharmanext.test, password=doctor123');
 
   await prisma.$disconnect();
 }

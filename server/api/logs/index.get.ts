@@ -1,17 +1,14 @@
+import { requireAdminLikeUser } from '../../utils/rbac';
+import { buildPaginationMetadata, parsePagination } from '../../utils/pagination';
+
 export default defineEventHandler(async (event) => {
+  requireAdminLikeUser(event)
+
   const query = getQuery(event);
-  const pageRaw = query.page;
-  if (typeof pageRaw !== 'string') {
-    throw createError({ statusCode: 400, statusMessage: 'Parâmetro page é obrigatório.' });
-  }
-
-  const page = Number.parseInt(pageRaw, 10);
-  if (!Number.isInteger(page) || page < 1) {
-    throw createError({ statusCode: 400, statusMessage: 'Parâmetro page inválido.' });
-  }
-
-  const limit = 20;
-  const skip = (page - 1) * limit;
+  const { page, limit, skip } = parsePagination(query as Record<string, unknown>, {
+    defaultLimit: 20,
+    maxLimit: 50,
+  });
   const userId = query.userId as string | undefined;
   const patientId = query.patientId as string | undefined;
   const date = query.date as string | undefined;
@@ -29,12 +26,15 @@ export default defineEventHandler(async (event) => {
       take: limit,
       orderBy: { event_time: 'desc' },
       include: {
-        user: { select: { id: true, username: true } },
+        user: { select: { id: true, full_name: true, email: true } },
         patient: { select: { id: true, name: true } },
       },
     }),
     prisma.log.count({ where }),
   ]);
 
-  return { logs, total, page, totalPages: Math.ceil(total / limit) };
+  return {
+    data: logs,
+    metadata: buildPaginationMetadata(total, page, limit),
+  };
 })

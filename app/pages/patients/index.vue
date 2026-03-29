@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { useDateFormatting } from '../../composables/useDateFormatting'
+
 interface Patient {
   id: string;
   name: string;
-  user: { username: string; };
+  user: { email: string; full_name: string };
   cpf: string | null;
   last_prescription_date?: string;
 }
@@ -13,6 +15,8 @@ interface PaginatedResponse {
 }
 
 const page = ref(1);
+const pageJumpInput = ref('1');
+const { formatDatePtBR } = useDateFormatting()
 
 const { data: response } = await useFetch<PaginatedResponse>('/api/patients', {
   method: 'GET',
@@ -39,6 +43,24 @@ const prevPage = () => {
     page.value--;
   }
 };
+
+const goToPage = () => {
+  const parsedPage = Number.parseInt(pageJumpInput.value, 10);
+  if (!Number.isFinite(parsedPage)) {
+    pageJumpInput.value = String(metadata.value.page);
+    return;
+  }
+
+  const totalPages = Math.max(1, metadata.value.totalPages);
+  const targetPage = Math.min(totalPages, Math.max(1, parsedPage));
+
+  page.value = targetPage;
+  pageJumpInput.value = String(targetPage);
+};
+
+watch(() => metadata.value.page, (currentPage) => {
+  pageJumpInput.value = String(currentPage);
+}, { immediate: true });
 </script>
 
 <template>
@@ -53,20 +75,33 @@ const prevPage = () => {
           <tr>
             <th>Paciente</th>
             <th>Última Prescrição</th>
-            <th v-if="isAdmin">Prescritor</th>
+            <th v-if="isAdmin">Prescritor Registrado</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="patient in patients" :key="patient.id" @click="navigateTo(`/patients/${patient.id}`)">
             <td>{{ patient.name }}</td>
-            <td><span class="text-muted">{{ patient.last_prescription_date || '—' }}</span></td>
-            <td v-if="isAdmin"><span class="text-muted">{{ patient.user?.username || '—' }}</span></td>
+            <td><span class="text-muted">{{ formatDatePtBR(patient.last_prescription_date) }}</span></td>
+            <td v-if="isAdmin"><span class="text-muted">{{ patient.user?.full_name || '—' }}</span></td>
           </tr>
         </tbody>
       </table>
       <div class="pagination">
         <button class="btn-secondary" :disabled="page <= 1" @click="prevPage">Anterior</button>
         <span class="pagination-info">Página {{ metadata.page }} de {{ metadata.totalPages }}</span>
+        <div class="pagination-jump">
+          <label for="patients-page-jump">Ir para</label>
+          <input
+            id="patients-page-jump"
+            v-model="pageJumpInput"
+            type="number"
+            inputmode="numeric"
+            min="1"
+            :max="Math.max(1, metadata.totalPages)"
+            :disabled="metadata.totalPages <= 1"
+            @keyup.enter.prevent="goToPage"
+          />
+        </div>
         <button class="btn-secondary" :disabled="page >= metadata.totalPages" @click="nextPage">Próxima</button>
       </div>
     </template>
