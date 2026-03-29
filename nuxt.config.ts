@@ -23,7 +23,7 @@ export default defineNuxtConfig({
     // safeidClientSecret: requireEnv('SAFEID_CLIENT_SECRET'),
     // safeidRedirectUri: requireEnv('SAFEID_REDIRECT_URI'),
     activationTokenSecret: requireEnv('ACTIVATION_TOKEN_SECRET'),
-    // activationBaseUrl: requireEnv('ACTIVATION_BASE_URL'),
+    activationBaseUrl: requireEnv('ACTIVATION_BASE_URL'),
     public: {
       nodeEnv: requireEnv('NODE_ENV')
     }
