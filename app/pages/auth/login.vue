@@ -3,6 +3,9 @@ const email = ref('')
 const password = ref('')
 const { add: addToast } = useToast()
 const { isValidEmail } = useInputFormatting()
+const { loadCurrentUser } = useCurrentUser()
+
+const isAdminRole = (role?: string) => role === 'admin' || role === 'superadmin'
 
 const { brand } = useAppConfig()
 
@@ -23,11 +26,18 @@ const handleSubmit = async () => {
   try {
     const res = await $fetch('/api/auth/login', {
       method: 'POST',
+      credentials: 'include',
       body: { email: normalizedEmail, password: normalizedPassword },
     })
     addToast(res.message, 'success')
-    await refreshNuxtData()
-    await navigateTo('/')
+
+    const user = await loadCurrentUser({ force: true })
+    if (!user) {
+      addToast('Login realizado, mas não foi possível carregar sua sessão.', 'error')
+      return
+    }
+
+    await navigateTo(isAdminRole(user.role) ? '/admin' : '/')
   } catch (err: any) {
     addToast(err?.data?.statusMessage ?? err?.data?.message ?? 'Falha no login. Verifique suas credenciais.', 'error')
   }
