@@ -19,9 +19,10 @@ export default defineNuxtConfig({
     alwaysSendEmails: requireEnv('ALWAYS_SEND_EMAILS'),
     fromEmail: requireEnv('FROM_EMAIL'),
     blobReadWriteToken: requireEnv('BLOB_READ_WRITE_TOKEN'),
-    // safeidClientId: requireEnv('SAFEID_CLIENT_ID'),
-    // safeidClientSecret: requireEnv('SAFEID_CLIENT_SECRET'),
-    // safeidRedirectUri: requireEnv('SAFEID_REDIRECT_URI'),
+    safeidClientId: requireEnv('SAFEID_CLIENT_ID'),
+    safeidClientSecret: requireEnv('SAFEID_CLIENT_SECRET'),
+    safeidRedirectUri: requireEnv('SAFEID_REDIRECT_URI'),
+    safeidBaseUrl: requireEnv('SAFEID_BASE_URL'),
     activationTokenSecret: requireEnv('ACTIVATION_TOKEN_SECRET'),
     activationBaseUrl: requireEnv('ACTIVATION_BASE_URL'),
     public: {
