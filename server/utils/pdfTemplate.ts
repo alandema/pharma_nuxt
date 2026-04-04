@@ -46,9 +46,8 @@ export async function generatePDFDocument(
     });
     doc.on('error', reject);
 
-    const prescriberBaseName = prescriber.full_name || prescriber.email || prescriber;
     const prescriberTitle = typeof prescriber.title === 'string' ? prescriber.title.trim() : '';
-    const prescriberDisplayName = prescriberTitle ? `${prescriberTitle} ${prescriberBaseName}` : prescriberBaseName;
+    const prescriberDisplayName = prescriber.full_name;
     const signatureStatus: SignatureStatus = options.signatureStatus === 'signed' ? 'signed' : 'unsigned';
     const signatureStamp = signatureStatus === 'signed' ? `${prescriberDisplayName}` : 'DOCUMENTO NÃO ASSINADO';
     const signatureStampColor = signatureStatus === 'signed' ? '#000000' : '#B91C1C';
@@ -111,7 +110,7 @@ export async function generatePDFDocument(
     }
     doc.fillColor('black');
     doc.fontSize(12).text('_____________________________________', { align: 'center' });
-    doc.text(`${prescriberDisplayName}`, { align: 'center' });
+    doc.text(`${prescriberTitle} ${prescriberDisplayName}`, { align: 'center' });
     if (prescriber.council && prescriber.council_number && prescriber.council_state) {
       doc.text(`${prescriber.council}: ${prescriber.council_number} / ${prescriber.council_state}`, { align: 'center' });
     }

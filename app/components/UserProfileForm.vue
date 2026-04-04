@@ -205,6 +205,7 @@ const handleSubmit = async () => {
     await refresh();
     profile.value = { ...(prescriberData.value || {}) };
     password.value = "";
+    await navigateTo("/admin");
   } catch (error: any) {
     addToast(
       error?.data?.statusMessage ??
