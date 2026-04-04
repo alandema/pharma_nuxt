@@ -46,7 +46,9 @@ export async function generatePDFDocument(
     });
     doc.on('error', reject);
 
-    const prescriberDisplayName = prescriber.full_name || prescriber.email || prescriber;
+    const prescriberBaseName = prescriber.full_name || prescriber.email || prescriber;
+    const prescriberTitle = typeof prescriber.title === 'string' ? prescriber.title.trim() : '';
+    const prescriberDisplayName = prescriberTitle ? `${prescriberTitle} ${prescriberBaseName}` : prescriberBaseName;
     const signatureStatus: SignatureStatus = options.signatureStatus === 'signed' ? 'signed' : 'unsigned';
     const signatureStamp = signatureStatus === 'signed' ? `${prescriberDisplayName}` : 'DOCUMENTO NÃO ASSINADO';
     const signatureStampColor = signatureStatus === 'signed' ? '#000000' : '#B91C1C';
