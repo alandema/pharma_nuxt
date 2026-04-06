@@ -1,6 +1,4 @@
 import PDFDocument from 'pdfkit';
-import { existsSync } from 'node:fs';
-import { resolve as resolvePath } from 'node:path';
 
 type SignatureStatus = 'signed' | 'unsigned'
 
@@ -37,6 +35,13 @@ export async function generatePDFDocument(
       .join(', ');
   };
 
+  const prescriberTitle = typeof prescriber.title === 'string' ? prescriber.title.trim() : '';
+  const prescriberDisplayName = prescriber.full_name;
+  const signatureStatus: SignatureStatus = options.signatureStatus === 'signed' ? 'signed' : 'unsigned';
+  const signatureFontSource = signatureStatus === 'signed' ? await useStorage('assets:server').getItemRaw('Thesignature.ttf') : null;
+  const signatureStamp = signatureStatus === 'signed' ? `${prescriberDisplayName}` : 'DOCUMENTO NÃO ASSINADO';
+  const signatureStampColor = signatureStatus === 'signed' ? '#000000' : '#B91C1C';
+
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ size: 'A4', margin: 50 });
     const chunks: Buffer[] = [];
@@ -45,18 +50,6 @@ export async function generatePDFDocument(
       resolve(Buffer.concat(chunks));
     });
     doc.on('error', reject);
-
-    const prescriberTitle = typeof prescriber.title === 'string' ? prescriber.title.trim() : '';
-    const prescriberDisplayName = prescriber.full_name;
-    const signatureStatus: SignatureStatus = options.signatureStatus === 'signed' ? 'signed' : 'unsigned';
-    const signatureStamp = signatureStatus === 'signed' ? `${prescriberDisplayName}` : 'DOCUMENTO NÃO ASSINADO';
-    const signatureStampColor = signatureStatus === 'signed' ? '#000000' : '#B91C1C';
-    const signatureFontPathCandidates = [
-      resolvePath(process.cwd(), 'server', 'assets', 'Thesignature.ttf'),
-      resolvePath(process.cwd(), 'public', 'Thesignature.ttf'),
-      resolvePath(process.cwd(), '.output', 'public', 'Thesignature.ttf'),
-    ];
-    const signatureFontPath = signatureFontPathCandidates.find((candidatePath) => existsSync(candidatePath));
 
     // Header / Prescription Date
     doc.fontSize(12).text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, { align: 'right' });
@@ -102,8 +95,8 @@ export async function generatePDFDocument(
     // Prescriber Info (Footer-ish)
     doc.moveDown(4);
     doc.moveDown(0.5);
-    if (signatureStatus === 'signed' && signatureFontPath) {
-      doc.registerFont('prescriber-signature', signatureFontPath);
+    if (signatureStatus === 'signed' && signatureFontSource) {
+      doc.registerFont('prescriber-signature', Buffer.from(signatureFontSource as Uint8Array));
       doc.font('prescriber-signature').fontSize(24).fillColor(signatureStampColor).text(signatureStamp, { align: 'center' });
       doc.font('Helvetica');
     } else {
