@@ -53,7 +53,6 @@ const patientOptionsPage = ref(1);
 const date_prescribed = ref(getTodayInputDate());
 const cid_code = ref(getSingleQueryValue(route.query.cid_code as QueryValue));
 const manual_cid = ref("");
-const formulaOptionsPage = ref(1);
 const formulasInput = ref<PrescriptionFormulaInput[]>([]);
 const selectedPatientFallback = ref<PatientOption | null>(null);
 const isPreviewing = ref(false);
@@ -70,6 +69,26 @@ let signStatusPollTimer: ReturnType<typeof setInterval> | null = null;
 
 const isSubmitting = ref(false);
 const formulaCache = ref<Record<string, Formula>>({});
+const FORMULAS_FETCH_LIMIT = 50;
+
+const fetchAllFormulas = async () => {
+  const allFormulas: Formula[] = [];
+  let page = 1;
+  let totalPages = 1;
+
+  while (page <= totalPages) {
+    const response = await $fetch<PaginatedResponse<Formula>>("/api/formulas", {
+      method: "GET",
+      query: { page, limit: FORMULAS_FETCH_LIMIT },
+    });
+
+    allFormulas.push(...response.data);
+    totalPages = response.metadata.totalPages;
+    page += 1;
+  }
+
+  return allFormulas.sort((a, b) => a.name.localeCompare(b.name));
+};
 
 const { data: cidsData } = await useAsyncData("cids", () =>
   queryCollection("cids").first(),
@@ -81,13 +100,9 @@ const { data: patientsResponse } = await useFetch<
   query: { page: patientOptionsPage, limit: 10 },
   watch: [patientOptionsPage],
 });
-const { data: formulasResponse } = await useFetch<PaginatedResponse<Formula>>(
-  "/api/formulas",
-  {
-    method: "GET",
-    query: { page: formulaOptionsPage, limit: 10 },
-    watch: [formulaOptionsPage],
-  },
+const { data: formulasData } = await useAsyncData(
+  "prescription-formulas-all",
+  fetchAllFormulas,
 );
 
 const patients = computed<PatientOption[]>(
@@ -102,16 +117,7 @@ const patientsMetadata = computed(
       totalPages: 1,
     },
 );
-const formulas = computed<Formula[]>(() => formulasResponse.value?.data || []);
-const formulasMetadata = computed(
-  () =>
-    formulasResponse.value?.metadata || {
-      total: 0,
-      page: 1,
-      limit: 10,
-      totalPages: 1,
-    },
-);
+const formulas = computed<Formula[]>(() => formulasData.value || []);
 
 watch(
   formulas,
@@ -200,18 +206,6 @@ const nextPatientsPage = () => {
 const prevPatientsPage = () => {
   if (patientOptionsPage.value > 1) {
     patientOptionsPage.value--;
-  }
-};
-
-const nextFormulasPage = () => {
-  if (formulaOptionsPage.value < formulasMetadata.value.totalPages) {
-    formulaOptionsPage.value++;
-  }
-};
-
-const prevFormulasPage = () => {
-  if (formulaOptionsPage.value > 1) {
-    formulaOptionsPage.value--;
   }
 };
 
@@ -703,32 +697,6 @@ onBeforeUnmount(() => {
         </div>
         <div class="form-group">
           <label>Fórmulas Prescritas *</label>
-          <div
-            v-if="formulasMetadata.totalPages > 1"
-            class="lookup-pagination"
-            style="margin-bottom: 0.75rem"
-          >
-            <button
-              type="button"
-              class="btn-sm"
-              :disabled="formulaOptionsPage <= 1"
-              @click="prevFormulasPage"
-            >
-              Anterior
-            </button>
-            <span
-              >Página {{ formulasMetadata.page }} de
-              {{ formulasMetadata.totalPages }}</span
-            >
-            <button
-              type="button"
-              class="btn-sm"
-              :disabled="formulaOptionsPage >= formulasMetadata.totalPages"
-              @click="nextFormulasPage"
-            >
-              Próxima
-            </button>
-          </div>
           <div
             v-for="(item, index) in formulasInput"
             :key="index"
