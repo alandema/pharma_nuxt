@@ -182,14 +182,28 @@ async function main() {
     console.log(`✓ Upserted prescriber ${createdOrUpdated.email}`);
   }
 
-  // Create formulas used by the prescription flow
-  const formulaSeeds = [
+  // Create formulas used by the prescription flow and guarantee a broad lookup list.
+  const baseFormulaSeeds = [
     { name: 'Aspirin Complex', information: 'Analgésico e antitérmico. Uso oral após refeições.' },
     { name: 'Losartan 50mg', information: '1 comprimido pela manhã. Monitorar pressão arterial.' },
     { name: 'Metformin 850mg', information: '1 comprimido após café da manhã e jantar.' },
     { name: 'Vitamina D3', information: '2000 UI ao dia por 90 dias.' },
     { name: 'Ibuprofeno 400mg', information: '1 comprimido a cada 8 horas se dor.' },
   ];
+
+  const MIN_FORMULA_COUNT = 51;
+  const generatedFormulaSeeds = Array.from(
+    { length: Math.max(0, MIN_FORMULA_COUNT - baseFormulaSeeds.length) },
+    (_, index) => {
+      const formulaNumber = String(index + 1).padStart(2, '0');
+      return {
+        name: `Formula Seed ${formulaNumber}`,
+        information: `Fórmula de teste ${formulaNumber}: uso conforme orientação médica.`,
+      };
+    },
+  );
+
+  const formulaSeeds = [...baseFormulaSeeds, ...generatedFormulaSeeds];
 
   const formulaByName = new Map<string, { id: string; name: string; information: string | null }>();
   for (const formula of formulaSeeds) {
@@ -202,7 +216,7 @@ async function main() {
 
     formulaByName.set(saved.name, saved);
   }
-  console.log('✓ Upserted formulas');
+  console.log(`✓ Upserted formulas (${formulaSeeds.length})`);
 
   const doctor1 = prescriberByEmail.get('doctor1@pharmanext.test');
   const doctor2 = prescriberByEmail.get('doctor2@pharmanext.test');
