@@ -40,36 +40,71 @@ type LogEntry = {
 
 const page = ref(1);
 const pageJumpInput = ref("1");
-const prescriberOptionsPage = ref(1);
-const patientOptionsPage = ref(1);
 const selectedPrescriberId = ref("");
 const selectedPatientId = ref("");
 const selectedDate = ref("");
 const { formatDateTimePtBR } = useDateFormatting();
+const LOOKUP_FETCH_LIMIT = 50;
 
-const { data: prescribersResponse } = await useFetch<
-  PaginatedResponse<PrescriberOption>
->("/api/users/admin", {
-  method: "GET",
-  query: { page: prescriberOptionsPage, limit: 10 },
-  watch: [prescriberOptionsPage],
-});
-const { data: patientsResponse } = await useFetch<
-  PaginatedResponse<PatientOption>
->("/api/patients", {
-  method: "GET",
-  query: { page: patientOptionsPage, limit: 10 },
-  watch: [patientOptionsPage],
-});
+const fetchAllPrescribers = async () => {
+  const allPrescribers: PrescriberOption[] = [];
+  let currentPage = 1;
+  let totalPages = 1;
 
-const prescribers = computed(() => prescribersResponse.value?.data || []);
-const patients = computed(() => patientsResponse.value?.data || []);
-const prescribersMetadata = computed(
-  () => prescribersResponse.value?.metadata || { page: 1, totalPages: 1 },
+  while (currentPage <= totalPages) {
+    const response = await $fetch<PaginatedResponse<PrescriberOption>>(
+      "/api/users/admin",
+      {
+        method: "GET",
+        query: { page: currentPage, limit: LOOKUP_FETCH_LIMIT },
+      },
+    );
+
+    allPrescribers.push(...response.data);
+    totalPages = response.metadata.totalPages;
+    currentPage += 1;
+  }
+
+  return allPrescribers.sort((a, b) =>
+    a.full_name.localeCompare(b.full_name),
+  );
+};
+
+const fetchAllPatients = async () => {
+  const allPatients: PatientOption[] = [];
+  let currentPage = 1;
+  let totalPages = 1;
+
+  while (currentPage <= totalPages) {
+    const response = await $fetch<PaginatedResponse<PatientOption>>(
+      "/api/patients",
+      {
+        method: "GET",
+        query: { page: currentPage, limit: LOOKUP_FETCH_LIMIT },
+      },
+    );
+
+    allPatients.push(...response.data);
+    totalPages = response.metadata.totalPages;
+    currentPage += 1;
+  }
+
+  return allPatients.sort((a, b) => a.name.localeCompare(b.name));
+};
+
+const { data: prescribersData } = await useAsyncData(
+  "admin-logs-prescribers-all",
+  fetchAllPrescribers,
 );
-const patientsMetadata = computed(
-  () => patientsResponse.value?.metadata || { page: 1, totalPages: 1 },
+const { data: patientsData } = await useAsyncData(
+  "admin-logs-patients-all",
+  fetchAllPatients,
 );
+
+const prescribers = computed<PrescriberOption[]>(() =>
+  prescribersData.value || [],
+);
+const patients = computed<PatientOption[]>(() => patientsData.value || []);
 
 const { data: response } = await useFetch<PaginatedResponse<LogEntry>>(
   "/api/logs",
@@ -92,36 +127,10 @@ const metadata = computed(
 );
 
 const clearFilters = () => {
-  prescriberOptionsPage.value = 1;
-  patientOptionsPage.value = 1;
   selectedPrescriberId.value = "";
   selectedPatientId.value = "";
   selectedDate.value = "";
   page.value = 1;
-};
-
-const nextPrescribersPage = () => {
-  if (prescriberOptionsPage.value < prescribersMetadata.value.totalPages) {
-    prescriberOptionsPage.value++;
-  }
-};
-
-const prevPrescribersPage = () => {
-  if (prescriberOptionsPage.value > 1) {
-    prescriberOptionsPage.value--;
-  }
-};
-
-const nextPatientsPage = () => {
-  if (patientOptionsPage.value < patientsMetadata.value.totalPages) {
-    patientOptionsPage.value++;
-  }
-};
-
-const prevPatientsPage = () => {
-  if (patientOptionsPage.value > 1) {
-    patientOptionsPage.value--;
-  }
 };
 
 const nextPage = () => {
@@ -177,26 +186,6 @@ watch(
           {{ prescriber.full_name }}
         </option>
       </select>
-      <div v-if="prescribersMetadata.totalPages > 1" class="lookup-pagination">
-        <button
-          class="btn-sm"
-          :disabled="prescriberOptionsPage <= 1"
-          @click="prevPrescribersPage"
-        >
-          Anterior
-        </button>
-        <span
-          >Página {{ prescribersMetadata.page }} de
-          {{ prescribersMetadata.totalPages }}</span
-        >
-        <button
-          class="btn-sm"
-          :disabled="prescriberOptionsPage >= prescribersMetadata.totalPages"
-          @click="nextPrescribersPage"
-        >
-          Próxima
-        </button>
-      </div>
     </div>
     <div class="filter-group">
       <label>Paciente:</label>
@@ -206,26 +195,6 @@ watch(
           {{ p.name }}
         </option>
       </select>
-      <div v-if="patientsMetadata.totalPages > 1" class="lookup-pagination">
-        <button
-          class="btn-sm"
-          :disabled="patientOptionsPage <= 1"
-          @click="prevPatientsPage"
-        >
-          Anterior
-        </button>
-        <span
-          >Página {{ patientsMetadata.page }} de
-          {{ patientsMetadata.totalPages }}</span
-        >
-        <button
-          class="btn-sm"
-          :disabled="patientOptionsPage >= patientsMetadata.totalPages"
-          @click="nextPatientsPage"
-        >
-          Próxima
-        </button>
-      </div>
     </div>
     <div class="filter-group">
       <label>Data:</label>
