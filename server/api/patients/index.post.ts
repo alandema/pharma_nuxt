@@ -61,10 +61,12 @@ export default defineEventHandler(async (event) => {
       medical_history: normalizedData.medical_history,
     },
   }).catch((error: any) => {
-    if (error?.code === 'P2002') {
-      const target = Array.isArray(error?.meta?.target) ? String(error.meta.target[0] ?? '') : String(error?.meta?.target ?? '')
-      if (target.includes('cpf')) throw createError({ statusCode: 409, statusMessage: 'CPF já cadastrado.' })
-      if (target.includes('email')) throw createError({ statusCode: 409, statusMessage: 'E-mail já cadastrado.' })
+    const prismaError = error?.code === 'P2002' ? error : error?.cause
+    if (prismaError?.code === 'P2002') {
+      const target = Array.isArray(prismaError?.meta?.target) ? String(prismaError.meta.target[0] ?? '') : String(prismaError?.meta?.target ?? '')
+      const uniqueHint = `${target} ${String(prismaError?.message ?? '')}`.toLowerCase()
+      if (uniqueHint.includes('cpf')) throw createError({ statusCode: 409, statusMessage: 'CPF já cadastrado.' })
+      if (uniqueHint.includes('email')) throw createError({ statusCode: 409, statusMessage: 'E-mail já cadastrado.' })
       throw createError({ statusCode: 409, statusMessage: 'Valor já cadastrado.' })
     }
     throw createError({ statusCode: 400, statusMessage: 'Não foi possível cadastrar o paciente. Verifique os dados e tente novamente.' })

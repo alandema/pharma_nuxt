@@ -1,17 +1,8 @@
-import { queryCollection } from '@nuxt/content/server'
+const OPTIONAL_COUNCILS = new Set(['TERAPEUTA INTEGRATIVO'])
 
-type CouncilCollection = {
-  councils?: Array<{ abbreviation?: string | null; required?: boolean | null }>
-}
-
-export async function isCouncilNumberAndStateRequired(event: any, council: unknown) {
+export async function isCouncilNumberAndStateRequired(_event: unknown, council: unknown) {
   const normalizedCouncil = typeof council === 'string' ? council.trim().toUpperCase() : ''
   if (!normalizedCouncil) return true
 
-  const councilCollection = await queryCollection(event, 'councils').first() as CouncilCollection | null
-  const matchedCouncil = councilCollection?.councils?.find(
-    (item) => `${item?.abbreviation ?? ''}`.trim().toUpperCase() === normalizedCouncil,
-  )
-
-  return matchedCouncil?.required !== false
+  return !OPTIONAL_COUNCILS.has(normalizedCouncil)
 }
