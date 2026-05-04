@@ -50,7 +50,7 @@ const patient_id = ref(
   getSingleQueryValue(route.query.patient_id as QueryValue),
 );
 const date_prescribed = ref(getTodayInputDate());
-const cid_code = ref(getSingleQueryValue(route.query.cid_code as QueryValue));
+const cid_id = ref(getSingleQueryValue(route.query.cid_id as QueryValue));
 const manual_cid = ref("");
 const formulasInput = ref<PrescriptionFormulaInput[]>([]);
 const selectedPatientFallback = ref<PatientOption | null>(null);
@@ -163,27 +163,27 @@ const formulaOptions = computed<Formula[]>(() => {
 const cids = computed(() => {
   const codes = cidsData.value?.codes ?? [];
   return [...codes].sort((a, b) => {
-    if (a.code === "Outro") return -1;
-    if (b.code === "Outro") return 1;
-    return a.code.localeCompare(b.code);
+    if (a.name === "Outro") return -1;
+    if (b.name === "Outro") return 1;
+    return a.name.localeCompare(b.name);
   });
 });
 
 const selectedCidLabel = computed(() => {
-  const selectedCid = cids.value.find((cid) => cid.code === cid_code.value);
+  const selectedCid = cids.value.find((cid) => String(cid.id) === cid_id.value);
   if (selectedCid) {
-    return `${selectedCid.code} - ${selectedCid.name}`;
-  }
-  if (cid_code.value === "Outro") {
-    const manual = manual_cid.value.trim();
-    return manual ? `Outro - ${manual}` : "Outro";
+    if (selectedCid.name === "Outro") {
+      const manual = manual_cid.value.trim();
+      return manual ? `Outro - ${manual}` : "Outro";
+    }
+    return selectedCid.name;
   }
   return "Selecione um código CID";
 });
 const cidDropdownRef = ref<HTMLDetailsElement | null>(null);
 
-const selectCidCode = (code: string) => {
-  cid_code.value = code;
+const selectCidCode = (id: string | number) => {
+  cid_id.value = String(id);
   if (cidDropdownRef.value) {
     cidDropdownRef.value.open = false;
   }
@@ -324,18 +324,17 @@ const buildPayload = () => {
     }))
     .filter((item) => item.formula_id && item.description);
 
-  const selectedCid = cids.value.find((cid) => cid.code === cid_code.value);
+  const selectedCid = cids.value.find((cid) => String(cid.id) === cid_id.value);
   const cidDescription = selectedCid?.name;
   const finalCid =
-    cid_code.value === "Outro"
+    selectedCid?.name === "Outro"
       ? manual_cid.value.trim()
-      : cidDescription
-        ? `${cid_code.value} - ${cidDescription}`
-        : cid_code.value;
+      : cidDescription || "";
 
   return {
     patient_id: patient_id.value,
-    cid_code: finalCid,
+    cid_id: Number(cid_id.value),
+    cid_name: finalCid,
     formulas: cleanedFormulas,
   };
 };
@@ -346,12 +345,13 @@ const validateBeforeSubmit = () => {
     return false;
   }
 
-  if (!cid_code.value) {
+  if (!cid_id.value) {
     toast.add("CID é obrigatório.", "error");
     return false;
   }
 
-  if (cid_code.value === "Outro" && !manual_cid.value.trim()) {
+  const selectedCid = cids.value.find((cid) => String(cid.id) === cid_id.value);
+  if (selectedCid?.name === "Outro" && !manual_cid.value.trim()) {
     toast.add('Informe o CID manual quando selecionar "Outro".', "error");
     return false;
   }
@@ -677,7 +677,7 @@ onBeforeUnmount(() => {
           <details ref="cidDropdownRef" style="position: relative">
             <summary
               class="cid-dropdown-summary"
-              :style="!cid_code ? 'color: var(--c-muted); padding: 0.7rem 0; border-bottom: 2px solid var(--c-border); line-height: 1.35; white-space: normal; word-break: break-word; cursor: pointer;' : 'padding: 0.7rem 0; border-bottom: 2px solid var(--c-border); line-height: 1.35; white-space: normal; word-break: break-word; cursor: pointer;'"
+              :style="!cid_id ? 'color: var(--c-muted); padding: 0.7rem 0; border-bottom: 2px solid var(--c-border); line-height: 1.35; white-space: normal; word-break: break-word; cursor: pointer;' : 'padding: 0.7rem 0; border-bottom: 2px solid var(--c-border); line-height: 1.35; white-space: normal; word-break: break-word; cursor: pointer;'"
             >
               {{ selectedCidLabel }}
             </summary>
@@ -688,17 +688,17 @@ onBeforeUnmount(() => {
             >
               <button
                 v-for="c in cids"
-                :key="c.code"
+                :key="c.id"
                 type="button"
                 style="width: 100%; padding: 0.65rem 0.75rem; border: none; background: transparent; color: var(--c-text); text-align: left; text-transform: none; letter-spacing: normal; font-weight: 400; line-height: 1.35; white-space: normal; word-break: break-word; justify-content: flex-start"
-                @click="selectCidCode(c.code)"
+                @click="selectCidCode(c.id)"
               >
-                {{ c.code }} – {{ c.name }}
+                {{ c.name }}
               </button>
             </div>
           </details>
         </div>
-        <div class="form-group" v-if="cid_code === 'Outro'">
+        <div class="form-group" v-if="cids.find((c) => String(c.id) === String(cid_id))?.name === 'Outro'">
           <input
             v-model="manual_cid"
             type="text"

@@ -115,7 +115,8 @@ export const prescriptionFormulaItemSchema = z.object({
 
 export const prescriptionPostBodySchema = z.object({
   patient_id: z.string().optional(),
-  cid_code: z.string().optional(),
+  cid_id: z.coerce.number().optional(),
+  cid_name: z.string().optional(),
   formulas: z.array(prescriptionFormulaItemSchema).optional(),
   preview_only: z.boolean().optional(),
   preview_pdf_base64: z.string().optional(),

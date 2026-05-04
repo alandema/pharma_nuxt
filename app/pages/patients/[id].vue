@@ -32,7 +32,7 @@ type Prescription = {
   patient_id: string;
   date_prescribed: string;
   json_form_info: {
-    cid_code: string;
+    cid_id: number;
     formulas: {
       formula_id: string;
       formula_name: string;
@@ -73,6 +73,8 @@ type PaginatedResponse<T> = {
   metadata: PaginationMetadata;
 };
 
+const TRANSFER_LOOKUP_PAGE_SIZE = 50;
+
 const route = useRoute();
 const toast = useToast();
 const { isBrazilCountry, isValidBirthDate } = useInputFormatting();
@@ -91,35 +93,38 @@ const canDelete = computed(() => {
   return isAdmin.value || currentUserId === patient.value?.registered_by;
 });
 
-const prescritoresPage = ref(1);
+const fetchAllPrescribers = async () => {
+  const all: Prescritor[] = [];
+  let currentPage = 1;
+  let totalPages = 1;
 
-const { data: allPrescribersResponse } = await useFetch<
-  PaginatedResponse<Prescritor>
->("/api/users/admin", {
-  method: "GET",
-  query: { page: prescritoresPage, limit: 10, role: "user" },
-  watch: [prescritoresPage],
-});
+  do {
+    const response = await $fetch<PaginatedResponse<Prescritor>>(
+      "/api/users/admin",
+      {
+        method: "GET",
+        query: { page: currentPage, limit: TRANSFER_LOOKUP_PAGE_SIZE, role: "user" },
+      },
+    );
 
-const prescritores = computed(() => allPrescribersResponse.value?.data ?? []);
-const prescritoresMetadata = computed(
-  () => allPrescribersResponse.value?.metadata || { page: 1, totalPages: 1 },
-);
+    all.push(...response.data);
+    totalPages = response.metadata.totalPages;
+    currentPage += 1;
+  } while (currentPage <= totalPages);
+
+  return all;
+};
+
+const {
+  data: allPrescribersData,
+  pending: allPrescribersPending,
+  error: allPrescribersError,
+} = await useAsyncData("transfer-all-prescribers", fetchAllPrescribers);
+
+const prescritores = computed(() => allPrescribersData.value ?? []);
 const selectedPrescritorId = ref("");
 const transferError = ref("");
 const transferSuccess = ref("");
-
-const nextPrescritoresPage = () => {
-  if (prescritoresPage.value < prescritoresMetadata.value.totalPages) {
-    prescritoresPage.value++;
-  }
-};
-
-const prevPrescritoresPage = () => {
-  if (prescritoresPage.value > 1) {
-    prescritoresPage.value--;
-  }
-};
 
 const transferPatient = async () => {
   transferError.value = "";
@@ -279,8 +284,18 @@ const save = async (data: Record<string, string>) => {
       }}</strong>
     </p>
     <div class="gap-row">
-      <select v-model="selectedPrescritorId" style="flex: 1">
-        <option value="" disabled>Selecione um prescritor</option>
+      <select
+        v-model="selectedPrescritorId"
+        style="flex: 1"
+        :disabled="allPrescribersPending || !!allPrescribersError"
+      >
+        <option value="" disabled>
+          {{
+            allPrescribersPending
+              ? "Carregando prescritores..."
+              : "Selecione um prescritor"
+          }}
+        </option>
         <option
           v-for="prescritor in prescritores"
           :key="prescritor.id"
@@ -294,35 +309,14 @@ const save = async (data: Record<string, string>) => {
       <button
         class="btn-primary"
         @click="transferPatient"
-        :disabled="!selectedPrescritorId"
+        :disabled="!selectedPrescritorId || allPrescribersPending || !!allPrescribersError"
       >
         Transferir
       </button>
     </div>
-    <div
-      v-if="prescritoresMetadata.totalPages > 1"
-      class="lookup-pagination"
-      style="margin-top: 0.5rem"
-    >
-      <button
-        class="btn-sm"
-        :disabled="prescritoresPage <= 1"
-        @click="prevPrescritoresPage"
-      >
-        Anterior
-      </button>
-      <span
-        >Página {{ prescritoresMetadata.page }} de
-        {{ prescritoresMetadata.totalPages }}</span
-      >
-      <button
-        class="btn-sm"
-        :disabled="prescritoresPage >= prescritoresMetadata.totalPages"
-        @click="nextPrescritoresPage"
-      >
-        Próxima
-      </button>
-    </div>
+    <p v-if="allPrescribersError" style="color: var(--c-danger); margin-top: 0.5rem">
+      Não foi possível carregar todos os prescritores para transferência.
+    </p>
     <p
       v-if="transferSuccess"
       style="color: var(--c-success); margin-top: 0.5rem"

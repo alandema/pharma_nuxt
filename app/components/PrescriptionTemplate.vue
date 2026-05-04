@@ -30,7 +30,7 @@ type Prescription = {
 };
 
 type ParsedPrescriptionInfo = {
-  cid_code?: string;
+  cid_id?: number | string;
   formulas?: {
     formula_id?: string;
     formula_name?: string;
@@ -40,7 +40,7 @@ type ParsedPrescriptionInfo = {
 };
 
 type CidEntry = {
-  code: string;
+  id: number;
   name: string;
 };
 
@@ -53,16 +53,16 @@ const formInfo = computed<ParsedPrescriptionInfo>(() => {
   return props.prescription.json_form_info;
 });
 
-const cidCode = computed(() => (formInfo.value.cid_code as string) ?? "");
+const cidId = computed(() => formInfo.value.cid_id);
 
 const cidLabel = computed(() => {
-  const entry = props.cids.find((c) => c.code === cidCode.value);
-  return entry ? `${cidCode.value} – ${entry.name}` : cidCode.value;
+  const entry = props.cids.find((c) => String(c.id) === String(cidId.value));
+  return entry ? entry.name : cidId.value ?? "";
 });
 
 const detailEntries = computed(() =>
   Object.entries(formInfo.value).filter(
-    ([key]) => key !== "cid_code" && key !== "formulas",
+    ([key]) => key !== "cid_id" && key !== "formulas",
   ),
 );
 

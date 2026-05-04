@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { JwtPayload } from 'jsonwebtoken';
+import type { JwtPayload } from 'jsonwebtoken';
 import { isKnownRole } from '../../utils/rbac'
 
 const config = useRuntimeConfig()

@@ -29,7 +29,7 @@ type Prescription = {
   date_prescribed: string;
   pdf_url?: string | null;
   json_form_info: {
-    cid_code?: string;
+    cid_id?: number | string;
     formulas?: {
       formula_id: string;
       formula_name?: string;
@@ -66,7 +66,7 @@ const formulas = computed(() => formInfo.value?.formulas ?? []);
 const reuse = () => {
   const q = new URLSearchParams({
     patient_id: prescription.value!.patient_id,
-    cid_code: String(formInfo.value?.cid_code ?? ""),
+    cid_id: String(formInfo.value?.cid_id ?? ""),
     formulas: JSON.stringify(
       formulas.value.map(
         (item: { formula_id: string; description: string }) => ({
@@ -127,8 +127,8 @@ const reuse = () => {
 
     <div class="card">
       <h2>Conteúdo da Prescrição</h2>
-      <p v-if="formInfo?.cid_code" class="text-muted mb-2">
-        CID: <strong>{{ formInfo?.cid_code }}</strong>
+      <p v-if="formInfo?.cid_id" class="text-muted mb-2">
+        CID: <strong>{{ formInfo?.cid_id }}</strong>
       </p>
       <table v-if="formulas.length" class="list-table">
         <thead>
