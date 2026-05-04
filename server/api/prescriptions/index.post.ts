@@ -49,7 +49,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Paciente é obrigatório.' });
   }
 
-  if (!body.cid_code) {
+  if (body.cid_id === undefined) {
     throw createError({ statusCode: 400, statusMessage: 'CID é obrigatório.' });
   }
 
@@ -96,7 +96,8 @@ export default defineEventHandler(async (event) => {
   const signatureStatus = body.signature_status === 'signed' ? 'signed' : 'unsigned';
 
   const formInfo = {
-    cid_code: body.cid_code,
+    cid_id: body.cid_id,
+    cid_name: body.cid_name,
     signature_status: signatureStatus,
     formulas: normalizedFormulaItems.map((item) => ({
       formula_id: item.formula_id,

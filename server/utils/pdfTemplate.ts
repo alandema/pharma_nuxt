@@ -72,8 +72,10 @@ export async function generatePDFDocument(
     doc.moveDown();
     
     // Formulas / Medicines
-        if (body?.cid_code) {
-      doc.text(`CID: ${body.cid_code}`);
+        if (body?.cid_name) {
+      doc.text(`CID: ${body.cid_name}`);
+    } else if (body?.cid_id) {
+      doc.text(`CID ID: ${body.cid_id}`);
     }
     doc.moveDown();
     doc.fontSize(14).text('Prescrição', { underline: true });

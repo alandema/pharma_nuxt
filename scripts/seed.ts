@@ -53,7 +53,8 @@ type SeedPatient = {
 type SeedPrescription = {
   patientKey: string;
   date_prescribed: Date;
-  cid_code: string;
+  cid_id: number;
+  cid_name: string;
   formulas: { formulaRef: string; description: string }[];
 };
 
@@ -393,7 +394,8 @@ async function main() {
     {
       patientKey: 'alice',
       date_prescribed: new Date('2026-02-10T00:00:00.000Z'),
-      cid_code: 'R51',
+      cid_id: 1,
+      cid_name: 'E29.1 Hipofunção testicular',
       formulas: [
         { formulaRef: 'Aspirin Complex', description: 'Tomar 1 comprimido a cada 8 horas por 7 dias, após refeições.' },
       ],
@@ -401,7 +403,8 @@ async function main() {
     {
       patientKey: 'bob',
       date_prescribed: new Date('2026-02-12T00:00:00.000Z'),
-      cid_code: 'I10',
+      cid_id: 2,
+      cid_name: 'E29.8 Outra disfunção testicular',
       formulas: [
         { formulaRef: 'Losartan 50mg', description: 'Tomar 1 comprimido pela manhã continuamente.' },
       ],
@@ -409,7 +412,8 @@ async function main() {
     {
       patientKey: 'carol',
       date_prescribed: new Date('2026-02-13T00:00:00.000Z'),
-      cid_code: 'J01',
+      cid_id: 3,
+      cid_name: 'E29.9 Disfunção testicular não especificada',
       formulas: [
         { formulaRef: 'free', description: 'Cefalexina 500mg: tomar 1 cápsula a cada 12 horas por 10 dias.' },
       ],
@@ -417,7 +421,8 @@ async function main() {
     {
       patientKey: 'david',
       date_prescribed: new Date('2026-02-14T00:00:00.000Z'),
-      cid_code: 'E11',
+      cid_id: 4,
+      cid_name: 'R86.1 Achados anormais...',
       formulas: [
         { formulaRef: 'Metformin 850mg', description: 'Tomar 1 comprimido após café e jantar, uso contínuo.' },
       ],
@@ -425,7 +430,8 @@ async function main() {
     {
       patientKey: 'emma',
       date_prescribed: new Date('2026-02-15T00:00:00.000Z'),
-      cid_code: 'E55',
+      cid_id: 12,
+      cid_name: 'E55 Deficiência de vitamina D',
       formulas: [
         { formulaRef: 'Vitamina D3', description: 'Tomar 2000 UI por dia durante 90 dias.' },
       ],
@@ -433,7 +439,8 @@ async function main() {
     {
       patientKey: 'alice',
       date_prescribed: new Date('2026-03-01T00:00:00.000Z'),
-      cid_code: 'M79',
+      cid_id: 13,
+      cid_name: 'E55.9 Deficiência não especificada de vitamina D',
       formulas: [
         { formulaRef: 'Ibuprofeno 400mg', description: 'Se dor muscular, tomar 1 comprimido a cada 8 horas por até 5 dias.' },
       ],
@@ -453,7 +460,8 @@ async function main() {
     }
 
     const formInfo = {
-      cid_code: item.cid_code,
+      cid_id: item.cid_id,
+      cid_name: item.cid_name,
       formulas: item.formulas.map((formula) => {
         if (formula.formulaRef === 'free') {
           return {

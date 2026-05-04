@@ -6,7 +6,7 @@ export default defineContentConfig({
       type: 'data',
       source: 'cids.yml',
       schema: z.object({
-        codes: z.array(z.object({ id: z.number(), code: z.string(), name: z.string() }))
+        codes: z.array(z.object({ id: z.number(), name: z.string() }))
       })
     }),
     councils: defineCollection({

@@ -1,82 +1,76 @@
 codes:
   - id: 0
-    code: Outro
     name: Outro
   - id: 1
-    code: E29.1
-    name: Hipofunção testicular
+    name: E29.1 Hipofunção testicular
   - id: 2
-    code: E29.8
-    name: Outra disfunção testicular
+    name: E29.8 Outra disfunção testicular
   - id: 3
-    code: E29.9
-    name: Disfunção testicular não especificada
+    name: E29.9 Disfunção testicular não especificada
   - id: 4
-    code: R86.1
-    name: Achados anormais de material proveniente dos órgãos genitais masculinos - nível hormonal anormal
+    name: R86.1 Achados anormais de material proveniente dos órgãos genitais
+      masculinos - nível hormonal anormal
   - id: 5
-    code: E28
-    name: Disfunção ovariana
+    name: E28 Disfunção ovariana
   - id: 6
-    code: E28.2
-    name: Síndrome do ovário policístico
+    name: E28.2 Síndrome do ovário policístico
   - id: 7
-    code: E28.8
-    name: Outra disfunção ovariana
+    name: E28.8 Outra disfunção ovariana
   - id: 8
-    code: E28.9
-    name: Disfunção ovariana não especificada
+    name: E28.9 Disfunção ovariana não especificada
   - id: 9
-    code: R87.1
-    name: Achados anormais de material proveniente dos órgãos genitais femininos - nível hormonal anormal
+    name: R87.1 Achados anormais de material proveniente dos órgãos genitais
+      femininos - nível hormonal anormal
   - id: 10
-    code: N95.1
-    name: Estado da menopausa e do climatério feminino
+    name: N95.1 Estado da menopausa e do climatério feminino
   - id: 11
-    code: E34.9
-    name: Transtorno endócrino não especificado
+    name: E34.9 Transtorno endócrino não especificado
   - id: 12
-    code: E55
-    name: Deficiência de vitamina D
+    name: E55 Deficiência de vitamina D
   - id: 13
-    code: E55.9
-    name: Deficiência não especificada de vitamina D
+    name: E55.9 Deficiência não especificada de vitamina D
   - id: 14
-    code: F41.2
-    name: Transtorno misto ansioso e depressivo
+    name: F41.2 Transtorno misto ansioso e depressivo
   - id: 15
-    code: R45.4
-    name: Irritabilidade e mau humor
+    name: R45.4 Irritabilidade e mau humor
   - id: 16
-    code: E27.1
-    name: Hipofunção Adrenal
+    name: E27.1 Hipofunção Adrenal
   - id: 17
-    code: E03.9
-    name: Hipotireoidismo não especificado
+    name: E03.9 Hipotireoidismo não especificado
   - id: 18
-    code: K05
-    name: "Gengivite e doenças periodontais. N95 Menopausa. Justificativa: Doença periodontal associada à deficiência hormonal, inflamação crônica e estresse oxidativo, com necessidade de suporte vitamínico, aminoácidos e modulação neuroendócrina."
+    name: "K05 Gengivite e doenças periodontais. N95 Menopausa. Justificativa:
+      Doença periodontal associada à deficiência hormonal, inflamação crônica e
+      estresse oxidativo, com necessidade de suporte vitamínico, aminoácidos e
+      modulação neuroendócrina."
   - id: 19
-    code: K05
-    name: "Gengivite e doenças periodontais. N95 Menopausa. Justificativa: Gengivite crônica com comprometimento da cicatrização tecidual, associada a desequilíbrio hormonal e deficiência nutricional."
+    name: "K05 Gengivite e doenças periodontais. N95 Menopausa. Justificativa:
+      Gengivite crônica com comprometimento da cicatrização tecidual, associada
+      a desequilíbrio hormonal e deficiência nutricional."
   - id: 20
-    code: K05
-    name: "Gengivite e doenças periodontais. N95 Menopausa. Justificativa: Periodontite com resposta inflamatória exacerbada, associada à deficiência estrogênica, estresse oxidativo e baixa regeneração tecidual."
+    name: "K05 Gengivite e doenças periodontais. N95 Menopausa. Justificativa:
+      Periodontite com resposta inflamatória exacerbada, associada à deficiência
+      estrogênica, estresse oxidativo e baixa regeneração tecidual."
   - id: 21
-    code: K05
-    name: "Gengivite e doenças periodontais. N95 Menopausa. Justificativa: Periodontite com baixa resposta regenerativa associada a deficiência hormonal e suporte nutricional inadequado."
+    name: "K05 Gengivite e doenças periodontais. N95 Menopausa. Justificativa:
+      Periodontite com baixa resposta regenerativa associada a deficiência
+      hormonal e suporte nutricional inadequado."
   - id: 22
-    code: K05
-    name: "Gengivite e doenças periodontais. N95 Menopausa. Justificativa: Doença periodontal com impacto sistêmico, associada a desequilíbrio hormonal e metabólico."
+    name: "K05 Gengivite e doenças periodontais. N95 Menopausa. Justificativa:
+      Doença periodontal com impacto sistêmico, associada a desequilíbrio
+      hormonal e metabólico."
   - id: 23
-    code: K05
-    name: "Gengivite e doenças periodontais. E29 Hipogonadismo masculino. Justificativa: Periodontite com comprometimento da cicatrização e necessidade de suporte anabólico e nutricional."
+    name: "K05 Gengivite e doenças periodontais. E29 Hipogonadismo masculino.
+      Justificativa: Periodontite com comprometimento da cicatrização e
+      necessidade de suporte anabólico e nutricional."
   - id: 24
-    code: K05
-    name: "Gengivite e doenças periodontais. E29 Hipogonadismo masculino. Justificativa: Doença periodontal associada à deficiência androgênica, inflamação crônica e prejuízo na regeneração tecidual."
+    name: "K05 Gengivite e doenças periodontais. E29 Hipogonadismo masculino.
+      Justificativa: Doença periodontal associada à deficiência androgênica,
+      inflamação crônica e prejuízo na regeneração tecidual."
   - id: 25
-    code: K05
-    name: "Gengivite e doenças periodontais. E29 Hipogonadismo masculino. Justificativa: Periodontite com baixa resposta cicatricial associada a deficiência hormonal e estresse oxidativo."
+    name: "K05 Gengivite e doenças periodontais. E29 Hipogonadismo masculino.
+      Justificativa: Periodontite com baixa resposta cicatricial associada a
+      deficiência hormonal e estresse oxidativo."
   - id: 26
-    code: K05
-    name: "Gengivite e doenças periodontais. E29 Hipogonadismo masculino. Justificativa: Periodontite com evolução prolongada associada à deficiência hormonal e metabólica."
+    name: "K05 Gengivite e doenças periodontais. E29 Hipogonadismo masculino.
+      Justificativa: Periodontite com evolução prolongada associada à
+      deficiência hormonal e metabólica."

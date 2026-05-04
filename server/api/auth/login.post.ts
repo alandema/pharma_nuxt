@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from 'jsonwebtoken';
-import { JwtPayload } from 'jsonwebtoken';
+import type { JwtPayload } from 'jsonwebtoken';
 import { authLoginBodySchema } from '../../utils/contractSchemas';
 import { readStrictBody } from '../../utils/requestValidation';
 import { isKnownRole } from '../../utils/rbac';

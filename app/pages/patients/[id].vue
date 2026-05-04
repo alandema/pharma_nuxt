@@ -32,7 +32,7 @@ type Prescription = {
   patient_id: string;
   date_prescribed: string;
   json_form_info: {
-    cid_code: string;
+    cid_id: number;
     formulas: {
       formula_id: string;
       formula_name: string;

@@ -8,7 +8,8 @@ type Prescription = {
   prescribed_by: string | null;
   date_prescribed: string;
   json_form_info: {
-    cid_code: string;
+    cid_id: number;
+    cid_name?: string;
     formulas: {
       formula_id: string;
       formula_name: string;
