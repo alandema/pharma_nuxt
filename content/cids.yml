@@ -71,6 +71,10 @@ codes:
       Justificativa: Periodontite com baixa resposta cicatricial associada a
       deficiência hormonal e estresse oxidativo."
   - id: 26
-    name: E66.9 Sobrepeso
+    name: "K05 Gengivite e doenças periodontais. E29 Hipogonadismo masculino.
+      Justificativa: Periodontite com evolução prolongada associada à
+      deficiência hormonal e metabólica."
   - id: 27
     name: E66 Obesidade
+  - id: 28
+    name: E66.9 Sobrepeso
