@@ -57,8 +57,10 @@ export async function generatePDFDocument(
 
     // Patient & CID Info
     doc.fontSize(14).text('Informações do Paciente', { underline: true });
-    doc.fontSize(12).text(`Nome: ${patient.name || patient}`);
-    doc.fontSize(12).text(`CPF: ${patient.cpf || patient}`);
+    doc.fontSize(12).text(`Nome: ${patient.name || 'Não informado'}`);
+    if (patient.cpf) {
+      doc.fontSize(12).text(`CPF: ${patient.cpf}`);
+    }
     const patientAddress = buildAddress({
       street: patient.street,
       number: patient.house_number || patient.address_number,
