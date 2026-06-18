@@ -232,32 +232,34 @@ const save = async (data: Record<string, string>) => {
   <div class="card mb-2">
     <h2>Últimas 3 Prescrições</h2>
     <template v-if="patient?.prescriptions?.length">
-      <table class="list-table">
-        <thead>
-          <tr>
-            <th>Data</th>
-            <th>Resumo</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="prescription in patient.prescriptions"
-            :key="prescription.id"
-            @click="navigateTo(`/prescriptions/${prescription.id}`)"
-          >
-            <td>
-              <strong>{{
-                formatDatePtBR(prescription.date_prescribed)
-              }}</strong>
-            </td>
-            <td>
-              <span class="text-muted">{{
-                prescriptionSummary(prescription.json_form_info)
-              }}</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-responsive">
+        <table class="list-table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Resumo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="prescription in patient.prescriptions"
+              :key="prescription.id"
+              @click="navigateTo(`/prescriptions/${prescription.id}`)"
+            >
+              <td data-label="Data">
+                <strong>{{
+                  formatDatePtBR(prescription.date_prescribed)
+                }}</strong>
+              </td>
+              <td data-label="Resumo">
+                <span class="text-muted">{{
+                  prescriptionSummary(prescription.json_form_info)
+                }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <div style="margin-top: 1rem; text-align: center">
         <button
           class="btn-secondary btn-sm"

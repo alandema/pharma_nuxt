@@ -130,29 +130,31 @@ const reuse = () => {
       <p v-if="formInfo?.cid_id" class="text-muted mb-2">
         CID: <strong>{{ formInfo?.cid_id }}</strong>
       </p>
-      <table v-if="formulas.length" class="list-table">
-        <thead>
-          <tr>
-            <th>Fórmula</th>
-            <th>Descrição</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="(item, index) in formulas"
-            :key="`${item.formula_id}-${index}`"
-          >
-            <td>
-              {{
-                item.formula_id === "free"
-                  ? "Livre"
-                  : item.formula_name || item.formula_id
-              }}
-            </td>
-            <td style="white-space: pre-wrap">{{ item.description }}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div v-if="formulas.length" class="table-responsive">
+        <table class="list-table">
+          <thead>
+            <tr>
+              <th>Fórmula</th>
+              <th>Descrição</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="(item, index) in formulas"
+              :key="`${item.formula_id}-${index}`"
+            >
+              <td data-label="Fórmula">
+                {{
+                  item.formula_id === "free"
+                    ? "Livre"
+                    : item.formula_name || item.formula_id
+                }}
+              </td>
+              <td data-label="Descrição" style="white-space: pre-wrap">{{ item.description }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <p v-else class="text-muted">Nenhuma fórmula encontrada.</p>
     </div>
   </div>

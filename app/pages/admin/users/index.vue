@@ -56,45 +56,47 @@ watch(
   </div>
   <div class="card">
     <template v-if="prescribers.length">
-      <table class="list-table">
-        <thead>
-          <tr>
-            <th>Nome</th>
-            <th>Privilégio</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="prescriber in prescribers"
-            :key="prescriber.id"
-            @click="navigateTo(`/admin/users/${prescriber.id}`)"
-          >
-            <td>{{ prescriber.full_name }}</td>
-            <td style="text-align: right">
-              <span
-                :class="[
-                  'badge',
-                  prescriber.role === 'admin' ||
-                  prescriber.role === 'superadmin'
-                    ? 'badge-admin'
-                    : 'badge-prescriber',
-                ]"
-                >{{ prescriber.role }}</span
-              >
-            </td>
-            <td style="text-align: center">
-              <span
-                :class="[
-                  'badge',
-                  prescriber.is_active ? 'badge-active' : 'badge-inactive',
-                ]"
-                >{{ prescriber.is_active ? "Ativo" : "Inativo" }}</span
-              >
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-responsive">
+        <table class="list-table">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Privilégio</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="prescriber in prescribers"
+              :key="prescriber.id"
+              @click="navigateTo(`/admin/users/${prescriber.id}`)"
+            >
+              <td data-label="Nome">{{ prescriber.full_name }}</td>
+              <td data-label="Privilégio" style="text-align: right">
+                <span
+                  :class="[
+                    'badge',
+                    prescriber.role === 'admin' ||
+                    prescriber.role === 'superadmin'
+                      ? 'badge-admin'
+                      : 'badge-prescriber',
+                  ]"
+                  >{{ prescriber.role }}</span
+                >
+              </td>
+              <td data-label="Status" style="text-align: center">
+                <span
+                  :class="[
+                    'badge',
+                    prescriber.is_active ? 'badge-active' : 'badge-inactive',
+                  ]"
+                  >{{ prescriber.is_active ? "Ativo" : "Inativo" }}</span
+                >
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <div class="pagination">
         <button class="btn-secondary" :disabled="page <= 1" @click="prevPage">
           Anterior

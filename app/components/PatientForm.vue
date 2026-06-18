@@ -243,16 +243,24 @@ const submitForm = () => {
 <template>
   <form @submit.prevent="submitForm">
     <div class="form-group">
-      <label>Nome *</label>
-      <input v-model="f.name" placeholder="Nome completo" required />
+      <label for="name">Nome *</label>
+      <input
+        id="name"
+        v-model="f.name"
+        placeholder="Nome completo"
+        required
+        autocomplete="name"
+      />
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label>E-mail</label>
+        <label for="email">E-mail</label>
         <input
+          id="email"
           v-model="f.email"
           type="email"
           placeholder="paciente@email.com"
+          autocomplete="email"
         />
       </div>
       <div
@@ -270,27 +278,27 @@ const submitForm = () => {
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label>{{
-          isInternationalPatient ? "CPF (documento nacional)" : "CPF"
-        }}</label>
+        <label for="cpf">{{ isInternationalPatient ? "CPF (documento nacional)" : "CPF" }}</label>
         <input
+          id="cpf"
           v-model="f.cpf"
           :inputmode="isInternationalPatient ? 'text' : 'numeric'"
           :maxlength="isInternationalPatient ? 32 : 14"
           :placeholder="
             isInternationalPatient ? 'Documento nacional' : '000.000.000-00'
           "
+          autocomplete="off"
         />
       </div>
       <div class="form-group">
-        <label>RG</label>
-        <input v-model="f.rg" placeholder="RG" />
+        <label for="rg">RG</label>
+        <input id="rg" v-model="f.rg" placeholder="RG" autocomplete="off" />
       </div>
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label>Gênero</label>
-        <select v-model="f.gender">
+        <label for="gender">Gênero</label>
+        <select id="gender" v-model="f.gender" autocomplete="off">
           <option value="">Selecione</option>
           <option
             v-for="gender in GENDER_OPTIONS"
@@ -302,66 +310,65 @@ const submitForm = () => {
         </select>
       </div>
       <div class="form-group">
-        <label>Data de Nascimento</label>
-        <input v-model="f.birth_date" type="date" />
+        <label for="birth_date">Data de Nascimento</label>
+        <input id="birth_date" v-model="f.birth_date" type="date" autocomplete="bday" />
       </div>
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label>Telefone{{ isInternationalPatient ? "" : " *" }}</label>
+        <label for="phone">Telefone{{ isInternationalPatient ? "" : " *" }}</label>
         <input
+          id="phone"
           v-model="f.phone"
           :required="!isInternationalPatient"
+          type="tel"
           inputmode="tel"
           :placeholder="
             isInternationalPatient
               ? 'Telefone local ou internacional'
               : 'Ex: +55 11 91234-5678'
           "
+          autocomplete="tel"
         />
       </div>
       <div class="form-group">
-        <label>{{
-          isInternationalPatient
-            ? "Código Postal"
-            : isBrazilPatient
-              ? "CEP *"
-              : "CEP"
-        }}</label>
+        <label for="zipcode">{{ isInternationalPatient ? "Código Postal" : isBrazilPatient ? "CEP *" : "CEP" }}</label>
         <input
+          id="zipcode"
           v-model="f.zipcode"
           :required="isBrazilPatient"
           :inputmode="isInternationalPatient ? 'text' : 'numeric'"
           :placeholder="
             isInternationalPatient ? 'ZIP / Código postal' : '00000-000'
           "
+          autocomplete="postal-code"
         />
       </div>
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label>Rua</label>
-        <input v-model="f.street" placeholder="Rua" />
+        <label for="street">Rua</label>
+        <input id="street" v-model="f.street" placeholder="Rua" autocomplete="street-address" />
       </div>
       <div class="form-group">
-        <label>Número</label>
-        <input v-model="f.house_number" placeholder="Nº" />
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Bairro</label>
-        <input v-model="f.district" placeholder="Bairro" />
-      </div>
-      <div class="form-group">
-        <label>Complemento</label>
-        <input v-model="f.additional_info" placeholder="Apto, Bloco..." />
+        <label for="house_number">Número</label>
+        <input id="house_number" v-model="f.house_number" placeholder="Nº" autocomplete="street-address" />
       </div>
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label>País</label>
-        <select v-model="f.country">
+        <label for="district">Bairro</label>
+        <input id="district" v-model="f.district" placeholder="Bairro" autocomplete="address-level3" />
+      </div>
+      <div class="form-group">
+        <label for="additional_info">Complemento</label>
+        <input id="additional_info" v-model="f.additional_info" placeholder="Apto, Bloco..." autocomplete="address-line2" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="country">País</label>
+        <select id="country" v-model="f.country" autocomplete="country">
           <option value="">Selecione</option>
           <option v-for="c in countries" :key="c.id['M49']" :value="c.nome">
             {{ c.nome }}
@@ -369,11 +376,13 @@ const submitForm = () => {
         </select>
       </div>
       <div class="form-group">
-        <label>Estado</label>
+        <label for="state">Estado</label>
         <select
           v-if="isBrazilPatient"
+          id="state"
           v-model="f.state"
           :disabled="!states.length"
+          autocomplete="address-level1"
         >
           <option value="">Selecione</option>
           <option v-for="s in states" :key="s.id" :value="s.sigla">
@@ -382,28 +391,33 @@ const submitForm = () => {
         </select>
         <input
           v-else
+          id="state"
           v-model="f.state"
           placeholder="Estado / Província / Região"
+          autocomplete="address-level1"
         />
       </div>
     </div>
     <div class="form-group">
-      <label>Cidade</label>
+      <label for="city">Cidade</label>
       <select
         v-if="isBrazilPatient"
+        id="city"
         v-model="f.city"
         :disabled="!cities.length"
+        autocomplete="address-level2"
       >
         <option value="">Selecione</option>
         <option v-for="c in cities" :key="c.id" :value="c.nome">
           {{ c.nome }}
         </option>
       </select>
-      <input v-else v-model="f.city" placeholder="Cidade" />
+      <input v-else id="city" v-model="f.city" placeholder="Cidade" autocomplete="address-level2" />
     </div>
     <div class="form-group">
-      <label>Histórico Médico</label>
+      <label for="medical_history">Histórico Médico</label>
       <textarea
+        id="medical_history"
         v-model="f.medical_history"
         placeholder="Observações clínicas..."
         rows="4"

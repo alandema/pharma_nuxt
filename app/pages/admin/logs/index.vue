@@ -211,34 +211,36 @@ watch(
 
   <div class="card">
     <template v-if="logs.length">
-      <table class="list-table">
-        <thead>
-          <tr>
-            <th>Data/Hora</th>
-            <th>Mensagem</th>
-            <th>Prescritor</th>
-            <th>Paciente</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="log in logs" :key="log.id">
-            <td>
-              <span class="text-muted">{{
-                formatDateTimePtBR(log.event_time)
-              }}</span>
-            </td>
-            <td>{{ log.message }}</td>
-            <td>
-              <span class="text-muted">{{
-                log.user?.full_name || log.user?.email || "—"
-              }}</span>
-            </td>
-            <td>
-              <span class="text-muted">{{ log.patient?.name || "—" }}</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-responsive">
+        <table class="list-table">
+          <thead>
+            <tr>
+              <th>Data/Hora</th>
+              <th>Mensagem</th>
+              <th>Prescritor</th>
+              <th>Paciente</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="log in logs" :key="log.id">
+              <td data-label="Data/Hora">
+                <span class="text-muted">{{
+                  formatDateTimePtBR(log.event_time)
+                }}</span>
+              </td>
+              <td data-label="Mensagem">{{ log.message }}</td>
+              <td data-label="Prescritor">
+                <span class="text-muted">{{
+                  log.user?.full_name || log.user?.email || "—"
+                }}</span>
+              </td>
+              <td data-label="Paciente">
+                <span class="text-muted">{{ log.patient?.name || "—" }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <div class="pagination">
         <button class="btn-secondary" :disabled="page <= 1" @click="prevPage">
           Anterior
