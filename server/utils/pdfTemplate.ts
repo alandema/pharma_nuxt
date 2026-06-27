@@ -242,15 +242,15 @@ export async function generatePDFDocument(
        .stroke();
 
     // --- Left column ---
-    let fieldY = y + 12;
-    drawField(leftColX, fieldY, 'Nome:', patient.name || 'Não informado', leftColWidth, 11, true);
+let fieldY = y + 12;
+    drawField(leftColX, fieldY, 'Nome:', patient.name || 'Não informado', leftColWidth - 14, 11, true);
     fieldY += 22;
-    drawField(leftColX, fieldY, 'CPF:', patient.cpf || 'Não informado', leftColWidth, 10);
+    drawField(leftColX, fieldY, 'CPF:', patient.cpf || 'Não informado', leftColWidth - 14, 10);
     fieldY += 22;
-    drawField(leftColX, fieldY, 'Telefone:', patient.phone || 'Não informado', leftColWidth, 10);
+    drawField(leftColX, fieldY, 'Telefone:', patient.phone || 'Não informado', leftColWidth - 14, 10);
     fieldY += 22;
-    drawField(leftColX, fieldY, 'Endereço:', addrText, leftColWidth, 10);
-
+    drawField(leftColX, fieldY, 'Endereço:', addrText, leftColWidth - 14, 10);
+    
     // --- Right column ---
     let rightY = y + 12;
     if (cidText) {
