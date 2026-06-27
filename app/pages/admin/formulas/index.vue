@@ -56,22 +56,24 @@ watch(
   </div>
   <div class="card">
     <template v-if="formulas.length">
-      <table class="list-table">
-        <thead>
-          <tr>
-            <th>Fórmula</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="formula in formulas"
-            :key="formula.id"
-            @click="navigateTo(`/admin/formulas/${formula.id}`)"
-          >
-            <td>{{ formula.name }}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-responsive">
+        <table class="list-table">
+          <thead>
+            <tr>
+              <th>Fórmula</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="formula in formulas"
+              :key="formula.id"
+              @click="navigateTo(`/admin/formulas/${formula.id}`)"
+            >
+              <td data-label="Fórmula">{{ formula.name }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <div class="pagination">
         <button class="btn-secondary" :disabled="page <= 1" @click="prevPage">
           Anterior

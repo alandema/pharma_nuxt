@@ -79,34 +79,36 @@ watch(
   </div>
   <div class="card">
     <template v-if="patients.length">
-      <table class="list-table">
-        <thead>
-          <tr>
-            <th>Paciente</th>
-            <th>Última Prescrição</th>
-            <th v-if="isAdmin">Prescritor Registrado</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="patient in patients"
-            :key="patient.id"
-            @click="navigateTo(`/patients/${patient.id}`)"
-          >
-            <td>{{ patient.name }}</td>
-            <td>
-              <span class="text-muted">{{
-                formatDatePtBR(patient.last_prescription_date)
-              }}</span>
-            </td>
-            <td v-if="isAdmin">
-              <span class="text-muted">{{
-                patient.user?.full_name || "—"
-              }}</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-responsive">
+        <table class="list-table">
+          <thead>
+            <tr>
+              <th>Paciente</th>
+              <th>Última Prescrição</th>
+              <th v-if="isAdmin">Prescritor Registrado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="patient in patients"
+              :key="patient.id"
+              @click="navigateTo(`/patients/${patient.id}`)"
+            >
+              <td data-label="Paciente">{{ patient.name }}</td>
+              <td data-label="Última Prescrição">
+                <span class="text-muted">{{
+                  formatDatePtBR(patient.last_prescription_date)
+                }}</span>
+              </td>
+              <td v-if="isAdmin" data-label="Prescritor Registrado">
+                <span class="text-muted">{{
+                  patient.user?.full_name || "—"
+                }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <div class="pagination">
         <button class="btn-secondary" :disabled="page <= 1" @click="prevPage">
           Anterior

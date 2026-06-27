@@ -202,30 +202,32 @@ const clearFilter = () => {
 
   <div class="card">
     <template v-if="prescriptions.length">
-      <table class="list-table">
-        <thead>
-          <tr>
-            <th>Data</th>
-            <th>Paciente</th>
-            <th v-if="isAdmin">Prescritor</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="prescription in prescriptions"
-            :key="prescription.id"
-            @click="navigateTo(`/prescriptions/${prescription.id}`)"
-          >
-            <td>{{ formatDatePtBR(prescription.date_prescribed) }}</td>
-            <td>{{ prescription.patient.name }}</td>
-            <td v-if="isAdmin">
-              <span class="text-muted">{{
-                prescription.user?.full_name || "—"
-              }}</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-responsive">
+        <table class="list-table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Paciente</th>
+              <th v-if="isAdmin">Prescritor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="prescription in prescriptions"
+              :key="prescription.id"
+              @click="navigateTo(`/prescriptions/${prescription.id}`)"
+            >
+              <td data-label="Data">{{ formatDatePtBR(prescription.date_prescribed) }}</td>
+              <td data-label="Paciente">{{ prescription.patient.name }}</td>
+              <td v-if="isAdmin" data-label="Prescritor">
+                <span class="text-muted">{{
+                  prescription.user?.full_name || "—"
+                }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <div class="pagination">
         <button class="btn-secondary" :disabled="page <= 1" @click="prevPage">
           Anterior

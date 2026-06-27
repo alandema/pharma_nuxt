@@ -124,6 +124,24 @@ a:hover { color: var(--c-text); }
   color: var(--c-gold);
 }
 
+@media (max-width: 640px) {
+  .app-nav {
+    padding: 1rem;
+    height: auto;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .app-nav .nav-left {
+    gap: 1rem;
+  }
+  .app-nav .logo {
+    font-size: 1rem;
+  }
+  .app-nav .logo img {
+    height: 32px;
+  }
+}
+
 .app-main {
   width: 100%;
   max-width: 1100px;
@@ -189,6 +207,7 @@ button, .btn {
   justify-content: center;
   gap: .5rem;
   padding: .7rem 1.75rem;
+  min-height: 44px;
   font-size: .85rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -283,13 +302,62 @@ textarea:focus { border-color: var(--c-gold); }
 input:disabled, select:disabled, textarea:disabled { background: transparent; color: var(--c-muted); border-bottom-color: var(--c-bg); cursor: not-allowed; opacity: .7; }
 
 .form-group { display: flex; flex-direction: column; gap: .5rem; }
-.form-row  { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+.form-row  { display: grid; gap: 2rem; grid-template-columns: 1fr; }
+@media (min-width: 640px) {
+  .form-row { grid-template-columns: 1fr 1fr; }
+}
 
 /* ── Lists / Tables ──────────────────────────── */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .list-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0 0.5rem;
+}
+
+/* Mobile stacked card layout for tables */
+@media (max-width: 640px) {
+  .table-responsive .list-table thead {
+    display: none;
+  }
+  .table-responsive .list-table,
+  .table-responsive .list-table tbody,
+  .table-responsive .list-table tr,
+  .table-responsive .list-table td {
+    display: block;
+    width: 100%;
+  }
+  .table-responsive .list-table tr {
+    margin-bottom: 1rem;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-lg);
+    background: var(--c-surface);
+    box-shadow: var(--shadow);
+  }
+  .table-responsive .list-table td {
+    padding: 0.75rem 1rem;
+    border: none;
+    border-bottom: 1px solid var(--c-border);
+    position: relative;
+  }
+  .table-responsive .list-table td:last-child {
+    border-bottom: none;
+  }
+  .table-responsive .list-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--c-muted);
+    display: block;
+    margin-bottom: 0.25rem;
+  }
 }
 .list-table th {
   padding: 1rem;
@@ -397,7 +465,7 @@ input:disabled, select:disabled, textarea:disabled { background: transparent; co
 /* ── Dashboard Grid ──────────────────────────── */
 .dash-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
   max-width: 1200px;
   margin-left: auto;

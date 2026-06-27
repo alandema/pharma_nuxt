@@ -356,6 +356,42 @@ const { brand } = useAppConfig();
   padding: 8px 0;
 }
 
+/* Mobile stacked card layout for details table */
+@media (max-width: 640px) {
+  .details-table thead {
+    display: none;
+  }
+  .details-table,
+  .details-table tbody,
+  .details-table tr,
+  .details-table td {
+    display: block;
+    width: 100%;
+  }
+  .details-table tr {
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fff;
+  }
+  .details-table td {
+    padding: 0.5rem 0.75rem;
+    border: none;
+    border-bottom: 1px dotted #ccc;
+  }
+  .details-table td:last-child {
+    border-bottom: none;
+  }
+  .details-table .detail-key {
+    width: auto;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #666;
+    margin-bottom: 0.25rem;
+  }
+}
+
 /* ── Signature ───────────────────────────────────── */
 .signature-block {
   display: flex;
