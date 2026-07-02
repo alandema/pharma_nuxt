@@ -6,19 +6,19 @@ type PdfGenerationOptions = {
   signatureStatus?: SignatureStatus
 }
 
-// Professional color palette
-// Professional color palette
+// Brand palette tuned for fast printing: large areas stay white, while the
+// gold identity is kept in borders, headers, and small accents.
 const COLORS = {
   primary: '#87752B',       // dark gold — headers, borders
   secondary: '#B19938',     // medium gold — subheaders
   accent: '#CCB761',        // light gold — lines, highlights
-  lightBg: '#FDFBF3',       // warm white — box backgrounds
+  lightBg: '#FFFFFF',       // printable white — box backgrounds
   border: '#87752B',        // = primary
   textPrimary: '#1A1A1A',   // near-black — main text
   textSecondary: '#5C5030', // warm brown — labels
   red: '#B91C1C',           // unsigned stamp (status color, unchanged)
   green: '#166534',         // signed stamp (status color, unchanged)
-  lightGray: '#EDE8D5',     // warm gray — dividers
+  lightGray: '#D8D0A8',     // warm gray — dividers
   white: '#FFFFFF',
 } as const;
 
@@ -89,14 +89,73 @@ export async function generatePDFDocument(
     // HELPER: colored section header bar
     // ============================================================
     function drawSectionHeader(x: number, y: number, width: number, title: string) {
-      doc.fillColor(COLORS.primary)
+      doc.fillColor(COLORS.white)
          .roundedRect(x, y, width, 24, 3)
          .fill();
+      doc.lineWidth(0.8)
+         .strokeColor(COLORS.accent)
+         .roundedRect(x, y, width, 24, 3)
+         .stroke();
 
-      doc.fillColor(COLORS.white)
+      doc.fillColor(COLORS.primary)
          .font('Helvetica-Bold')
          .fontSize(11)
          .text(title, x, y + 6, { width, align: 'center' });
+    }
+
+    function addContentPage(title?: string) {
+      doc.addPage();
+      y = margin + 30;
+      drawPageBorder();
+
+      if (title) {
+        drawSectionHeader(contentX, y, innerWidth, title);
+        y += 32;
+      }
+    }
+
+    function wrapTextLines(text: string, width: number, font: string, fontSize: number) {
+      doc.font(font).fontSize(fontSize);
+
+      return `${text}`.replace(/\r\n/g, '\n').split('\n').flatMap((paragraph) => {
+        if (!paragraph.trim()) return [''];
+
+        const lines: string[] = [];
+        let line = '';
+
+        paragraph.split(/\s+/).forEach((word) => {
+          const candidate = line ? `${line} ${word}` : word;
+          if (doc.widthOfString(candidate) <= width) {
+            line = candidate;
+            return;
+          }
+
+          if (line) {
+            lines.push(line);
+            line = '';
+          }
+
+          if (doc.widthOfString(word) <= width) {
+            line = word;
+            return;
+          }
+
+          let fragment = '';
+          for (const char of word) {
+            const fragmentCandidate = fragment + char;
+            if (doc.widthOfString(fragmentCandidate) <= width) {
+              fragment = fragmentCandidate;
+            } else {
+              if (fragment) lines.push(fragment);
+              fragment = char;
+            }
+          }
+          line = fragment;
+        });
+
+        if (line) lines.push(line);
+        return lines;
+      });
     }
 
     // ============================================================
@@ -145,9 +204,6 @@ export async function generatePDFDocument(
     // HEADER
     // ============================================================
     const headerHeight = 35;
-    doc.fillColor(COLORS.lightBg)
-       .roundedRect(contentX, y, innerWidth, headerHeight, 4)
-       .fill();
     doc.lineWidth(1).strokeColor(COLORS.accent)
        .roundedRect(contentX, y, innerWidth, headerHeight, 4)
        .stroke();
@@ -226,7 +282,7 @@ export async function generatePDFDocument(
       + 14;      // bottom padding
 
     const patientBoxHeight = Math.max(leftContentHeight, rightContentHeight, 90);
-    doc.fillColor(COLORS.lightBg)
+    doc.fillColor(COLORS.white)
        .roundedRect(contentX, y, innerWidth, patientBoxHeight, 4)
        .fill();
     doc.lineWidth(0.5).strokeColor(COLORS.lightGray)
@@ -279,45 +335,28 @@ let fieldY = y + 12;
 
     const formulas: any[] = body.formulas;
 
-    // textW used when actually drawing formula name/description — must match below
-    const formulaTextWidth = innerWidth - 46;
+    const formulaTextX = contentX + 44;
+    const formulaTextWidth = innerWidth - 58;
+    const formulaBottomLimit = pageHeight - margin - 36;
+    const formulaPadX = 12;
+    const formulaPadTop = 12;
+    const formulaPadBottom = 12;
+    const formulaNameFontSize = 12;
+    const formulaDescFontSize = 10;
+    const formulaNameLineHeight = 15;
+    const formulaDescLineHeight = 13;
+    const formulaTextGap = 6;
 
-    formulas.forEach((f, index) => {
-      const formulaName = f.formula_name || 'Fórmula';
-      const description = f.description || '';
-
-      // FIX: use heightOfString() instead of char-count estimation so that
-      // rows with long descriptions that wrap many lines are sized correctly.
-      const nameH = doc.font('Helvetica-Bold').fontSize(12).heightOfString(formulaName, { width: formulaTextWidth });
-      const descH = description
-        ? doc.font('Helvetica').fontSize(10).heightOfString(description, { width: formulaTextWidth })
-        : 0;
-      const itemHeight = 14             // top padding
-        + nameH                         // formula name (may wrap)
-        + (descH > 0 ? 6 + descH : 0)  // gap + description
-        + 12;                           // bottom padding
-
-      // New page if needed, preserving footer space (150px)
-      if (y + itemHeight > pageHeight - margin - 150) {
-        doc.addPage();
-        y = margin + 30;
-        drawPageBorder();
-      }
-
-      // Alternating row background
-      doc.fillColor(index % 2 === 0 ? COLORS.lightBg : COLORS.white)
-         .roundedRect(contentX, y, innerWidth, itemHeight, 4)
+    function drawFormulaSegmentBox(segmentY: number, segmentHeight: number) {
+      doc.fillColor(COLORS.white)
+         .roundedRect(contentX, segmentY, innerWidth, segmentHeight, 4)
          .fill();
       doc.lineWidth(0.5).strokeColor(COLORS.lightGray)
-         .roundedRect(contentX, y, innerWidth, itemHeight, 4)
+         .roundedRect(contentX, segmentY, innerWidth, segmentHeight, 4)
          .stroke();
+    }
 
-      // FIX: The number circle was drawn at y + itemHeight/2 (vertical
-      // center of the whole row), but the formula name was placed at
-      // y + 10 (near the top). This made the circle appear BELOW the
-      // text it labels. Now the circle is anchored at y + 14 + 8 (the
-      // vertical midpoint of the name line) so it aligns with the name.
-      const circleY = y + 14 + 7; // center of name text line
+    function drawFormulaNumber(index: number, circleY: number) {
       const circleR = 11;
       doc.fillColor(COLORS.primary)
          .circle(contentX + 20, circleY, circleR)
@@ -326,23 +365,83 @@ let fieldY = y + 12;
          .font('Helvetica-Bold')
          .fontSize(11)
          .text(`${index + 1}`, contentX + 9, circleY - 7, { width: circleR * 2, align: 'center', lineBreak: false });
+    }
 
-      // Formula name
-      const textX = contentX + 40;
-      doc.fillColor(COLORS.textPrimary)
-         .font('Helvetica-Bold')
-         .fontSize(12)
-         .text(formulaName, textX, y + 14, { width: formulaTextWidth });
+    formulas.forEach((f, index) => {
+      const formulaName = f.formula_name || 'Fórmula';
+      const description = f.description || '';
+      const nameLines = wrapTextLines(formulaName, formulaTextWidth, 'Helvetica-Bold', formulaNameFontSize);
+      const descriptionLines = description
+        ? wrapTextLines(description, formulaTextWidth, 'Helvetica', formulaDescFontSize)
+        : [];
 
-      // Description — y offset uses measured nameH so it always clears the name
-      if (description) {
-        doc.fillColor(COLORS.textSecondary)
-           .font('Helvetica')
-           .fontSize(10)
-           .text(description, textX, y + 14 + nameH + 6, { width: formulaTextWidth });
+      let remainingNameLines = [...nameLines];
+      let remainingDescriptionLines = [...descriptionLines];
+      let isFirstSegment = true;
+
+      while (remainingNameLines.length || remainingDescriptionLines.length || isFirstSegment) {
+        const minSegmentHeight = formulaPadTop + formulaNameLineHeight + formulaPadBottom;
+        if (y + minSegmentHeight > formulaBottomLimit) {
+          addContentPage('PRESCRIÇÃO (continuação)');
+        }
+
+        const segmentY = y;
+        let cursorY = segmentY + formulaPadTop;
+        const availableHeight = formulaBottomLimit - segmentY - formulaPadTop - formulaPadBottom;
+        let usedHeight = 0;
+        const segmentNameLines: string[] = [];
+        const segmentDescriptionLines: string[] = [];
+
+        while (remainingNameLines.length && usedHeight + formulaNameLineHeight <= availableHeight) {
+          segmentNameLines.push(remainingNameLines.shift() as string);
+          usedHeight += formulaNameLineHeight;
+        }
+
+        const descriptionGap = segmentNameLines.length ? formulaTextGap : 0;
+        if (!remainingNameLines.length && remainingDescriptionLines.length && usedHeight + descriptionGap + formulaDescLineHeight <= availableHeight) {
+          usedHeight += descriptionGap;
+          while (remainingDescriptionLines.length && usedHeight + formulaDescLineHeight <= availableHeight) {
+            segmentDescriptionLines.push(remainingDescriptionLines.shift() as string);
+            usedHeight += formulaDescLineHeight;
+          }
+        }
+
+        const segmentHeight = Math.max(formulaPadTop + usedHeight + formulaPadBottom, minSegmentHeight);
+        drawFormulaSegmentBox(segmentY, segmentHeight);
+
+        if (isFirstSegment) {
+          drawFormulaNumber(index, segmentY + formulaPadTop + 7);
+        } else {
+          doc.fillColor(COLORS.secondary)
+             .font('Helvetica-Bold')
+             .fontSize(8)
+             .text('cont.', contentX + formulaPadX, cursorY + 2, { width: 24, align: 'center', lineBreak: false });
+        }
+
+        doc.fillColor(COLORS.textPrimary)
+           .font('Helvetica-Bold')
+           .fontSize(formulaNameFontSize);
+        segmentNameLines.forEach((line) => {
+          doc.text(line, formulaTextX, cursorY, { width: formulaTextWidth, lineBreak: false });
+          cursorY += formulaNameLineHeight;
+        });
+
+        if (segmentDescriptionLines.length) {
+          if (segmentNameLines.length) {
+            cursorY += formulaTextGap;
+          }
+          doc.fillColor(COLORS.textSecondary)
+             .font('Helvetica')
+             .fontSize(formulaDescFontSize);
+          segmentDescriptionLines.forEach((line) => {
+            doc.text(line, formulaTextX, cursorY, { width: formulaTextWidth, lineBreak: false });
+            cursorY += formulaDescLineHeight;
+          });
+        }
+
+        y += segmentHeight + 6;
+        isFirstSegment = false;
       }
-
-      y += itemHeight + 6;
     });
 
     y += 10;
@@ -390,9 +489,7 @@ let fieldY = y + 12;
 
     // Ensure footer fits on current page
     if (y + separatorAndBoxH > pageHeight - margin - 30) {
-      doc.addPage();
-      y = margin + 30;
-      drawPageBorder();
+      addContentPage();
     }
 
     // Separator line
@@ -403,7 +500,7 @@ let fieldY = y + 12;
     y += 12;
 
     // Signature box background
-    doc.fillColor(COLORS.lightBg)
+    doc.fillColor(COLORS.white)
        .roundedRect(contentX, y, innerWidth, sigBoxContentH, 4)
        .fill();
     doc.lineWidth(0.5).strokeColor(COLORS.lightGray)
