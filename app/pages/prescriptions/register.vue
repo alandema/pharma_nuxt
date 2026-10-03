@@ -286,16 +286,7 @@ const resetSignatureFlow = () => {
   isPreparingSignature.value = false;
 };
 
-const SIGN_EDIT_INVALIDATION_WARNING =
-  "ATENÇÃO: Este documento já está assinado digitalmente. Ao editar a prescrição, o PDF assinado será invalidado e será necessária uma nova assinatura. Deseja continuar?";
-
 const clearPreview = () => {
-  if (signatureStatus.value === "signed") {
-    if (!confirm(SIGN_EDIT_INVALIDATION_WARNING)) {
-      return;
-    }
-  }
-
   if (previewPdfUrl.value) {
     URL.revokeObjectURL(previewPdfUrl.value);
   }
@@ -536,7 +527,7 @@ const startSignaturePolling = () => {
 };
 
 const SIGN_BEFORE_WARNING =
-  "ATENÇÃO: Após assinar digitalmente, qualquer edição nesta prescrição invalidará o PDF assinado e será necessária uma nova assinatura. Deseja continuar com a assinatura?";
+  "ATENÇÃO: REVISE OS DADOS DA PRESCRIÇÃO ANTES DE ASSINAR. Após assinar digitalmente, não será possível editar o PDF desta prescrição. Deseja continuar com a assinatura?";
 
 const startDigitalSignature = async () => {
   if (
@@ -597,6 +588,11 @@ const cancelSignatureFlow = () => {
   resetSignatureFlow();
 };
 
+const cancelPrescription = async () => {
+  clearPreview();
+  await navigateTo("/prescriptions/register");
+};
+
 const save = async () => {
   const payload = buildPayload();
   if (!previewPayload.value) {
@@ -615,7 +611,7 @@ const save = async () => {
     },
   });
   clearPreview();
-  await navigateTo("/prescriptions");
+  await navigateTo("/prescriptions/register");
 };
 
 const submit = async () => {
@@ -883,12 +879,21 @@ onBeforeUnmount(() => {
       </template>
       <div class="btn-group" style="justify-content: flex-end; gap: 0.5rem">
         <button
-          v-if="isPreviewing"
+          v-if="isPreviewing && signatureStatus !== 'signed'"
           type="button"
           :disabled="isSubmitting || isPreparingSignature"
           @click="clearPreview"
         >
           Editar
+        </button>
+        <button
+          v-if="isPreviewing && signatureStatus === 'signed'"
+          type="button"
+          class="btn-danger"
+          :disabled="isSubmitting || isPreparingSignature"
+          @click="cancelPrescription"
+        >
+          Cancelar
         </button>
         <button type="submit" :disabled="isSubmitting || isPreparingSignature">
           {{
