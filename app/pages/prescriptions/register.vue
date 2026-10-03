@@ -286,7 +286,16 @@ const resetSignatureFlow = () => {
   isPreparingSignature.value = false;
 };
 
+const SIGN_EDIT_INVALIDATION_WARNING =
+  "ATENÇÃO: Este documento já está assinado digitalmente. Ao editar a prescrição, o PDF assinado será invalidado e será necessária uma nova assinatura. Deseja continuar?";
+
 const clearPreview = () => {
+  if (signatureStatus.value === "signed") {
+    if (!confirm(SIGN_EDIT_INVALIDATION_WARNING)) {
+      return;
+    }
+  }
+
   if (previewPdfUrl.value) {
     URL.revokeObjectURL(previewPdfUrl.value);
   }
@@ -526,12 +535,19 @@ const startSignaturePolling = () => {
   }, 2500);
 };
 
+const SIGN_BEFORE_WARNING =
+  "ATENÇÃO: Após assinar digitalmente, qualquer edição nesta prescrição invalidará o PDF assinado e será necessária uma nova assinatura. Deseja continuar com a assinatura?";
+
 const startDigitalSignature = async () => {
   if (
     isPreparingSignature.value ||
     !isPreviewing.value ||
     !previewPayload.value
   ) {
+    return;
+  }
+
+  if (!confirm(SIGN_BEFORE_WARNING)) {
     return;
   }
 
