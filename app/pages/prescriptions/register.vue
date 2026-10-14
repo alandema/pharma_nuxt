@@ -526,12 +526,19 @@ const startSignaturePolling = () => {
   }, 2500);
 };
 
+const SIGN_BEFORE_WARNING =
+  "ATENÇÃO: REVISE OS DADOS DA PRESCRIÇÃO ANTES DE ASSINAR. Após assinar digitalmente, não será possível editar o PDF desta prescrição. Deseja continuar com a assinatura?";
+
 const startDigitalSignature = async () => {
   if (
     isPreparingSignature.value ||
     !isPreviewing.value ||
     !previewPayload.value
   ) {
+    return;
+  }
+
+  if (!confirm(SIGN_BEFORE_WARNING)) {
     return;
   }
 
@@ -581,6 +588,11 @@ const cancelSignatureFlow = () => {
   resetSignatureFlow();
 };
 
+const cancelPrescription = async () => {
+  clearPreview();
+  await navigateTo("/prescriptions/register");
+};
+
 const save = async () => {
   const payload = buildPayload();
   if (!previewPayload.value) {
@@ -599,7 +611,7 @@ const save = async () => {
     },
   });
   clearPreview();
-  await navigateTo("/prescriptions");
+  await navigateTo("/prescriptions/register");
 };
 
 const submit = async () => {
@@ -867,12 +879,21 @@ onBeforeUnmount(() => {
       </template>
       <div class="btn-group" style="justify-content: flex-end; gap: 0.5rem">
         <button
-          v-if="isPreviewing"
+          v-if="isPreviewing && signatureStatus !== 'signed'"
           type="button"
           :disabled="isSubmitting || isPreparingSignature"
           @click="clearPreview"
         >
           Editar
+        </button>
+        <button
+          v-if="isPreviewing && signatureStatus === 'signed'"
+          type="button"
+          class="btn-danger"
+          :disabled="isSubmitting || isPreparingSignature"
+          @click="cancelPrescription"
+        >
+          Cancelar
         </button>
         <button type="submit" :disabled="isSubmitting || isPreparingSignature">
           {{
