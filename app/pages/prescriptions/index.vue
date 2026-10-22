@@ -215,7 +215,11 @@ const clearFilter = () => {
             <tr
               v-for="prescription in prescriptions"
               :key="prescription.id"
-              @click="navigateTo(`/prescriptions/${prescription.id}`)"
+              @click="navigateTo(`/prescriptions/${prescription.id}`,
+                {
+                  open: {target: '_blank'}
+                }
+              )"
             >
               <td data-label="Data">{{ formatDatePtBR(prescription.date_prescribed) }}</td>
               <td data-label="Paciente">{{ prescription.patient.name }}</td>

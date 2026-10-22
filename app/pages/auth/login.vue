@@ -4,6 +4,8 @@ const password = ref("");
 const { add: addToast } = useToast();
 const { isValidEmail } = useInputFormatting();
 const { loadCurrentUser } = useCurrentUser();
+const { start: startLoading, finish: finishLoading } = useLoadingIndicator();
+const isSubmitting = ref(false);
 
 const isAdminRole = (role?: string) =>
   role === "admin" || role === "superadmin";
@@ -11,6 +13,8 @@ const isAdminRole = (role?: string) =>
 const { brand } = useAppConfig();
 
 const handleSubmit = async () => {
+  if (isSubmitting.value) return;
+
   const normalizedEmail = email.value.trim();
   const normalizedPassword = password.value.trim();
 
@@ -23,6 +27,9 @@ const handleSubmit = async () => {
     addToast("E-mail inválido. Informe um e-mail válido.", "error");
     return;
   }
+
+  isSubmitting.value = true;
+  startLoading({ force: true });
 
   try {
     const res = await $fetch("/api/auth/login", {
@@ -49,6 +56,9 @@ const handleSubmit = async () => {
         "Falha no login. Verifique suas credenciais.",
       "error",
     );
+  } finally {
+    isSubmitting.value = false;
+    finishLoading({ force: true });
   }
 };
 </script>
@@ -66,6 +76,7 @@ const handleSubmit = async () => {
             type="email"
             placeholder="Digite seu e-mail"
             required
+            :disabled="isSubmitting"
           />
         </div>
         <div class="form-group">
@@ -75,9 +86,16 @@ const handleSubmit = async () => {
             type="password"
             placeholder="Digite sua senha"
             required
+            :disabled="isSubmitting"
           />
         </div>
-        <button type="submit">Entrar</button>
+        <button
+          type="submit"
+          :disabled="isSubmitting"
+          :aria-busy="isSubmitting"
+        >
+          {{ isSubmitting ? "Entrando..." : "Entrar" }}
+        </button>
       </form>
     </div>
   </div>
