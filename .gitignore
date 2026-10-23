@@ -1,10 +1,12 @@
 .vscode
+.codex
 .data
 dev.db
 .github
 .nuxt
 .output
 generated/
+docs/
 
 
 # dependencies

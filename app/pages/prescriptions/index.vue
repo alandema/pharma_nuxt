@@ -7,15 +7,6 @@ type Prescription = {
   patient_id: string;
   prescribed_by: string | null;
   date_prescribed: string;
-  json_form_info: {
-    cid_id: number;
-    cid_name?: string;
-    formulas: {
-      formula_id: string;
-      formula_name: string;
-      description: string;
-    }[];
-  };
   created_at: string;
   patient: {
     id: string;
@@ -45,11 +36,6 @@ type PaginationMetadata = {
   totalPages: number;
 };
 
-type PaginatedPatientResponse = {
-  data: Patient[];
-  metadata: PaginationMetadata;
-};
-
 const route = useRoute();
 const page = ref(1);
 const pageJumpInput = ref("1");
@@ -57,7 +43,9 @@ const { formatDatePtBR } = useDateFormatting();
 const selectedPatientId = ref((route.query.patientId as string) || "");
 const startDate = ref("");
 const endDate = ref("");
-const PATIENTS_FETCH_LIMIT = 50;
+const patientSearch = ref("");
+const patientOptions = ref<Patient[]>([]);
+let patientSearchTimer: ReturnType<typeof setTimeout> | undefined;
 
 const { currentUser } = useCurrentUser();
 const isAdmin = computed(() => {
@@ -65,33 +53,27 @@ const isAdmin = computed(() => {
   return role === "admin" || role === "superadmin";
 });
 
-const fetchAllPatients = async () => {
-  const allPatients: Patient[] = [];
-  let currentPage = 1;
-  let totalPages = 1;
-
-  while (currentPage <= totalPages) {
-    const response = await $fetch<PaginatedPatientResponse>("/api/patients", {
-      method: "GET",
-      query: {
-        page: currentPage,
-        limit: PATIENTS_FETCH_LIMIT,
-      },
-    });
-
-    allPatients.push(...response.data);
-    totalPages = response.metadata.totalPages;
-    currentPage += 1;
-  }
-
-  return allPatients.sort((a, b) => a.name.localeCompare(b.name));
+const searchPatients = async () => {
+  patientOptions.value = await $fetch<Patient[]>("/api/patients/options", {
+    query: { q: patientSearch.value, limit: 20 },
+  });
 };
 
-const { data: patientsData } = await useAsyncData(
-  "prescriptions-patients-all",
-  fetchAllPatients,
-);
-const patients = computed<Patient[]>(() => patientsData.value || []);
+const schedulePatientSearch = () => {
+  selectedPatientId.value = "";
+  if (patientSearchTimer) {
+    clearTimeout(patientSearchTimer);
+  }
+  patientSearchTimer = setTimeout(searchPatients, 250);
+};
+
+const selectPatient = () => {
+  const selectedPatient = patientOptions.value.find(
+    (patient) => patient.name === patientSearch.value,
+  );
+  selectedPatientId.value = selectedPatient?.id || "";
+  page.value = 1;
+};
 
 const { data: response } = await useFetch<PaginatedPrescriptionResponse>(
   "/api/prescriptions",
@@ -154,6 +136,7 @@ const filterByPatient = () => {
 // test
 
 const clearFilter = () => {
+  patientSearch.value = "";
   selectedPatientId.value = "";
   startDate.value = "";
   endDate.value = "";
@@ -172,16 +155,21 @@ const clearFilter = () => {
   <div class="filter-bar">
     <div class="filter-group">
       <label>Paciente:</label>
-      <select v-model="selectedPatientId" @change="filterByPatient">
-        <option value="">Todos</option>
+      <input
+        v-model="patientSearch"
+        list="prescription-patient-options"
+        placeholder="Digite o nome"
+        @input="schedulePatientSearch"
+        @change="selectPatient"
+      />
+      <datalist id="prescription-patient-options">
         <option
-          v-for="patient in patients"
+          v-for="patient in patientOptions"
           :key="patient.id"
-          :value="patient.id"
+          :value="patient.name"
         >
-          {{ patient.name }}
         </option>
-      </select>
+      </datalist>
     </div>
     <div class="filter-group">
       <label>De:</label>

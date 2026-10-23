@@ -15,9 +15,7 @@ type PaginatedResponse<T> = {
 
 type PrescriberOption = {
   id: string;
-  email: string;
   full_name: string;
-  role: string;
 };
 
 type PatientOption = {
@@ -44,67 +42,53 @@ const selectedPrescriberId = ref("");
 const selectedPatientId = ref("");
 const selectedDate = ref("");
 const { formatDateTimePtBR } = useDateFormatting();
-const LOOKUP_FETCH_LIMIT = 50;
+const prescriberSearch = ref("");
+const patientSearch = ref("");
+const prescriberOptions = ref<PrescriberOption[]>([]);
+const patientOptions = ref<PatientOption[]>([]);
+let prescriberSearchTimer: ReturnType<typeof setTimeout> | undefined;
+let patientSearchTimer: ReturnType<typeof setTimeout> | undefined;
 
-const fetchAllPrescribers = async () => {
-  const allPrescribers: PrescriberOption[] = [];
-  let currentPage = 1;
-  let totalPages = 1;
-
-  while (currentPage <= totalPages) {
-    const response = await $fetch<PaginatedResponse<PrescriberOption>>(
-      "/api/users/admin",
-      {
-        method: "GET",
-        query: { page: currentPage, limit: LOOKUP_FETCH_LIMIT },
-      },
-    );
-
-    allPrescribers.push(...response.data);
-    totalPages = response.metadata.totalPages;
-    currentPage += 1;
-  }
-
-  return allPrescribers.sort((a, b) =>
-    a.full_name.localeCompare(b.full_name),
+const searchPrescribers = async () => {
+  prescriberOptions.value = await $fetch<PrescriberOption[]>(
+    "/api/users/admin/options",
+    { query: { q: prescriberSearch.value, limit: 20 } },
   );
 };
 
-const fetchAllPatients = async () => {
-  const allPatients: PatientOption[] = [];
-  let currentPage = 1;
-  let totalPages = 1;
-
-  while (currentPage <= totalPages) {
-    const response = await $fetch<PaginatedResponse<PatientOption>>(
-      "/api/patients",
-      {
-        method: "GET",
-        query: { page: currentPage, limit: LOOKUP_FETCH_LIMIT },
-      },
-    );
-
-    allPatients.push(...response.data);
-    totalPages = response.metadata.totalPages;
-    currentPage += 1;
-  }
-
-  return allPatients.sort((a, b) => a.name.localeCompare(b.name));
+const searchPatients = async () => {
+  patientOptions.value = await $fetch<PatientOption[]>("/api/patients/options", {
+    query: { q: patientSearch.value, limit: 20 },
+  });
 };
 
-const { data: prescribersData } = await useAsyncData(
-  "admin-logs-prescribers-all",
-  fetchAllPrescribers,
-);
-const { data: patientsData } = await useAsyncData(
-  "admin-logs-patients-all",
-  fetchAllPatients,
-);
+const schedulePrescriberSearch = () => {
+  selectedPrescriberId.value = "";
+  if (prescriberSearchTimer) clearTimeout(prescriberSearchTimer);
+  prescriberSearchTimer = setTimeout(searchPrescribers, 250);
+};
 
-const prescribers = computed<PrescriberOption[]>(() =>
-  prescribersData.value || [],
-);
-const patients = computed<PatientOption[]>(() => patientsData.value || []);
+const schedulePatientSearch = () => {
+  selectedPatientId.value = "";
+  if (patientSearchTimer) clearTimeout(patientSearchTimer);
+  patientSearchTimer = setTimeout(searchPatients, 250);
+};
+
+const selectPrescriber = () => {
+  selectedPrescriberId.value =
+    prescriberOptions.value.find(
+      (prescriber) => prescriber.full_name === prescriberSearch.value,
+    )?.id || "";
+  page.value = 1;
+};
+
+const selectPatient = () => {
+  selectedPatientId.value =
+    patientOptions.value.find(
+      (patient) => patient.name === patientSearch.value,
+    )?.id || "";
+  page.value = 1;
+};
 
 const { data: response } = await useFetch<PaginatedResponse<LogEntry>>(
   "/api/logs",
@@ -127,6 +111,8 @@ const metadata = computed(
 );
 
 const clearFilters = () => {
+  prescriberSearch.value = "";
+  patientSearch.value = "";
   selectedPrescriberId.value = "";
   selectedPatientId.value = "";
   selectedDate.value = "";
@@ -176,25 +162,35 @@ watch(
   <div class="filter-bar">
     <div class="filter-group">
       <label>Prescritor:</label>
-      <select v-model="selectedPrescriberId" @change="page = 1">
-        <option value="">Todos</option>
+      <input
+        v-model="prescriberSearch"
+        list="log-prescriber-options"
+        placeholder="Digite o nome"
+        @input="schedulePrescriberSearch"
+        @change="selectPrescriber"
+      />
+      <datalist id="log-prescriber-options">
         <option
-          v-for="prescriber in prescribers"
+          v-for="prescriber in prescriberOptions"
           :key="prescriber.id"
-          :value="prescriber.id"
+          :value="prescriber.full_name"
         >
-          {{ prescriber.full_name }}
         </option>
-      </select>
+      </datalist>
     </div>
     <div class="filter-group">
       <label>Paciente:</label>
-      <select v-model="selectedPatientId" @change="page = 1">
-        <option value="">Todos</option>
-        <option v-for="p in patients" :key="p.id" :value="p.id">
-          {{ p.name }}
+      <input
+        v-model="patientSearch"
+        list="log-patient-options"
+        placeholder="Digite o nome"
+        @input="schedulePatientSearch"
+        @change="selectPatient"
+      />
+      <datalist id="log-patient-options">
+        <option v-for="patient in patientOptions" :key="patient.id" :value="patient.name">
         </option>
-      </select>
+      </datalist>
     </div>
     <div class="filter-group">
       <label>Data:</label>

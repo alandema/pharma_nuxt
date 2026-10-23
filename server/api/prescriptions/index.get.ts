@@ -30,7 +30,12 @@ export default defineEventHandler(async (event) => {
         { date_prescribed: 'desc' },
         { created_at: 'desc' },
       ],
-      include: {
+      select: {
+        id: true,
+        patient_id: true,
+        prescribed_by: true,
+        date_prescribed: true,
+        created_at: true,
         patient: {
           select: { id: true, name: true }
         },
