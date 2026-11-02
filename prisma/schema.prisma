@@ -62,6 +62,8 @@ model Patient {
   prescriptions   Prescription[]
   logs             Log[]
 
+  @@index([name], map: "patients_name_idx")
+  @@index([registered_by, name], map: "patients_registered_by_name_idx")
   @@map("patients")
 }
 
@@ -76,6 +78,9 @@ model Prescription {
   patient         Patient  @relation(fields: [patient_id], references: [id], onDelete: Cascade)
   user            User?    @relation(fields: [prescribed_by], references: [id], onDelete: SetNull)
 
+  @@index([date_prescribed(sort: Desc), created_at(sort: Desc)], map: "prescriptions_date_prescribed_created_at_idx")
+  @@index([prescribed_by, date_prescribed(sort: Desc), created_at(sort: Desc)], map: "prescriptions_prescribed_by_date_prescribed_created_at_idx")
+  @@index([patient_id, date_prescribed(sort: Desc), created_at(sort: Desc)], map: "prescriptions_patient_id_date_prescribed_created_at_idx")
   @@map("prescriptions")
 }
 
@@ -96,5 +101,9 @@ model Log {
   patient_id    String?   @map("patient_id")
   user          User?     @relation(fields: [user_id], references: [id], onDelete: SetNull)
   patient       Patient?  @relation(fields: [patient_id], references: [id], onDelete: SetNull)
+
+  @@index([event_time(sort: Desc)], map: "logs_event_time_idx")
+  @@index([user_id, event_time(sort: Desc)], map: "logs_user_id_event_time_idx")
+  @@index([patient_id, event_time(sort: Desc)], map: "logs_patient_id_event_time_idx")
   @@map("logs")
 }
