@@ -7,7 +7,12 @@ export default defineEventHandler(async (event) => {
     defaultLimit: 10,
     maxLimit: 50,
   });
-  const where = user.role === 'admin' || user.role === 'superadmin' ? {} : { registered_by: user.userId };
+  const rawSearch = Array.isArray(query.q) ? query.q[0] : query.q;
+  const search = typeof rawSearch === 'string' ? rawSearch.trim() : '';
+  const where = {
+    ...(user.role === 'admin' || user.role === 'superadmin' ? {} : { registered_by: user.userId }),
+    ...(search ? { name: { contains: search, mode: 'insensitive' as const } } : {}),
+  };
 
   const [patients, total] = await Promise.all([
     prisma.patient.findMany({

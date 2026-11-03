@@ -17,11 +17,15 @@ interface PaginatedResponse {
 
 const page = ref(1);
 const pageJumpInput = ref("1");
+const searchText = ref("");
+const searchQuery = ref("");
+let searchTimer: ReturnType<typeof setTimeout> | undefined;
 const { formatDatePtBR } = useDateFormatting();
 
 const { data: response } = await useFetch<PaginatedResponse>("/api/patients", {
   method: "GET",
-  query: { page, limit: 10 },
+  query: { page, limit: 10, q: searchQuery },
+  watch: [page, searchQuery],
 });
 
 const patients = computed(() => response.value?.data || []);
@@ -34,6 +38,16 @@ const isAdmin = computed(() => {
   const role = currentUser.value?.role;
   return role === "admin" || role === "superadmin";
 });
+
+const scheduleSearch = () => {
+  page.value = 1;
+  if (searchTimer) {
+    clearTimeout(searchTimer);
+  }
+  searchTimer = setTimeout(() => {
+    searchQuery.value = searchText.value.trim();
+  }, 250);
+};
 
 const nextPage = () => {
   if (page.value < metadata.value.totalPages) {
@@ -76,6 +90,18 @@ watch(
     <button class="btn-primary" @click="navigateTo('/patients/register')">
       + Novo Paciente
     </button>
+  </div>
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label for="patients-search">Paciente:</label>
+      <input
+        id="patients-search"
+        v-model="searchText"
+        type="search"
+        placeholder="Digite o nome"
+        @input="scheduleSearch"
+      />
+    </div>
   </div>
   <div class="card">
     <template v-if="patients.length">
